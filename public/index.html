@@ -60,15 +60,15 @@
   .badge.warn{background:rgba(245,158,11,.15);color:var(--orange);}
   .badge.err{background:rgba(255,92,92,.15);color:var(--red);}
   .badge.info{background:rgba(59,130,246,.15);color:var(--blue);}
-  .plex-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
-  .plex-row:last-child{border-bottom:none;}
-  .plex-avatar{width:36px;height:36px;border-radius:50%;background:var(--border);object-fit:cover;flex-shrink:0;}
-  .plex-info{flex:1;min-width:0;}
-  .plex-info strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .plex-info span{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
-  .plex-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-  .plex-phone-input{background:#0b0f14;border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:12px;width:150px;margin-bottom:0;}
-  .plex-phone-input:focus{outline:none;border-color:var(--brand);}
+  .ov-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .ov-row:last-child{border-bottom:none;}
+  .ov-avatar{width:36px;height:36px;border-radius:50%;background:var(--border);object-fit:cover;flex-shrink:0;}
+  .ov-info{flex:1;min-width:0;}
+  .ov-info strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ov-info span{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+  .ov-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .ov-phone-input{background:#0b0f14;border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:12px;width:150px;margin-bottom:0;}
+  .ov-phone-input:focus{outline:none;border-color:var(--brand);}
   .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:150;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
   .modal-backdrop.open{display:flex;}
   .modal{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:420px;box-shadow:0 16px 40px rgba(0,0,0,.6);}
@@ -140,24 +140,24 @@
     <div class="card" style="margin-top:16px;">
       <h2>Integration Plex</h2>
       <div style="color:var(--muted);font-size:12px;margin-bottom:14px;">
-        Connectez votre compte Plex.tv pour importer les utilisateurs directement.<br>
-        <a href="https://www.plexopedia.com/plex-media-server/general/plex-token/" target="_blank" style="color:var(--blue);font-size:11px;">Comment trouver mon token Plex ?</a>
+        Connectez votre compte Overseerr pour importer tous vos utilisateurs..<br>
+        <div style="color:var(--blue);font-size:11px;">(La clé API se trouve dans Settings > General dans Overseerr)</div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <div style="flex:1;min-width:180px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">URL Plex (optionnel)</div>
-          <input type="text" id="plexUrl" placeholder="http://192.168.1.x:32400" style="margin-bottom:0;" />
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">URL Overseerr</div>
+          <input type="text" id="overseerrUrl" placeholder="http://192.168.1.x:5055" style="margin-bottom:0;" />
         </div>
         <div style="flex:1;min-width:180px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Token Plex.tv *</div>
-          <input type="text" id="plexToken" placeholder="xxxxxxxxxxxx" style="margin-bottom:0;" />
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Clé API Overseerr *</div>
+          <input type="text" id="overseerrApiKey" placeholder="xxxxxxxxxxxx" style="margin-bottom:0;" />
         </div>
       </div>
       <div class="btn-row" style="margin-top:12px;">
-        <button class="btn"           onclick="savePlex()">Sauvegarder</button>
-        <button class="btn secondary" onclick="testPlex()">Tester la connexion</button>
+        <button class="btn"           onclick="saveOverseerr()">Sauvegarder</button>
+        <button class="btn secondary" onclick="testOverseerr()">Tester la connexion</button>
       </div>
-      <div id="plexStatus" style="color:var(--muted);font-size:12px;margin-top:10px;"></div>
+      <div id="overseerrStatus" style="color:var(--muted);font-size:12px;margin-top:10px;"></div>
     </div>
   </div>
 
@@ -184,14 +184,14 @@
     <!-- Import Plex -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <h2 style="margin:0;">Importer depuis Plex</h2>
-        <button class="btn secondary sm" onclick="loadPlexUsers()" id="plexLoadBtn">Charger les users Plex</button>
+        <h2 style="margin:0;">Importer depuis Overseerr</h2>
+        <button class="btn secondary sm" onclick="loadOverseerrUsers()" id="overLoadBtn">Charger les users Overseerr</button>
       </div>
       <div id="plexImportInfo" style="color:var(--muted);font-size:12px;margin-bottom:12px;">
-        Cliquez sur "Charger" pour recuperer la liste de vos utilisateurs Plex et assigner leurs numeros WhatsApp.
+        Cliquez sur "Charger" pour recuperer la liste de vos utilisateurs Overseerr et assigner leurs numeros WhatsApp.
       </div>
-      <div id="plexUsersList" style="display:none;">
-        <div id="plexUsersContent"></div>
+      <div id="ovUsersList" style="display:none;">
+        <div id="ovUsersContent"></div>
       </div>
     </div>
 
@@ -327,9 +327,9 @@ async function refreshConfig() {
   try {
     var data = await apiCall('/config');
     document.getElementById('discordCurrent').textContent = data.hasWebhook ? ('Actif : ' + data.maskedUrl) : 'Non configure';
-    document.getElementById('plexUrl').placeholder = data.plexUrl || 'http://192.168.1.x:32400';
-    if (data.plexUrl) document.getElementById('plexUrl').value = data.plexUrl;
-    document.getElementById('plexStatus').textContent = data.hasPlexToken ? ('Token : ' + data.maskedToken) : 'Token non configure';
+    document.getElementById('overseerrUrl').placeholder = data.overseerrUrl || 'http://192.168.1.x:5055';
+    if (data.overseerrUrl) document.getElementById('overseerrUrl').value = data.overseerrUrl;
+    document.getElementById('overseerrStatus').textContent = data.hasOverseerrApiKey ? ('Token : ' + data.maskedApiKey) : 'Token non configure';
   } catch(e) {}
 }
 
@@ -344,21 +344,21 @@ async function testDiscord() {
   catch(e) { toast('Erreur', 'error'); }
 }
 
-async function savePlex() {
-  var url   = document.getElementById('plexUrl').value.trim();
-  var token = document.getElementById('plexToken').value.trim();
-  if (!token) { toast('Token Plex requis', 'error'); return; }
-  await apiCall('/config/plex', { method:'POST', body:JSON.stringify({ plexUrl:url, plexToken:token }) });
-  document.getElementById('plexToken').value = '';
-  refreshConfig(); toast('Config Plex sauvegardee');
+async function saveOverseerr() {
+  var url   = document.getElementById('overseerrUrl').value.trim();
+  var token = document.getElementById('overseerrApiKey').value.trim();
+  if (!token) { toast('Clé API Overseerr requise', 'error'); return; }
+  await apiCall('/config/overseerr', { method:'POST', body:JSON.stringify({ overseerrUrl:url, overseerrApiKey:token }) });
+  document.getElementById('overseerrApiKey').value = '';
+  refreshConfig(); toast('Config Overseerr sauvegardée');
 }
 
-async function testPlex() {
+async function testOverseerr() {
   var btn = event.target; btn.disabled = true; btn.textContent = '...';
   try {
-    var res = await apiCall('/plex/test', { method:'POST' });
-    if (res.ok) toast('Connexion Plex OK — ' + res.userCount + ' utilisateur(s) trouves');
-    else toast(res.error || 'Erreur Plex', 'error');
+    var res = await apiCall('/overseerr/test', { method:'POST' });
+    if (res.ok) toast('Connexion Overseerr OK — ' + res.userCount + ' utilisateur(s) trouves');
+    else toast(res.error || 'Erreur Overseerr', 'error');
   } catch(e) { toast('Erreur reseau', 'error'); }
   btn.disabled = false; btn.textContent = 'Tester la connexion';
 }
@@ -458,43 +458,43 @@ document.getElementById('editModal').addEventListener('click', function(e) {
 });
 
 // IMPORT PLEX
-async function loadPlexUsers() {
-  var btn = document.getElementById('plexLoadBtn');
+async function loadOverseerrUsers() {
+  var btn = document.getElementById('overLoadBtn');
   btn.disabled = true; btn.textContent = 'Chargement...';
-  toast('Connexion a Plex.tv...','info');
+  toast('Connexion à Overseerr...','info');
   try {
-    var users = await apiCall('/plex/users');
-    if (users && users.error) { toast(users.error,'error'); btn.disabled=false; btn.textContent='Charger les users Plex'; return; }
-    if (!users || !users.length) { toast('Aucun utilisateur Plex trouve','error'); btn.disabled=false; btn.textContent='Charger les users Plex'; return; }
+    var users = await apiCall('/overseerr/users');
+    if (users && users.error) { toast(users.error,'error'); btn.disabled=false; btn.textContent='Charger les users Overseerr'; return; }
+    if (!users || !users.length) { toast('Aucun utilisateur Overseerr trouvé','error'); btn.disabled=false; btn.textContent='Charger les users Overseerr'; return; }
 
     var html = users.map(function(u) {
       var avatarSrc = u.thumb || '';
       var avatar = avatarSrc
-        ? '<img class="plex-avatar" src="'+esc(avatarSrc)+'&X-Plex-Token='+getPlexTokenPreview()+'" onerror="this.src=\'\';this.style.background=\'var(--border)\'" alt="">'
-        : '<div class="plex-avatar"></div>';
+        ? '<img class="ov-avatar" src="'+esc(avatarSrc)+'" onerror="this.src=\'\';this.style.background=\'var(--border)\'" alt="">'
+        : '<div class="ov-avatar"></div>';
       if (u.registered) {
-        return '<div class="plex-row">'+avatar+'<div class="plex-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div><div class="plex-actions"><span class="badge ok">+'+esc(u.phone)+'</span></div></div>';
+        return '<div class="ov-row">'+avatar+'<div class="ov-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div><div class="ov-actions"><span class="badge ok">+'+esc(u.phone)+'</span></div></div>';
       } else {
-        return '<div class="plex-row">'+avatar+
-          '<div class="plex-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div>'+
-          '<div class="plex-actions">'+
-            '<input class="plex-phone-input" type="text" placeholder="33612345678" id="plexPhone_'+esc(u.id)+'">'+
-            '<button class="btn sm" onclick="addPlexUser(\''+esc(u.email)+'\',\'plexPhone_'+esc(u.id)+'\',this)">Ajouter</button>'+
+        return '<div class="ov-row">'+avatar+
+          '<div class="ov-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div>'+
+          '<div class="ov-actions">'+
+            '<input class="ov-phone-input" type="text" placeholder="33612345678" id="ovPhone_'+esc(u.id)+'">'+
+            '<button class="btn sm" onclick="addOvUser(\''+esc(u.email)+'\',\'ovPhone_'+esc(u.id)+'\',this)">Ajouter</button>'+
           '</div>'+
         '</div>';
       }
     }).join('');
 
-    document.getElementById('plexUsersContent').innerHTML = '<div style="margin-bottom:10px;color:var(--muted);font-size:12px;">'+users.length+' utilisateur(s) Plex — les ✓ sont deja enregistres</div>' + html;
-    document.getElementById('plexUsersList').style.display = 'block';
-    toast(users.length + ' utilisateurs Plex charges');
+    document.getElementById('ovUsersContent').innerHTML = '<div style="margin-bottom:10px;color:var(--muted);font-size:12px;">'+users.length+' utilisateur(s) Overseerr — les ✓ sont deja enregistres</div>' + html;
+    document.getElementById('ovUsersList').style.display = 'block';
+    toast(users.length + ' utilisateurs Overseerr chargés');
   } catch(e) { toast('Erreur reseau','error'); }
   btn.disabled=false; btn.textContent='Recharger';
 }
 
-function getPlexTokenPreview() { return ''; } // Token masque cote serveur, pas expose au frontend
 
-async function addPlexUser(email, inputId, btn) {
+
+async function addOvUser(email, inputId, btn) {
   var phone = document.getElementById(inputId).value.trim();
   if (!phone) { toast('Entrez un numero','error'); return; }
   btn.disabled = true; btn.textContent = '...';
@@ -502,7 +502,7 @@ async function addPlexUser(email, inputId, btn) {
     var res = await apiCall('/users', { method:'POST', body:JSON.stringify({ email:email, phone:phone }) });
     if (res&&res.saved) {
       toast(res.email + ' ajoute');
-      loadPlexUsers(); // recharger la liste pour mettre a jour le statut
+      loadOverseerrUsers(); // recharger la liste pour mettre a jour le statut
       refreshUsers();
     } else {
       toast((res&&res.error)||'Erreur','error');
@@ -519,3 +519,5 @@ function initDashboard() {
 </script>
 </body>
 </html>
+
+

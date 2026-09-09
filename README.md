@@ -43,7 +43,7 @@ docker-compose up -d --build
 1. Accédez au dashboard : `http://ip_de_votre_serveur:3001/dashboard`
 2. Connectez-vous avec vos identifiants.
 3. **Scannez le QR Code** avec votre application WhatsApp mobile (Appareils connectés -> Lier un appareil).
-4. Ajoutez vos utilisateurs dans l'onglet **Utilisateurs** (manuellement ou via l'import Plex).
+4. Ajoutez vos utilisateurs dans l'onglet **Utilisateurs** (manuellement ou via l'import Overseerr).
 
 ### Configuration Overseerr
 Dans Overseerr, allez dans **Settings > Notifications > Webhook** :
