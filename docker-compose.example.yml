@@ -1,0 +1,13 @@
+﻿services:
+  overseerr-whatsapp:
+    build: .
+    container_name: overseerr-whatsapp
+    restart: unless-stopped
+    mem_limit: 256m
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./auth_info:/usr/src/app/auth_info
+      - ./data:/usr/src/app/data

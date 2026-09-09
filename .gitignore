@@ -1,0 +1,17 @@
+﻿# Node
+node_modules/
+
+# Données persistantes (Sécurité : NE JAMAIS PUBLIER)
+data/
+auth_info/
+
+# Configuration locale
+docker-compose.yml
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+wwebjs_auth/
+
+.gemini/

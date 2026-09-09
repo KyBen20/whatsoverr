@@ -1,0 +1,521 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Whatsoverr - Dashboard</title>
+<style>
+  :root {
+    --bg:#0b0f14;--panel:#131820;--border:#1e2633;--text:#e6e8ec;--muted:#8b94a7;
+    --brand:#20b471;--brand-hover:#1b9b60;--red:#ff5c5c;--orange:#f59e0b;--blue:#3b82f6;--yellow:#eab308;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;}
+  #loginOverlay{position:fixed;inset:0;background:rgba(11,15,20,0.97);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(8px);}
+  .login-box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:360px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+  .login-box img{width:110px;margin-bottom:20px;}
+  .login-box h2{margin:0 0 20px;font-size:20px;font-weight:600;}
+  #appContainer{display:none;max-width:980px;margin:0 auto;padding:20px;}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+  header img{width:44px;border-radius:8px;}
+  header h1{font-size:20px;font-weight:700;margin:0;}
+  .sub{color:var(--muted);font-size:12px;}
+  .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);}
+  .tab-btn{background:none;border:none;color:var(--muted);padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s;}
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--brand);border-bottom-color:var(--brand);}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  @media(max-width:640px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+  .card:last-child{margin-bottom:0;}
+  .card h2{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 16px;font-weight:600;}
+  .status-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:15px;font-weight:500;}
+  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .dot.ok{background:var(--brand);box-shadow:0 0 10px var(--brand);}
+  .dot.ko{background:var(--red);box-shadow:0 0 10px var(--red);}
+  #qrArea{text-align:center;margin:15px 0;background:#fff;padding:15px;border-radius:12px;display:inline-block;}
+  #qrImg{width:180px;height:180px;}
+  .btn{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:.15s;white-space:nowrap;}
+  .btn:hover{background:var(--brand-hover);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .btn.secondary{background:var(--panel);border:1px solid var(--border);color:var(--text);}
+  .btn.secondary:hover{border-color:var(--brand);color:var(--brand);}
+  .btn.danger{background:rgba(255,92,92,.1);color:var(--red);border:1px solid rgba(255,92,92,.3);}
+  .btn.danger:hover{background:var(--red);color:#fff;}
+  .btn.sm{padding:5px 10px;font-size:11px;}
+  .btn.w-full{width:100%;}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+  input[type=text],input[type=email],input[type=password]{width:100%;background:#0b0f14;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;margin-bottom:12px;font-size:14px;transition:border .2s;}
+  input:focus{outline:none;border-color:var(--brand);}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  th{color:var(--muted);font-weight:500;font-size:11px;text-transform:uppercase;}
+  tr:last-child td{border-bottom:none;}
+  .poster{width:34px;height:50px;object-fit:cover;border-radius:4px;background:#1e2633;display:block;}
+  .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block;}
+  .badge.ok{background:rgba(32,180,113,.15);color:var(--brand);}
+  .badge.warn{background:rgba(245,158,11,.15);color:var(--orange);}
+  .badge.err{background:rgba(255,92,92,.15);color:var(--red);}
+  .badge.info{background:rgba(59,130,246,.15);color:var(--blue);}
+  .plex-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .plex-row:last-child{border-bottom:none;}
+  .plex-avatar{width:36px;height:36px;border-radius:50%;background:var(--border);object-fit:cover;flex-shrink:0;}
+  .plex-info{flex:1;min-width:0;}
+  .plex-info strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .plex-info span{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+  .plex-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .plex-phone-input{background:#0b0f14;border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:12px;width:150px;margin-bottom:0;}
+  .plex-phone-input:focus{outline:none;border-color:var(--brand);}
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:150;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+  .modal-backdrop.open{display:flex;}
+  .modal{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:420px;box-shadow:0 16px 40px rgba(0,0,0,.6);}
+  .modal h3{margin:0 0 20px;font-size:16px;}
+  .modal-actions{display:flex;gap:10px;margin-top:4px;}
+  #toast{position:fixed;bottom:24px;right:24px;background:#1e2633;border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.4);opacity:0;transform:translateY(10px);transition:opacity .25s,transform .25s;pointer-events:none;z-index:300;}
+  #toast.show{opacity:1;transform:translateY(0);}
+  #toast.success{border-color:var(--brand);color:var(--brand);}
+  #toast.error{border-color:var(--red);color:var(--red);}
+  #toast.info{border-color:var(--blue);color:var(--blue);}
+</style>
+</head>
+<body>
+
+<div id="loginOverlay">
+  <div class="login-box">
+    <img src="logo.png" alt="Logo">
+    <h2>Whatsoverr</h2>
+    <form id="loginForm">
+      <input type="text"     id="loginUser" placeholder="Identifiant" required>
+      <input type="password" id="loginPass" placeholder="Mot de passe" required>
+      <button type="submit" class="btn w-full">Acceder au Dashboard</button>
+    </form>
+    <div id="loginMsg" style="margin-top:14px;color:var(--red);font-size:13px;"></div>
+  </div>
+</div>
+
+<div id="appContainer">
+  <header>
+    <img src="logo.png" alt="Logo">
+    <div><h1>WHATSOVERR</h1><div class="sub">Relais Overseerr &middot; WhatsApp &mdash; Baileys (sans navigateur)</div></div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'status')">Statut</button>
+    <button class="tab-btn"        onclick="switchTab(this,'history')">Historique</button>
+    <button class="tab-btn"        onclick="switchTab(this,'users')">Utilisateurs</button>
+  </div>
+
+  <!-- STATUT -->
+  <div id="tab-status" class="tab-pane active">
+    <div class="grid">
+      <div class="card" style="margin-bottom:0;">
+        <h2>Etat du service</h2>
+        <div class="status-row"><span id="statusDot" class="dot ko"></span><span id="statusText">Verification...</span></div>
+        <div style="color:var(--muted);margin-bottom:16px;" id="uptimeText"></div>
+        <div id="qrAreaWrap" style="display:none;text-align:center;">
+          <div style="color:var(--muted);font-size:12px;margin-bottom:8px;">Scannez avec WhatsApp :</div>
+          <div id="qrArea"><img id="qrImg" src="" /></div>
+        </div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="btn secondary" onclick="restart(false)">Redemarrer</button>
+          <button class="btn danger"    onclick="restart(true)">Purger session</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <h2>Notifications Discord</h2>
+        <div style="color:var(--muted);font-size:12px;margin-bottom:12px;">Alertes systeme (deconnexion, erreurs) :</div>
+        <input type="text" id="discordUrl" placeholder="https://discord.com/api/webhooks/..." />
+        <div class="btn-row">
+          <button class="btn"           onclick="saveDiscord()">Sauvegarder</button>
+          <button class="btn secondary" onclick="testDiscord()">Tester</button>
+        </div>
+        <div id="discordCurrent" style="color:var(--muted);font-size:12px;margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <!-- Plex Config Card -->
+    <div class="card" style="margin-top:16px;">
+      <h2>Integration Plex</h2>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:14px;">
+        Connectez votre compte Plex.tv pour importer les utilisateurs directement.<br>
+        <a href="https://www.plexopedia.com/plex-media-server/general/plex-token/" target="_blank" style="color:var(--blue);font-size:11px;">Comment trouver mon token Plex ?</a>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:180px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">URL Plex (optionnel)</div>
+          <input type="text" id="plexUrl" placeholder="http://192.168.1.x:32400" style="margin-bottom:0;" />
+        </div>
+        <div style="flex:1;min-width:180px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Token Plex.tv *</div>
+          <input type="text" id="plexToken" placeholder="xxxxxxxxxxxx" style="margin-bottom:0;" />
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="btn"           onclick="savePlex()">Sauvegarder</button>
+        <button class="btn secondary" onclick="testPlex()">Tester la connexion</button>
+      </div>
+      <div id="plexStatus" style="color:var(--muted);font-size:12px;margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- HISTORIQUE -->
+  <div id="tab-history" class="tab-pane">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 style="margin:0;">Derniers envois</h2>
+        <button class="btn secondary sm" onclick="refreshHistory()">Actualiser</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th style="width:44px;"></th><th>Date</th><th>Demandeur</th><th>Contenu</th><th>Resultat</th><th style="width:110px;"></th>
+          </tr></thead>
+          <tbody id="historyBody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- UTILISATEURS -->
+  <div id="tab-users" class="tab-pane">
+    <!-- Import Plex -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h2 style="margin:0;">Importer depuis Plex</h2>
+        <button class="btn secondary sm" onclick="loadPlexUsers()" id="plexLoadBtn">Charger les users Plex</button>
+      </div>
+      <div id="plexImportInfo" style="color:var(--muted);font-size:12px;margin-bottom:12px;">
+        Cliquez sur "Charger" pour recuperer la liste de vos utilisateurs Plex et assigner leurs numeros WhatsApp.
+      </div>
+      <div id="plexUsersList" style="display:none;">
+        <div id="plexUsersContent"></div>
+      </div>
+    </div>
+
+    <!-- Ajout manuel -->
+    <div class="card">
+      <h2>Ajouter manuellement</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;">
+        <input type="email" id="newEmail" placeholder="email@exemple.com"               style="flex:1;min-width:200px;margin-bottom:0;" />
+        <input type="text"  id="newPhone" placeholder="33612345678 (sans + ni espaces)" style="flex:1;min-width:180px;margin-bottom:0;" />
+        <button class="btn" onclick="addUser()">Ajouter</button>
+      </div>
+      <div style="color:var(--muted);font-size:11px;margin-top:8px;">Format international sans le + (ex: 33612345678 pour la France)</div>
+    </div>
+
+    <!-- Liste -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 style="margin:0;">Utilisateurs enregistres</h2>
+        <button class="btn secondary sm" onclick="refreshUsers()">Actualiser</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Email Overseerr</th><th>Numero WhatsApp</th><th style="width:140px;"></th></tr></thead>
+          <tbody id="usersBody"><tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div class="modal-backdrop" id="editModal">
+  <div class="modal">
+    <h3>Modifier l'utilisateur</h3>
+    <input type="hidden" id="editOldEmail" />
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Email Overseerr</label>
+    <input type="email" id="editEmail" placeholder="email@exemple.com" />
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Numero WhatsApp</label>
+    <input type="text"  id="editPhone" placeholder="33612345678" />
+    <div class="modal-actions">
+      <button class="btn"           onclick="saveEditUser()">Enregistrer</button>
+      <button class="btn secondary" onclick="closeEditModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var authHeader = sessionStorage.getItem('whatsoverr_auth') || null;
+
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  var u = document.getElementById('loginUser').value;
+  var p = document.getElementById('loginPass').value;
+  authHeader = 'Basic ' + btoa(u + ':' + p);
+  try {
+    var res = await fetch('/dashboard/api/status', { headers: { Authorization: authHeader } });
+    if (res.ok) { sessionStorage.setItem('whatsoverr_auth', authHeader); showApp(); }
+    else document.getElementById('loginMsg').textContent = 'Identifiants incorrects';
+  } catch(e) { document.getElementById('loginMsg').textContent = 'Erreur reseau'; }
+});
+
+if (authHeader) {
+  fetch('/dashboard/api/status', { headers: { Authorization: authHeader } })
+    .then(function(r) { if (r.ok) showApp(); }).catch(function(){});
+}
+
+function showApp() {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('appContainer').style.display = 'block';
+  initDashboard();
+}
+
+async function apiCall(endpoint, options) {
+  options = options || {};
+  var res = await fetch('/dashboard/api' + endpoint, Object.assign({}, options, {
+    headers: Object.assign({}, options.headers || {}, { Authorization: authHeader, 'Content-Type': 'application/json' })
+  }));
+  if (res.status === 401) { sessionStorage.removeItem('whatsoverr_auth'); location.reload(); return; }
+  return res.json();
+}
+
+function switchTab(btn, name) {
+  document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'history') refreshHistory();
+  if (name === 'users')   refreshUsers();
+}
+
+var toastTimer;
+function toast(msg, type) {
+  type = type || 'success';
+  var el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { el.className = ''; }, 3200);
+}
+
+function timeAgo(iso) {
+  var diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60)    return 'il y a ' + diff + 's';
+  if (diff < 3600)  return 'il y a ' + Math.floor(diff/60) + 'min';
+  if (diff < 86400) return 'il y a ' + Math.floor(diff/3600) + 'h';
+  return new Date(iso).toLocaleString('fr-FR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+// STATUS
+async function refreshStatus() {
+  try {
+    var data = await apiCall('/status');
+    var dot = document.getElementById('statusDot'), txt = document.getElementById('statusText'), qrW = document.getElementById('qrAreaWrap');
+    if (data.whatsapp_ready) { dot.className='dot ok'; txt.textContent='En ligne et connecte'; qrW.style.display='none'; }
+    else {
+      dot.className='dot ko';
+      txt.textContent = data.qr ? 'Action requise : Scan QR Code' : 'Deconnecte / Demarrage...';
+      if (data.qr) { document.getElementById('qrImg').src = data.qr; qrW.style.display='block'; }
+      else qrW.style.display='none';
+    }
+    var m = Math.floor(data.uptime_seconds/60), s = data.uptime_seconds%60;
+    document.getElementById('uptimeText').textContent = 'Uptime : ' + m + 'min ' + s + 's';
+  } catch(e) {}
+}
+
+async function refreshConfig() {
+  try {
+    var data = await apiCall('/config');
+    document.getElementById('discordCurrent').textContent = data.hasWebhook ? ('Actif : ' + data.maskedUrl) : 'Non configure';
+    document.getElementById('plexUrl').placeholder = data.plexUrl || 'http://192.168.1.x:32400';
+    if (data.plexUrl) document.getElementById('plexUrl').value = data.plexUrl;
+    document.getElementById('plexStatus').textContent = data.hasPlexToken ? ('Token : ' + data.maskedToken) : 'Token non configure';
+  } catch(e) {}
+}
+
+async function saveDiscord() {
+  var url = document.getElementById('discordUrl').value;
+  await apiCall('/config', { method:'POST', body:JSON.stringify({ discordWebhookUrl:url }) });
+  document.getElementById('discordUrl').value = '';
+  refreshConfig(); toast('Webhook Discord sauvegarde');
+}
+async function testDiscord() {
+  try { await apiCall('/config/test-discord', { method:'POST' }); toast('Test envoye sur Discord'); }
+  catch(e) { toast('Erreur', 'error'); }
+}
+
+async function savePlex() {
+  var url   = document.getElementById('plexUrl').value.trim();
+  var token = document.getElementById('plexToken').value.trim();
+  if (!token) { toast('Token Plex requis', 'error'); return; }
+  await apiCall('/config/plex', { method:'POST', body:JSON.stringify({ plexUrl:url, plexToken:token }) });
+  document.getElementById('plexToken').value = '';
+  refreshConfig(); toast('Config Plex sauvegardee');
+}
+
+async function testPlex() {
+  var btn = event.target; btn.disabled = true; btn.textContent = '...';
+  try {
+    var res = await apiCall('/plex/test', { method:'POST' });
+    if (res.ok) toast('Connexion Plex OK — ' + res.userCount + ' utilisateur(s) trouves');
+    else toast(res.error || 'Erreur Plex', 'error');
+  } catch(e) { toast('Erreur reseau', 'error'); }
+  btn.disabled = false; btn.textContent = 'Tester la connexion';
+}
+
+async function restart(wipe) {
+  if (!confirm(wipe ? 'Effacer la session WhatsApp et redemarrer ?' : 'Redemarrer le bot ?')) return;
+  await apiCall(wipe ? '/restart-wipe' : '/restart', { method:'POST' });
+  toast('Redemarrage en cours...');
+  setTimeout(function() { location.reload(); }, 5000);
+}
+
+// HISTORIQUE
+async function refreshHistory() {
+  try {
+    var items = await apiCall('/history');
+    var body = document.getElementById('historyBody');
+    if (!items || !items.length) { body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Aucun envoi recent</td></tr>'; return; }
+    body.innerHTML = items.map(function(item) {
+      var badgeCls, badgeTxt;
+      if      (item.status==='sent_with_poster') { badgeCls='ok';   badgeTxt='Image'; }
+      else if (item.status==='sent_text_only')   { badgeCls='warn'; badgeTxt='Texte'; }
+      else if (item.status==='unknown_user')     { badgeCls='info'; badgeTxt='Inconnu'; }
+      else                                       { badgeCls='err';  badgeTxt='Erreur'; }
+      var isErr = badgeCls==='err';
+      var poster = item.media_poster ? '<img class="poster" src="'+esc(item.media_poster)+'" onerror="this.style.display=\'none\'" alt="">' : '<div class="poster" style="background:var(--border);"></div>';
+      var icon = item.media_type==='movie' ? '🎬' : item.media_type==='tv' ? '📺' : '';
+      var retryBadge = item.retriedFrom ? ' <span class="badge info" style="font-size:10px;">↺</span>' : '';
+      var retryBtn = isErr ? '<button class="btn sm" onclick="retryEntry(\''+item.id+'\',this)" title="'+esc(item.error||'')+'">Reessayer</button>' : '';
+      return '<tr><td>'+poster+'</td><td style="color:var(--muted);font-size:12px;white-space:nowrap;">'+timeAgo(item.timestamp)+'</td><td style="font-weight:500;">'+esc(item.requestedBy_username||'---')+'</td><td>'+icon+' '+esc(item.media_title||'---')+'</td><td><span class="badge '+badgeCls+'" title="'+esc(item.error||'')+'">'+badgeTxt+'</span>'+retryBadge+'</td><td style="text-align:right;">'+retryBtn+'</td></tr>';
+    }).join('');
+  } catch(e) {}
+}
+
+async function retryEntry(id, btn) {
+  btn.disabled=true; btn.textContent='...';
+  try {
+    var res = await apiCall('/retry/'+id, { method:'POST' });
+    if (res&&res.sent) { toast(res.withPoster ? 'Renvoye avec image' : 'Renvoye (texte seul)'); refreshHistory(); }
+    else { toast((res&&res.error)||'Erreur','error'); btn.disabled=false; btn.textContent='Reessayer'; }
+  } catch(e) { toast('Erreur reseau','error'); btn.disabled=false; btn.textContent='Reessayer'; }
+}
+
+// UTILISATEURS
+async function refreshUsers() {
+  try {
+    var users = await apiCall('/users');
+    var body = document.getElementById('usersBody');
+    if (!users||!users.length) { body.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">Aucun utilisateur. Ajoutez-en ci-dessus ou importez depuis Plex.</td></tr>'; return; }
+    body.innerHTML = users.map(function(u) {
+      return '<tr><td style="font-size:13px;">'+esc(u.email)+'</td><td><code style="background:var(--bg);padding:3px 8px;border-radius:6px;font-size:12px;">+'+esc(u.phone)+'</code></td><td style="text-align:right;"><div class="btn-row" style="justify-content:flex-end;"><button class="btn secondary sm" onclick="openEditModal(\''+esc(u.email)+'\',\''+esc(u.phone)+'\')">Modifier</button><button class="btn danger sm" onclick="deleteUser(\''+esc(u.email)+'\')">Supprimer</button></div></td></tr>';
+    }).join('');
+  } catch(e) {}
+}
+
+async function addUser() {
+  var email = document.getElementById('newEmail').value.trim();
+  var phone = document.getElementById('newPhone').value.trim();
+  if (!email||!phone) { toast('Email et numero requis','error'); return; }
+  try {
+    var res = await apiCall('/users', { method:'POST', body:JSON.stringify({ email:email, phone:phone }) });
+    if (res&&res.saved) { document.getElementById('newEmail').value=''; document.getElementById('newPhone').value=''; toast(res.email+' ajoute'); refreshUsers(); }
+    else toast((res&&res.error)||'Erreur','error');
+  } catch(e) { toast('Erreur reseau','error'); }
+}
+
+function openEditModal(email, phone) {
+  document.getElementById('editOldEmail').value = email;
+  document.getElementById('editEmail').value    = email;
+  document.getElementById('editPhone').value    = phone;
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEditModal() { document.getElementById('editModal').classList.remove('open'); }
+
+async function saveEditUser() {
+  var oldEmail = document.getElementById('editOldEmail').value;
+  var newEmail = document.getElementById('editEmail').value.trim();
+  var newPhone = document.getElementById('editPhone').value.trim();
+  if (!newEmail||!newPhone) { toast('Champs requis','error'); return; }
+  try {
+    var res = await apiCall('/users/'+encodeURIComponent(oldEmail), { method:'PUT', body:JSON.stringify({ email:newEmail, phone:newPhone }) });
+    if (res&&res.saved) { closeEditModal(); toast('Utilisateur modifie'); refreshUsers(); }
+    else toast((res&&res.error)||'Erreur','error');
+  } catch(e) { toast('Erreur reseau','error'); }
+}
+
+async function deleteUser(email) {
+  if (!confirm('Supprimer '+email+' ?')) return;
+  try {
+    var res = await apiCall('/users/'+encodeURIComponent(email), { method:'DELETE' });
+    if (res&&res.deleted) { toast('Supprime'); refreshUsers(); }
+    else toast((res&&res.error)||'Erreur','error');
+  } catch(e) { toast('Erreur reseau','error'); }
+}
+
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target===e.currentTarget) closeEditModal();
+});
+
+// IMPORT PLEX
+async function loadPlexUsers() {
+  var btn = document.getElementById('plexLoadBtn');
+  btn.disabled = true; btn.textContent = 'Chargement...';
+  toast('Connexion a Plex.tv...','info');
+  try {
+    var users = await apiCall('/plex/users');
+    if (users && users.error) { toast(users.error,'error'); btn.disabled=false; btn.textContent='Charger les users Plex'; return; }
+    if (!users || !users.length) { toast('Aucun utilisateur Plex trouve','error'); btn.disabled=false; btn.textContent='Charger les users Plex'; return; }
+
+    var html = users.map(function(u) {
+      var avatarSrc = u.thumb || '';
+      var avatar = avatarSrc
+        ? '<img class="plex-avatar" src="'+esc(avatarSrc)+'&X-Plex-Token='+getPlexTokenPreview()+'" onerror="this.src=\'\';this.style.background=\'var(--border)\'" alt="">'
+        : '<div class="plex-avatar"></div>';
+      if (u.registered) {
+        return '<div class="plex-row">'+avatar+'<div class="plex-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div><div class="plex-actions"><span class="badge ok">+'+esc(u.phone)+'</span></div></div>';
+      } else {
+        return '<div class="plex-row">'+avatar+
+          '<div class="plex-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div>'+
+          '<div class="plex-actions">'+
+            '<input class="plex-phone-input" type="text" placeholder="33612345678" id="plexPhone_'+esc(u.id)+'">'+
+            '<button class="btn sm" onclick="addPlexUser(\''+esc(u.email)+'\',\'plexPhone_'+esc(u.id)+'\',this)">Ajouter</button>'+
+          '</div>'+
+        '</div>';
+      }
+    }).join('');
+
+    document.getElementById('plexUsersContent').innerHTML = '<div style="margin-bottom:10px;color:var(--muted);font-size:12px;">'+users.length+' utilisateur(s) Plex — les ✓ sont deja enregistres</div>' + html;
+    document.getElementById('plexUsersList').style.display = 'block';
+    toast(users.length + ' utilisateurs Plex charges');
+  } catch(e) { toast('Erreur reseau','error'); }
+  btn.disabled=false; btn.textContent='Recharger';
+}
+
+function getPlexTokenPreview() { return ''; } // Token masque cote serveur, pas expose au frontend
+
+async function addPlexUser(email, inputId, btn) {
+  var phone = document.getElementById(inputId).value.trim();
+  if (!phone) { toast('Entrez un numero','error'); return; }
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    var res = await apiCall('/users', { method:'POST', body:JSON.stringify({ email:email, phone:phone }) });
+    if (res&&res.saved) {
+      toast(res.email + ' ajoute');
+      loadPlexUsers(); // recharger la liste pour mettre a jour le statut
+      refreshUsers();
+    } else {
+      toast((res&&res.error)||'Erreur','error');
+      btn.disabled=false; btn.textContent='Ajouter';
+    }
+  } catch(e) { toast('Erreur reseau','error'); btn.disabled=false; btn.textContent='Ajouter'; }
+}
+
+function initDashboard() {
+  refreshStatus(); refreshHistory(); refreshConfig();
+  setInterval(refreshStatus, 5000);
+  setInterval(refreshHistory, 15000);
+}
+</script>
+</body>
+</html>
