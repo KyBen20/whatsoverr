@@ -2,13 +2,13 @@
 
 Un bot léger et autonome pour envoyer des notifications WhatsApp multi-utilisateurs basées sur les webhooks d'Overseerr.
 
-![Whatsoverr Dashboard](https://via.placeholder.com/800x400.png?text=Whatsoverr+Dashboard)
+![Whatsoverr Dashboard](https://github.com/KyBen20/whatsoverr/blob/main/public/logo.png)
 
 ## 🚀 Fonctionnalités
 
 - **Extrêmement léger** : ~50Mo de RAM (utilise Baileys via WebSocket pur, *aucun navigateur Chrome n'est requis*).
 - **Dashboard d'administration** intégré et sécurisé.
-- **Intégration Plex** : Importation des utilisateurs Plex en 1 clic.
+- **Intégration Overserr** : Importation des utilisateurs Overserr en 1 clic.
 - **Historique et Relances** : Visualisation des statuts d'envoi et bouton pour réessayer en cas d'erreur.
 - **Affiches (Posters)** : Récupération des images TMDB en miniature.
 - **Zero Configuration Code** : Tout est configurable via le dashboard Web ou variables d'environnement.
