@@ -126,7 +126,7 @@ setInterval(async () => {
   
   const entry = queue.shift();
   saveJson(QUEUE_FILE, queue);
-  console.log([queue] Traitement du message en attente pour );
+  console.log(`[queue] Traitement du message en attente pour ${entry.requestedBy_username}`);
   await processSend(entry, true);
 }, 60000); // Check every minute
 
@@ -275,7 +275,7 @@ async function processSend(entry, isFromQueue = false) {
     }
   } catch (err) {
     pushHistory({ ...base, status: 'error', error: err.message });
-    notifyDiscord(❌ Échec WhatsApp pour **** : );
+    notifyDiscord(`❌ Échec WhatsApp pour **${base.requestedBy_username}** : ${err.message}`);
     return { error: err.message, status: 500 };
   }
 }
@@ -594,5 +594,5 @@ adminRouter.post('/api/retry/:id', async (req, res) => {
 
 app.use('/dashboard', adminRouter);
 app.use((req, res) => res.status(404).json({ error: 'Route inconnue' }));
-app.listen(PORT, () => console.log([server] Port  | POST /webhook | Admin: /dashboard));
+app.listen(PORT, () => console.log(`[server] Port ${PORT} | POST /webhook | Admin: /dashboard`));
 connectWhatsApp();
