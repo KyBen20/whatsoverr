@@ -1,385 +1,395 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no"/>
+<meta name="theme-color" content="#08090f"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="logo.png">
 <title>Whatsoverr</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
   --bg0:#08090f;--glass-bg:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.09);
   --text:#eef0f8;--muted:#7a82a0;--dimmed:#424a65;
   --green:#22d372;--red:#ff4f6e;--orange:#f59e0b;--blue:#60a5fa;--purple:#a78bfa;
   --r:16px;--r-sm:10px;
 }
-body{background:var(--bg0);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-size:14px;min-height:100vh;}
+body{background:var(--bg0);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-size:14px;min-height:100vh;padding-bottom:80px;}
 body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(34,211,114,0.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(96,165,250,0.05) 0%,transparent 60%);pointer-events:none;z-index:0;}
 .glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.09);border-radius:var(--r);position:relative;overflow:hidden;}
-.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 50%);pointer-events:none;}
-#loginPage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
-#loginCard{width:100%;max-width:380px;padding:44px 38px;background:rgba(255,255,255,0.05);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border:1px solid rgba(255,255,255,0.12);border-radius:28px;box-shadow:0 32px 80px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.15);}
-#loginCard .logo{width:90px;height:90px;border-radius:22px;margin:0 auto 24px;display:block;box-shadow:0 8px 30px rgba(0,0,0,0.5);object-fit:contain;}
+#loginPage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;background:var(--bg0);}
+#loginCard{width:100%;max-width:380px;padding:44px 38px;background:rgba(255,255,255,0.05);backdrop-filter:blur(40px);border:1px solid rgba(255,255,255,0.12);border-radius:28px;}
+#loginCard .logo{width:90px;height:90px;border-radius:22px;margin:0 auto 24px;display:block;object-fit:contain;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
 #loginCard h1{font-size:22px;font-weight:700;text-align:center;margin-bottom:6px;}
-#loginCard .sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:30px;}
-#loginMsg{color:var(--red);font-size:12px;text-align:center;margin-top:14px;min-height:18px;}
 #app{display:none;position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:24px 20px 60px;}
 .header{display:flex;align-items:center;gap:16px;margin-bottom:28px;}
-.header img{width:56px;height:56px;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,0.5);object-fit:contain;}
+.header img{width:56px;height:56px;border-radius:16px;object-fit:contain;box-shadow:0 6px 24px rgba(0,0,0,0.5);}
 .header h1{font-size:19px;font-weight:700;letter-spacing:-.3px;}
-.header .ver{color:var(--muted);font-size:11px;margin-top:3px;}
-.header-right{margin-left:auto;}
+.header-right{margin-left:auto;display:flex;gap:8px;}
 .tabs{display:flex;gap:2px;margin-bottom:22px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:4px;}
-.tab-btn{flex:1;background:none;border:none;color:var(--muted);padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;border-radius:11px;transition:all .18s;white-space:nowrap;font-family:inherit;}
-.tab-btn:hover{color:var(--text);background:rgba(255,255,255,0.05);}
-.tab-btn.active{background:rgba(34,211,114,0.12);color:var(--green);box-shadow:0 0 0 1px rgba(34,211,114,0.2);}
+.tab-btn{flex:1;background:none;border:none;color:var(--muted);padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;border-radius:11px;transition:.18s;}
+.tab-btn.active{background:rgba(34,211,114,0.12);color:var(--green);}
 .tab-pane{display:none;}.tab-pane.active{display:block;}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media(max-width:640px){.grid2{grid-template-columns:1fr;}}
-.card{padding:22px 24px;margin-bottom:16px;}.card:last-child{margin-bottom:0;}
-.card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:18px;}
-.pulse{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.pulse.on{background:var(--green);box-shadow:0 0 0 3px rgba(34,211,114,0.2),0 0 14px var(--green);animation:pa 2s infinite;}
-.pulse.off{background:var(--red);box-shadow:0 0 0 3px rgba(255,79,110,0.2);}
-.pulse.wait{background:var(--orange);animation:pa 1s infinite;}
-@keyframes pa{0%,100%{opacity:1;}50%{opacity:.3;}}
-.status-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.status-txt{font-size:15px;font-weight:600;}
-.uptime{color:var(--muted);font-size:12px;margin-bottom:18px;}
-#qrWrap{display:none;text-align:center;margin:14px 0;}
-#qrWrap .qr-hint{font-size:12px;color:var(--muted);margin-bottom:10px;}
-#qrImg{width:175px;height:175px;border-radius:12px;background:#fff;padding:8px;}
+@media(max-width:768px){
+  .grid2{grid-template-columns:1fr;}
+  .tabs{position:fixed;bottom:0;left:0;right:0;margin:0;border-radius:0 0 0 0;border:none;border-top:1px solid rgba(255,255,255,0.09);background:rgba(8,9,15,0.85);backdrop-filter:blur(20px);z-index:90;padding-bottom:env(safe-area-inset-bottom);}
+  .tab-btn{display:flex;flex-direction:column;align-items:center;padding:10px 0;font-size:11px;border-radius:8px;gap:4px;}
+  .tab-btn.active{background:transparent;color:var(--green);}
+}
+.card{padding:22px 24px;margin-bottom:16px;}
+.card-title{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
 label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500;}
-input[type=text],input[type=email],input[type=password],textarea{width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:var(--text);padding:10px 13px;font-size:13px;font-family:inherit;transition:border .2s;margin-bottom:12px;outline:none;}
-input:focus,textarea:focus{border-color:rgba(34,211,114,0.5);box-shadow:0 0 0 3px rgba(34,211,114,0.08);}
-textarea{resize:vertical;min-height:120px;line-height:1.6;}
-.input-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}.input-row input{flex:1;min-width:150px;margin-bottom:0;}
-.btn{display:inline-flex;align-items:center;gap:6px;background:rgba(34,211,114,0.13);color:var(--green);border:1px solid rgba(34,211,114,0.28);border-radius:10px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;white-space:nowrap;font-family:inherit;}
-.btn:hover{background:rgba(34,211,114,0.22);box-shadow:0 0 18px rgba(34,211,114,0.2);}
-.btn:disabled{opacity:.35;cursor:not-allowed;}
+input,textarea,select{width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:var(--text);padding:10px 13px;font-size:13px;margin-bottom:12px;outline:none;font-family:inherit;}
+.input-row{display:flex;gap:10px;flex-wrap:wrap;} .input-row>*{flex:1;min-width:150px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:rgba(34,211,114,0.13);color:var(--green);border:1px solid rgba(34,211,114,0.28);border-radius:10px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:.18s;}
 .btn.ghost{background:rgba(255,255,255,0.05);color:var(--muted);border-color:rgba(255,255,255,0.09);}
-.btn.ghost:hover{color:var(--text);background:rgba(255,255,255,0.1);}
 .btn.danger{background:rgba(255,79,110,0.12);color:var(--red);border-color:rgba(255,79,110,0.28);}
-.btn.danger:hover{background:rgba(255,79,110,0.22);}
 .btn.blue{background:rgba(96,165,250,0.12);color:var(--blue);border-color:rgba(96,165,250,0.28);}
 .btn.sm{padding:5px 10px;font-size:11px;border-radius:7px;}
-.btn.w-full{width:100%;justify-content:center;}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 .badge.ok{background:rgba(34,211,114,0.12);color:var(--green);}
 .badge.warn{background:rgba(245,158,11,0.12);color:var(--orange);}
 .badge.err{background:rgba(255,79,110,0.12);color:var(--red);}
-.badge.retry{background:rgba(167,139,250,0.12);color:var(--purple);}
+.pulse{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.pulse.on{background:var(--green);box-shadow:0 0 14px var(--green);animation:pa 2s infinite;}
+.pulse.off{background:var(--red);}
+.pulse.wait{background:var(--orange);animation:pa 1s infinite;}
+@keyframes pa{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* KPI Widget */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:12px;margin-bottom:16px;}
+.kpi-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;}
+.kpi-val{font-size:20px;font-weight:700;}
+.kpi-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;}
+
+/* Tables / Mobile Cards */
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--dimmed);border-bottom:1px solid rgba(255,255,255,0.06);}
-td{text-align:left;padding:11px 10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-.poster{width:32px;height:46px;object-fit:cover;border-radius:5px;background:rgba(255,255,255,0.05);display:block;}
-.uavatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);}
-.uavatar-ph{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--muted);}
-.ov-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
-.ov-row:last-child{border-bottom:none;}
-.ov-info{flex:1;min-width:0;}
-.ov-info strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ov-info span{color:var(--muted);font-size:11px;display:block;overflow:hidden;text-overflow:ellipsis;}
-.ov-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.ov-phone{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.09);border-radius:8px;color:var(--text);padding:7px 10px;font-size:12px;width:148px;outline:none;font-family:inherit;}
-.ov-phone:focus{border-color:rgba(34,211,114,0.4);}
-.template-vars{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
-.var-chip{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2);border-radius:6px;padding:3px 9px;font-size:11px;font-family:monospace;cursor:pointer;transition:.15s;}
-.var-chip:hover{background:rgba(96,165,250,0.2);}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
-.modal-bg.open{display:flex;}
-.modal{background:rgba(11,13,22,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:22px;padding:30px;width:100%;max-width:430px;}
-.modal h3{font-size:16px;font-weight:600;margin-bottom:20px;}
-.saved-pill{display:none;align-items:center;font-size:12px;color:var(--green);background:rgba(34,211,114,0.1);border:1px solid rgba(34,211,114,0.2);border-radius:20px;padding:3px 10px;}
-.saved-pill.show{display:inline-flex;}
-#toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:500;pointer-events:none;z-index:999;opacity:0;transform:translateY(8px);transition:all .22s;backdrop-filter:blur(20px);border:1px solid transparent;}
-#toast.show{opacity:1;transform:translateY(0);}
-#toast.s{background:rgba(34,211,114,0.15);color:var(--green);border-color:rgba(34,211,114,0.3);}
-#toast.e{background:rgba(255,79,110,0.15);color:var(--red);border-color:rgba(255,79,110,0.3);}
-#toast.i{background:rgba(96,165,250,0.15);color:var(--blue);border-color:rgba(96,165,250,0.3);}
-.divider{height:1px;background:rgba(255,255,255,0.06);margin:20px 0;}
-</style>
-<link rel="icon" type="image/png" href="logo.png">
-</head><body>
-<div id="loginPage">
-  <div id="loginCard">
-    <img class="logo" src="logo.png" onerror="this.style.display='none'" alt="">
-    <h1>Whatsoverr</h1>
-    <div class="sub">Dashboard d'administration</div>
-    <form id="loginForm" style="margin-top:28px;">
-      <label class="lbl">Identifiant</label>
-      <input type="text" id="lu" required autocomplete="username">
-      <label class="lbl">Mot de passe</label>
-      <input type="password" id="lp" required autocomplete="current-password">
-      <button type="submit" class="btn w-full" style="margin-top:4px;">Connexion</button>
-    </form>
-    <div id="loginMsg"></div>
-  </div>
-</div>
-<div id="app">
-  <div class="header">
-    <img src="logo.png" onerror="this.style.display='none'" alt="">
-    <div><h1>WHATSOVERR</h1><div class="ver">Overseerr &rarr; WhatsApp &middot; Baileys</div></div>
-    <div class="header-right"><button class="btn ghost sm" onclick="logout()">D&eacute;connexion</button></div>
-  </div>
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab(this,'status')">&#9889; Statut</button>
-    <button class="tab-btn" onclick="switchTab(this,'history')">&#128203; Historique</button>
-    <button class="tab-btn" onclick="switchTab(this,'users')">&#128101; Utilisateurs</button>
-    <button class="tab-btn" onclick="switchTab(this,'settings')">&#9881; R&eacute;glages</button>
-  </div>
-  <div id="tab-status" class="tab-pane active">
-    <div class="grid2" style="margin-bottom:16px;">
-      <div class="glass card" style="margin-bottom:0;">
-        <div class="card-title">WhatsApp</div>
-        <div class="status-row"><div class="pulse wait" id="statusDot"></div><div class="status-txt" id="statusTxt">V&eacute;rification&hellip;</div></div>
-        <div class="uptime" id="uptimeTxt"></div>
-        <div id="qrWrap">
-          <div class="qr-hint">Scannez avec WhatsApp :<br><small style="color:#424a65">Appareils connect&eacute;s &rarr; Lier un appareil</small></div>
-          <img id="qrImg" src="" alt="QR">
-        </div>
-        <div class="btn-row" style="margin-top:16px;">
-          <button class="btn ghost" onclick="doRestart(false)">&#8634; Red&eacute;marrer</button>
-          <button class="btn danger" onclick="doRestart(true)">Purger session</button>
-        </div>
-      </div>
-      <div class="glass card" style="margin-bottom:0;">
-        <div class="card-title">Discord</div>
-        <div style="color:var(--muted);font-size:12px;margin-bottom:14px;">Alertes syst&egrave;me (cooldown 30min pour &eacute;viter le spam) :</div>
-        <label class="lbl">URL Webhook</label>
-        <input type="text" id="discordUrl" placeholder="https://discord.com/api/webhooks/...">
-        <div id="discordCurrent" style="font-size:11px;color:var(--muted);margin-bottom:14px;"></div>
-        <div class="btn-row">
-          <button class="btn" onclick="saveDiscord()">Sauvegarder</button>
-          <button class="btn ghost" onclick="testDiscord()">Tester</button>
-        </div>
-      </div>
-    </div>
-    <div class="glass card">
-      <div class="card-title">Connexion Overseerr</div>
-      <div style="color:var(--muted);font-size:12px;margin-bottom:16px;">La cl&eacute; API se trouve dans Overseerr &rarr; Settings &rarr; General &rarr; API Key</div>
-      <div class="input-row" style="align-items:flex-start;">
-        <div style="flex:1;min-width:200px;"><label class="lbl">URL Overseerr</label><input type="text" id="overseerrUrl" placeholder="http://192.168.1.x:5055" style="margin-bottom:0;"></div>
-        <div style="flex:1;min-width:180px;"><label class="lbl">Cl&eacute; API</label><input type="text" id="overseerrApiKey" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" style="margin-bottom:0;"></div>
-      </div>
-      <div class="btn-row" style="margin-top:14px;">
-        <button class="btn" onclick="saveOverseerr()">Sauvegarder</button>
-        <button class="btn ghost" onclick="testOverseerr()">Tester la connexion</button>
-      </div>
-      <div id="overseerrStatus" style="font-size:11px;color:var(--muted);margin-top:10px;"></div>
-    </div>
-  </div>
-  <div id="tab-history" class="tab-pane">
-    <div class="glass card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <div class="card-title" style="margin-bottom:0;">Derniers envois</div>
-        <button class="btn ghost sm" onclick="refreshHistory()">Actualiser</button>
-      </div>
-      <div class="table-wrap">
-        <table><thead><tr><th style="width:44px;"></th><th>Heure</th><th>Demandeur</th><th>Contenu</th><th>R&eacute;sultat</th><th style="width:80px;"></th></tr></thead>
-        <tbody id="histBody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">Chargement&hellip;</td></tr></tbody></table>
-      </div>
-    </div>
-  </div>
-  <div id="tab-users" class="tab-pane">
-    <div class="glass card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div class="card-title" style="margin-bottom:0;">Import depuis Overseerr</div>
-        <button class="btn blue sm" onclick="loadOvUsers()" id="ovLoadBtn">Charger</button>
-      </div>
-      <div id="ovImportHint" style="color:var(--muted);font-size:12px;margin-bottom:10px;">Cliquez sur Charger pour voir vos utilisateurs Overseerr et assigner leurs num&eacute;ros WhatsApp.</div>
-      <div id="ovList" style="display:none;"><div id="ovContent"></div></div>
-    </div>
-    <div class="glass card">
-      <div class="card-title">Ajouter manuellement</div>
-      <div class="input-row">
-        <input type="email" id="newEmail" placeholder="email@exemple.com">
-        <input type="text" id="newPhone" placeholder="336xxxxxxxx (sans +)">
-        <button class="btn" onclick="addUser()">Ajouter</button>
-      </div>
-      <div style="font-size:11px;color:var(--dimmed);">Format international sans + (ex: 33612345678)</div>
-    </div>
-    <div class="glass card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <div class="card-title" style="margin-bottom:0;">Utilisateurs enregistr&eacute;s</div>
-        <button class="btn ghost sm" onclick="refreshUsers()">Actualiser</button>
-      </div>
-      <div class="table-wrap">
-        <table><thead><tr><th style="width:50px;"></th><th>Email</th><th>Num&eacute;ro WhatsApp</th><th style="width:140px;"></th></tr></thead>
-        <tbody id="usersBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:28px;">Chargement&hellip;</td></tr></tbody></table>
-      </div>
-    </div>
-  </div>
-  <div id="tab-settings" class="tab-pane">
-    <div class="glass card">
-      <div class="card-title">Template du message WhatsApp</div>
-      <div style="color:var(--muted);font-size:12px;margin-bottom:14px;">Personnalisez le message envoy&eacute;. Cliquez sur une variable pour l'ins&eacute;rer :</div>
-      <div class="template-vars">
-        <span class="var-chip" onclick="insertVar('{username}')">{username}</span>
-        <span class="var-chip" onclick="insertVar('{title}')">{title}</span>
-        <span class="var-chip" onclick="insertVar('{icon}')">{icon}</span>
-        <span class="var-chip" onclick="insertVar('{type}')">{type}</span>
-      </div>
-      <label class="lbl">Message (\n = saut de ligne)</label>
-      <textarea id="templateTxt"></textarea>
-      <div class="btn-row">
-        <button class="btn" onclick="saveTemplate()">Sauvegarder</button>
-        <button class="btn ghost" onclick="resetTemplate()">R&eacute;initialiser</button>
-        <span class="saved-pill" id="tplSaved">&#10003; Sauvegard&eacute;</span>
-      </div>
-      <div class="divider"></div>
-      <div class="card-title">Aper&ccedil;u</div>
-      <div id="tplPreview" style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;font-size:13px;white-space:pre-wrap;line-height:1.6;color:var(--muted);min-height:80px;"></div>
-    </div>
-  </div>
-</div>
-<div class="modal-bg" id="editModal">
-  <div class="modal">
-    <h3>Modifier l'utilisateur</h3>
-    <input type="hidden" id="editOld">
-    <label class="lbl">Email</label><input type="email" id="editEmail">
-    <label class="lbl">Num&eacute;ro WhatsApp</label><input type="text" id="editPhone">
-    <div class="btn-row" style="margin-top:4px;">
-      <button class="btn" onclick="saveEdit()">Enregistrer</button>
-      <button class="btn ghost" onclick="closeEdit()">Annuler</button>
-    </div>
-  </div>
-</div>
-<div id="toast"></div>
+th,td{text-align:left;padding:11px 10px;border-bottom:1px solid rgba(255,255,255,0.04);}
+th{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--dimmed);border-bottom:1px solid rgba(255,255,255,0.06);}
+@media(max-width:640px){
+  thead{display:none;}
+  tr{display:block;padding:12px;background:rgba(255,255,255,0.02);border-radius:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.05);}
+  td{display:block;border:none;padding:4px 0;}
+  td:last-child{display:flex;justify-content:flex-end;}
+}
+.poster{width:32px;height:46px;object-fit:cover;border-radius:5px;}
+.uavatar{width:34px;height:34px;border-radius:50%;object-fit:cover;}
+.uavatar-ph{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--muted);}
 
+/* Modals & Toasts */
+#toast{position:fixed;top:24px;left:50%;transform:translate(-50%, -20px);padding:12px 18px;border-radius:12px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:.22s;background:rgba(255,255,255,0.1);backdrop-filter:blur(20px);}
+#toast.show{opacity:1;transform:translate(-50%, 0);}
+#toast.s{color:var(--green);border:1px solid rgba(34,211,114,0.3);}
+#toast.e{color:var(--red);border:1px solid rgba(255,79,110,0.3);}
+#toast.i{color:var(--blue);border:1px solid rgba(96,165,250,0.3);}
+</style>
+</head>
+<body>
+<div id="root"></div>
 <script>
-var auth=sessionStorage.getItem('wa_auth')||'';
-function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-document.getElementById('loginForm').addEventListener('submit',async function(e){
-  e.preventDefault();
-  auth='Basic '+btoa(document.getElementById('lu').value+':'+document.getElementById('lp').value);
-  var r=await fetch('/dashboard/api/status',{headers:{Authorization:auth}});
-  if(r.ok){sessionStorage.setItem('wa_auth',auth);showApp();}
-  else document.getElementById('loginMsg').textContent='Identifiants incorrects';
-});
-if(auth){fetch('/dashboard/api/status',{headers:{Authorization:auth}}).then(function(r){if(r.ok)showApp();}).catch(function(){});}
-function showApp(){document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';init();}
-function logout(){sessionStorage.removeItem('wa_auth');location.reload();}
-async function api(url,opts){
-  opts=opts||{};
-  var r=await fetch('/dashboard/api'+url,Object.assign({},opts,{headers:Object.assign({Authorization:auth,'Content-Type':'application/json'},opts.headers||{})}));
-  if(r.status===401){sessionStorage.removeItem('wa_auth');location.reload();}
+const DICT = {
+  fr: {
+    login: "Connexion", user: "Identifiant", pass: "Mot de passe",
+    logout: "Déconnexion",
+    tab_status: "⚡ Statut", tab_hist: "📋 Historique", tab_users: "👥 Utilisateurs", tab_settings: "⚙️ Réglages",
+    st_wa: "WhatsApp", st_wa_ok: "Connecté", st_wa_wait: "Attente QR", st_wa_off: "Déconnecté",
+    st_restart: "Redémarrer", st_purge: "Purger session",
+    st_disc: "Discord", st_disc_hint: "Alertes système",
+    st_ov: "Connexion Overseerr", st_save: "Sauvegarder", st_test: "Tester",
+    kpi_sent: "Envoyés", kpi_rate: "Succès", kpi_last: "Dernier notifié", kpi_up: "Uptime",
+    hist_title: "Derniers envois", hist_refresh: "Actualiser",
+    usr_import: "Import Overseerr", usr_load: "Charger", usr_add: "Ajouter manuellement",
+    usr_email: "Email", usr_phone: "Numéro (sans +)", usr_list: "Enregistrés",
+    set_tpl: "Templates du message", set_lang: "Langue Dashboard", set_dnd: "Ne Pas Déranger",
+    set_export: "Export / Sauvegarde", set_test: "Envoi Test Manuel",
+    btn_import: "Importer Backup", btn_export: "Télécharger Backup"
+  },
+  en: {
+    login: "Login", user: "Username", pass: "Password",
+    logout: "Logout",
+    tab_status: "⚡ Status", tab_hist: "📋 History", tab_users: "👥 Users", tab_settings: "⚙️ Settings",
+    st_wa: "WhatsApp", st_wa_ok: "Connected", st_wa_wait: "Waiting QR", st_wa_off: "Disconnected",
+    st_restart: "Restart", st_purge: "Purge Session",
+    st_disc: "Discord", st_disc_hint: "System alerts",
+    st_ov: "Overseerr Connection", st_save: "Save", st_test: "Test",
+    kpi_sent: "Sent", kpi_rate: "Success", kpi_last: "Last Notified", kpi_up: "Uptime",
+    hist_title: "Recent Deliveries", hist_refresh: "Refresh",
+    usr_import: "Import from Overseerr", usr_load: "Load", usr_add: "Add Manually",
+    usr_email: "Email", usr_phone: "Phone (no +)", usr_list: "Registered Users",
+    set_tpl: "Message Templates", set_lang: "Dashboard Language", set_dnd: "Do Not Disturb",
+    set_export: "Export / Backup", set_test: "Manual Test Send",
+    btn_import: "Import Backup", btn_export: "Download Backup"
+  }
+};
+
+let currentLang = 'fr';
+let auth = sessionStorage.getItem('wa_auth') || '';
+
+function t(key) { return DICT[currentLang][key] || key; }
+
+function renderLogin() {
+  return `
+    <div id="loginPage">
+      <div id="loginCard">
+        <img class="logo" src="logo.png" alt="">
+        <h1>Whatsoverr</h1>
+        <form id="loginForm" style="margin-top:28px;">
+          <label class="lbl">${t('user')}</label><input type="text" id="lu" required>
+          <label class="lbl">${t('pass')}</label><input type="password" id="lp" required>
+          <button type="submit" class="btn w-full" style="width:100%">${t('login')}</button>
+        </form>
+        <div id="loginMsg" style="color:var(--red);text-align:center;margin-top:10px;font-size:12px;"></div>
+      </div>
+    </div>`;
+}
+
+function renderApp() {
+  return `
+    <div id="app" style="display:block;">
+      <div class="header">
+        <img src="logo.png" alt="">
+        <div><h1>WHATSOVERR</h1><div style="font-size:11px;color:var(--muted)">v2.0 PWA Edition</div></div>
+        <div class="header-right"><button class="btn ghost sm" onclick="logout()">${t('logout')}</button></div>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(this,'status')">${t('tab_status')}</button>
+        <button class="tab-btn" onclick="switchTab(this,'history')">${t('tab_hist')}</button>
+        <button class="tab-btn" onclick="switchTab(this,'users')">${t('tab_users')}</button>
+        <button class="tab-btn" onclick="switchTab(this,'settings')">${t('tab_settings')}</button>
+      </div>
+      <div id="tab-status" class="tab-pane active">
+        <div class="kpi-row" id="kpiBox"></div>
+        <div class="grid2">
+          <div class="glass card">
+            <div class="card-title">${t('st_wa')}</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div class="pulse wait" id="statusDot"></div><div id="statusTxt" style="font-weight:600">...</div></div>
+            <img id="qrImg" src="" style="display:none;width:150px;border-radius:12px;margin-bottom:10px;">
+            <div class="btn-row">
+              <button class="btn ghost sm" onclick="doRestart(false)">${t('st_restart')}</button>
+              <button class="btn danger sm" onclick="doRestart(true)">${t('st_purge')}</button>
+            </div>
+          </div>
+          <div class="glass card">
+            <div class="card-title">${t('st_disc')}</div>
+            <input type="text" id="discordUrl" placeholder="https://discord.com/api/webhooks/...">
+            <div class="btn-row"><button class="btn sm" onclick="saveDiscord()">${t('st_save')}</button><button class="btn ghost sm" onclick="api('/config/test-discord',{method:'POST'}).then(()=>toast('OK'))">${t('st_test')}</button></div>
+          </div>
+        </div>
+        <div class="glass card" style="margin-top:16px;">
+          <div class="card-title">${t('st_ov')}</div>
+          <div class="input-row">
+            <div><label class="lbl">URL</label><input type="text" id="overseerrUrl"></div>
+            <div><label class="lbl">API Key</label><input type="text" id="overseerrApiKey"></div>
+          </div>
+          <div class="btn-row"><button class="btn" onclick="saveOverseerr()">${t('st_save')}</button><button class="btn ghost" onclick="testOverseerr()">${t('st_test')}</button></div>
+        </div>
+      </div>
+      <div id="tab-history" class="tab-pane">
+        <div class="glass card">
+          <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+            <div class="card-title" style="margin:0">${t('hist_title')}</div>
+            <button class="btn ghost sm" onclick="refreshHistory()">${t('hist_refresh')}</button>
+          </div>
+          <div class="table-wrap">
+            <table><tbody id="histBody"></tbody></table>
+          </div>
+        </div>
+      </div>
+      <div id="tab-users" class="tab-pane">
+        <div class="glass card">
+          <div class="card-title">${t('usr_add')}</div>
+          <div class="input-row">
+            <input type="email" id="newEmail" placeholder="${t('usr_email')}">
+            <input type="text" id="newPhone" placeholder="${t('usr_phone')}">
+            <select id="newLang" style="width:auto;flex:none;min-width:70px;"><option value="fr">FR</option><option value="en">EN</option></select>
+            <button class="btn" onclick="addUser()">${t('usr_add')}</button>
+          </div>
+        </div>
+        <div class="glass card">
+          <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+            <div class="card-title" style="margin:0">${t('usr_list')}</div>
+            <button class="btn ghost sm" onclick="refreshUsers()">${t('hist_refresh')}</button>
+          </div>
+          <div class="table-wrap"><table><tbody id="usersBody"></tbody></table></div>
+        </div>
+        <div class="glass card">
+          <div style="display:flex;justify-content:space-between;">
+            <div class="card-title" style="margin:0">${t('usr_import')}</div>
+            <button class="btn blue sm" onclick="loadOvUsers()" id="ovLoadBtn">${t('usr_load')}</button>
+          </div>
+          <div id="ovList" style="margin-top:16px;"></div>
+        </div>
+      </div>
+      <div id="tab-settings" class="tab-pane">
+        <div class="glass card">
+          <div class="card-title">${t('set_tpl')}</div>
+          <label class="lbl">FR Template</label><textarea id="tpl_fr"></textarea>
+          <label class="lbl">EN Template</label><textarea id="tpl_en"></textarea>
+          <button class="btn" onclick="saveTemplates()">${t('st_save')}</button>
+        </div>
+        <div class="glass card">
+          <div class="card-title">${t('set_dnd')}</div>
+          <div class="input-row">
+            <div><label class="lbl">Enabled</label><select id="dnd_en"><option value="true">Oui / Yes</option><option value="false">Non / No</option></select></div>
+            <div><label class="lbl">Start</label><input type="time" id="dnd_s"></div>
+            <div><label class="lbl">End</label><input type="time" id="dnd_e"></div>
+          </div>
+          <button class="btn" onclick="saveConfig()">${t('st_save')}</button>
+        </div>
+        <div class="grid2">
+          <div class="glass card" style="margin:0">
+            <div class="card-title">${t('set_lang')}</div>
+            <select id="dashLang" onchange="changeDashLang()"><option value="fr">Français</option><option value="en">English</option></select>
+          </div>
+          <div class="glass card" style="margin:0">
+            <div class="card-title">${t('set_test')}</div>
+            <div class="input-row"><input type="text" id="testPhone" placeholder="${t('usr_phone')}"><button class="btn sm" onclick="testManual()">Go</button></div>
+          </div>
+        </div>
+        <div class="glass card" style="margin-top:16px;">
+          <div class="card-title">${t('set_export')}</div>
+          <div class="btn-row"><button class="btn ghost" onclick="exportData()">${t('btn_export')}</button><input type="file" id="importFile" style="display:none" onchange="importData(event)"><button class="btn blue" onclick="document.getElementById('importFile').click()">${t('btn_import')}</button></div>
+        </div>
+      </div>
+    </div>
+    <div id="toast"></div>
+  `;
+}
+
+// --- Logic ---
+let toastT;
+function toast(m, c='s') { let e=document.getElementById('toast'); e.textContent=m; e.className='show '+c; clearTimeout(toastT); toastT=setTimeout(()=>e.className='', 3000); }
+async function api(url, o={}) {
+  let r = await fetch('/dashboard/api'+url, { ...o, headers: { Authorization: auth, 'Content-Type': 'application/json', ...(o.headers||{}) }});
+  if(r.status===401) { sessionStorage.removeItem('wa_auth'); location.reload(); }
   return r.json();
 }
-function switchTab(btn,name){
-  document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
-  document.getElementById('tab-'+name).classList.add('active');btn.classList.add('active');
-  if(name==='history')refreshHistory();
-  if(name==='users')refreshUsers();
-  if(name==='settings')refreshTemplate();
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function logout(){ sessionStorage.removeItem('wa_auth'); location.reload(); }
+function switchTab(btn, n) {
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active'); btn.classList.add('active');
 }
-var toastT;
-function toast(msg,type){type=type||'s';var el=document.getElementById('toast');el.textContent=msg;el.className='show '+type;clearTimeout(toastT);toastT=setTimeout(function(){el.className='';},3200);}
-function fmtUptime(s){if(s<60)return s+'s';var h=Math.floor(s/3600),m=Math.floor((s%3600)/60);if(h===0)return m+'min';return h+'h '+m+'min';}
-function timeAgo(iso){var d=Math.floor((Date.now()-new Date(iso))/1000);if(d<60)return 'il y a '+d+'s';if(d<3600)return 'il y a '+Math.floor(d/60)+'min';if(d<86400)return 'il y a '+Math.floor(d/3600)+'h'+Math.floor((d%3600)/60)+'min';return new Date(iso).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
-async function refreshStatus(){
-  try{
-    var d=await api('/status');
-    var dot=document.getElementById('statusDot'),txt=document.getElementById('statusTxt'),qw=document.getElementById('qrWrap');
-    if(d.whatsapp_ready){dot.className='pulse on';txt.textContent='Connecté';qw.style.display='none';}
-    else if(d.qr){dot.className='pulse wait';txt.textContent='En attente de scan QR';document.getElementById('qrImg').src=d.qr;qw.style.display='block';}
-    else{dot.className='pulse off';txt.textContent='Déconnecté';qw.style.display='none';}
-    document.getElementById('uptimeTxt').textContent='Uptime : '+fmtUptime(d.uptime_seconds);
-  }catch(e){}
+
+function doRestart(wipe) { if(confirm(wipe?'Purger?':'Restart?')){ api(wipe?'/restart-wipe':'/restart',{method:'POST'}); toast('Reboot...'); setTimeout(()=>location.reload(), 4000); } }
+
+async function saveDiscord(){ await api('/config',{method:'POST',body:JSON.stringify({discordWebhookUrl:document.getElementById('discordUrl').value})}); toast('OK'); }
+async function saveOverseerr(){ await api('/config/overseerr',{method:'POST',body:JSON.stringify({overseerrUrl:document.getElementById('overseerrUrl').value, overseerrApiKey:document.getElementById('overseerrApiKey').value})}); toast('OK'); }
+async function testOverseerr(){ let r=await api('/overseerr/test',{method:'POST'}); if(r.ok)toast('OK'); else toast('Err','e'); }
+async function saveTemplates(){ await api('/config/templates',{method:'POST',body:JSON.stringify({templates:{fr:document.getElementById('tpl_fr').value,en:document.getElementById('tpl_en').value}})}); toast('OK'); }
+async function saveConfig(){ await api('/config',{method:'POST',body:JSON.stringify({dnd:{enabled:document.getElementById('dnd_en').value==='true',start:document.getElementById('dnd_s').value,end:document.getElementById('dnd_e').value}})}); toast('OK'); }
+async function testManual(){ await api('/whatsapp/test',{method:'POST',body:JSON.stringify({phone:document.getElementById('testPhone').value,message:'TEST WhatsApp Bot'})}); toast('OK'); }
+
+function changeDashLang() {
+  currentLang = document.getElementById('dashLang').value;
+  api('/config',{method:'POST',body:JSON.stringify({dashboardLang:currentLang})});
+  renderFull();
 }
-async function refreshConfig(){
-  try{
-    var d=await api('/config');
-    document.getElementById('discordCurrent').textContent=d.hasWebhook?'Actif : '+d.maskedUrl:'Non configuré';
-    if(d.overseerrUrl)document.getElementById('overseerrUrl').value=d.overseerrUrl;
-    document.getElementById('overseerrStatus').textContent=d.hasOverseerrApiKey?'Clé : '+d.maskedApiKey:'Clé API non configurée';
-  }catch(e){}
+
+async function exportData() {
+  let d = await api('/config/export');
+  let b = new Blob([JSON.stringify(d, null, 2)], {type:'application/json'});
+  let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'whatsoverr_backup.json'; a.click();
 }
-async function saveDiscord(){var url=document.getElementById('discordUrl').value.trim();await api('/config',{method:'POST',body:JSON.stringify({discordWebhookUrl:url})});document.getElementById('discordUrl').value='';refreshConfig();toast('Webhook Discord sauvegardé');}
-async function testDiscord(){try{await api('/config/test-discord',{method:'POST'});toast('Test envoyé sur Discord');}catch(e){toast('Erreur','e');}}
-async function saveOverseerr(){
-  var url=document.getElementById('overseerrUrl').value.trim(),key=document.getElementById('overseerrApiKey').value.trim();
-  if(!url||!key){toast('URL et clé API requis','e');return;}
-  await api('/config/overseerr',{method:'POST',body:JSON.stringify({overseerrUrl:url,overseerrApiKey:key})});
-  document.getElementById('overseerrApiKey').value='';refreshConfig();toast('Config Overseerr sauvegardée');
+async function importData(e) {
+  let f = e.target.files[0]; if(!f) return;
+  let r = new FileReader();
+  r.onload = async (ev) => {
+    try {
+      let j = JSON.parse(ev.target.result);
+      await api('/config/import',{method:'POST',body:JSON.stringify(j)});
+      toast('Import OK, rebooting...'); setTimeout(()=>api('/restart',{method:'POST'}).then(()=>setTimeout(()=>location.reload(),3000)), 1000);
+    } catch(err) { toast('Invalid file','e'); }
+  };
+  r.readAsText(f);
 }
-async function testOverseerr(){
-  var btn=event.target;btn.disabled=true;btn.textContent='...';
-  try{var r=await api('/overseerr/test',{method:'POST'});if(r.ok)toast('Connexion OK - '+r.userCount+' utilisateur(s)');else toast(r.error||'Erreur Overseerr','e');}
-  catch(e){toast('Erreur réseau','e');}
-  btn.disabled=false;btn.textContent='Tester la connexion';
+
+async function refreshAll() {
+  let st = await api('/status');
+  document.getElementById('statusDot').className = st.whatsapp_ready?'pulse on':(st.qr?'pulse wait':'pulse off');
+  document.getElementById('statusTxt').textContent = st.whatsapp_ready?t('st_wa_ok'):(st.qr?t('st_wa_wait'):t('st_wa_off'));
+  let qr = document.getElementById('qrImg'); if(st.qr){qr.src=st.qr;qr.style.display='block';}else{qr.style.display='none';}
+
+  let cf = await api('/config');
+  if(cf.dashboardLang && cf.dashboardLang !== currentLang) { currentLang = cf.dashboardLang; renderFull(); return; }
+  document.getElementById('discordUrl').placeholder = cf.hasWebhook?cf.maskedUrl:'';
+  document.getElementById('overseerrUrl').placeholder = cf.overseerrUrl||'';
+  document.getElementById('overseerrApiKey').placeholder = cf.hasOverseerrApiKey?cf.maskedApiKey:'';
+  document.getElementById('dashLang').value = currentLang;
+  
+  if(cf.templates) { document.getElementById('tpl_fr').value = cf.templates.fr||''; document.getElementById('tpl_en').value = cf.templates.en||''; }
+  if(cf.dnd) { document.getElementById('dnd_en').value = cf.dnd.enabled?'true':'false'; document.getElementById('dnd_s').value = cf.dnd.start; document.getElementById('dnd_e').value = cf.dnd.end; }
+
+  refreshHistory(); refreshUsers();
 }
-async function doRestart(wipe){
-  if(!confirm(wipe?'Effacer la session WhatsApp et redémarrer ?':'Redémarrer le bot ?'))return;
-  await api(wipe?'/restart-wipe':'/restart',{method:'POST'});
-  toast('Redémarrage en cours...','i');setTimeout(function(){location.reload();},5000);
+
+async function refreshHistory() {
+  let hs = await api('/history');
+  if(!hs) return;
+  document.getElementById('histBody').innerHTML = hs.map(h=>{
+    let c = h.status.includes('sent')?'ok':(h.status.includes('dnd')?'warn':'err');
+    let p = h.media_poster?'<img class="poster" src="'+esc(h.media_poster)+'">':'';
+    return `<tr><td style="width:40px">${p}</td><td>${esc(h.requestedBy_username||'?')}</td><td>${esc(h.media_title||'?')}</td><td><span class="badge ${c}">${esc(h.status)}</span></td></tr>`;
+  }).join('');
+  
+  let sent = hs.filter(h=>h.status.includes('sent')).length;
+  let rate = hs.length ? Math.round((sent/hs.length)*100) : 0;
+  let last = hs.length ? hs[0].requestedBy_username : '--';
+  document.getElementById('kpiBox').innerHTML = `
+    <div class="kpi-card"><span class="kpi-lbl">${t('kpi_sent')}</span><span class="kpi-val">${sent}</span></div>
+    <div class="kpi-card"><span class="kpi-lbl">${t('kpi_rate')}</span><span class="kpi-val">${rate}%</span></div>
+    <div class="kpi-card"><span class="kpi-lbl">${t('kpi_last')}</span><span class="kpi-val" style="font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(last)}</span></div>
+  `;
 }
-async function refreshHistory(){
-  try{
-    var items=await api('/history'),body=document.getElementById('histBody');
-    if(!items||!items.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">Aucun envoi enregistré</td></tr>';return;}
-    body.innerHTML=items.map(function(item){
-      var bc,bt;
-      if(item.status==='sent_with_poster'){bc='ok';bt='&#10003; Image';}
-      else if(item.status==='sent_text_only'){bc='warn';bt='&#10003; Texte';}
-      else{bc='err';bt='&#10007; Erreur';}
-      var poster=item.media_poster?'<img class="poster" src="'+esc(item.media_poster)+'" onerror="this.style.display=\'none\'">':'<div class="poster"></div>';
-      var retryBtn=(item.status==='error')?'<button class="btn sm danger" onclick="retryEntry(\''+item.id+'\',this)">&#8634;</button>':'';
-      var retryBadge=item.retriedFrom?' <span class="badge retry">&#8634;</span>':'';
-      return '<tr><td>'+poster+'</td><td style="color:var(--muted);white-space:nowrap;font-size:12px;">'+timeAgo(item.timestamp)+'</td><td style="font-weight:500;">'+esc(item.requestedBy_username||'--')+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(item.media_title||'--')+'</td><td><span class="badge '+bc+'" title="'+esc(item.error||'')+'">'+bt+'</span>'+retryBadge+'</td><td style="text-align:right;">'+retryBtn+'</td></tr>';
-    }).join('');
-  }catch(e){}
+
+async function refreshUsers() {
+  let us = await api('/users');
+  if(!us) return;
+  document.getElementById('usersBody').innerHTML = us.map(u=>{
+    let av = u.avatar?'<img class="uavatar" src="'+esc(u.avatar)+'">':'<div class="uavatar-ph">'+u.email[0].toUpperCase()+'</div>';
+    return `<tr><td style="width:40px">${av}</td><td>${esc(u.email)}<br><span style="color:var(--muted);font-size:11px">+${esc(u.phone)} · ${esc(u.lang).toUpperCase()}</span></td>
+    <td style="text-align:right"><button class="btn danger sm" onclick="api('/users/'+encodeURIComponent('${esc(u.email)}'),{method:'DELETE'}).then(refreshUsers)">X</button></td></tr>`;
+  }).join('');
 }
-async function retryEntry(id,btn){btn.disabled=true;btn.textContent='...';try{var r=await api('/retry/'+id,{method:'POST'});if(r&&r.sent){toast(r.withPoster?'Renvoyé avec image':'Renvoyé (texte seul)');refreshHistory();}else{toast((r&&r.error)||'Erreur','e');btn.disabled=false;btn.textContent='&#8634;';}}catch(e){toast('Erreur','e');btn.disabled=false;btn.textContent='&#8634;';}}
-function renderAv(av,email){var ini=(email||'?')[0].toUpperCase();if(av)return '<img class="uavatar" src="'+esc(av)+'" onerror="this.outerHTML=\'<div class=uavatar-ph>'+ini+'</div>\'">';return '<div class="uavatar-ph">'+ini+'</div>';}
-async function refreshUsers(){
-  try{
-    var users=await api('/users'),body=document.getElementById('usersBody');
-    if(!users||!users.length){body.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:28px;">Aucun utilisateur. Ajoutez-en ci-dessus ou importez depuis Overseerr.</td></tr>';return;}
-    body.innerHTML=users.map(function(u){
-      return '<tr><td>'+renderAv(u.avatar,u.email)+'</td><td style="font-size:13px;">'+esc(u.email)+'</td><td><code style="background:rgba(0,0,0,0.3);padding:3px 8px;border-radius:6px;font-size:12px;">+'+esc(u.phone)+'</code></td><td style="text-align:right;"><div class="btn-row" style="justify-content:flex-end;gap:6px;"><button class="btn ghost sm" onclick="openEdit(\''+esc(u.email)+'\',\''+esc(u.phone)+'\')">Modifier</button><button class="btn danger sm" onclick="deleteUser(\''+esc(u.email)+'\')">&#215;</button></div></td></tr>';
-    }).join('');
-  }catch(e){}
+
+async function addUser() {
+  let r=await api('/users',{method:'POST',body:JSON.stringify({email:document.getElementById('newEmail').value,phone:document.getElementById('newPhone').value,lang:document.getElementById('newLang').value})});
+  if(r.saved){toast('OK');document.getElementById('newEmail').value='';document.getElementById('newPhone').value='';refreshUsers();}else toast('Err','e');
 }
-async function addUser(){var email=document.getElementById('newEmail').value.trim(),phone=document.getElementById('newPhone').value.trim();if(!email||!phone){toast('Email et numéro requis','e');return;}var r=await api('/users',{method:'POST',body:JSON.stringify({email:email,phone:phone})});if(r&&r.saved){document.getElementById('newEmail').value='';document.getElementById('newPhone').value='';toast(email+' ajouté');refreshUsers();}else toast((r&&r.error)||'Erreur','e');}
-function openEdit(email,phone){document.getElementById('editOld').value=email;document.getElementById('editEmail').value=email;document.getElementById('editPhone').value=phone;document.getElementById('editModal').classList.add('open');}
-function closeEdit(){document.getElementById('editModal').classList.remove('open');}
-document.getElementById('editModal').addEventListener('click',function(e){if(e.target===e.currentTarget)closeEdit();});
-async function saveEdit(){var old=document.getElementById('editOld').value,email=document.getElementById('editEmail').value.trim(),phone=document.getElementById('editPhone').value.trim();if(!email||!phone){toast('Champs requis','e');return;}var r=await api('/users/'+encodeURIComponent(old),{method:'PUT',body:JSON.stringify({email:email,phone:phone})});if(r&&r.saved){closeEdit();toast('Modifié');refreshUsers();}else toast((r&&r.error)||'Erreur','e');}
-async function deleteUser(email){if(!confirm('Supprimer '+email+' ?'))return;var r=await api('/users/'+encodeURIComponent(email),{method:'DELETE'});if(r&&r.deleted){toast('Supprimé');refreshUsers();}else toast((r&&r.error)||'Erreur','e');}
-async function loadOvUsers(){
-  var btn=document.getElementById('ovLoadBtn');btn.disabled=true;btn.textContent='Chargement...';
-  toast('Connexion à Overseerr...','i');
-  try{
-    var users=await api('/overseerr/users');
-    if(users&&users.error){toast(users.error,'e');btn.disabled=false;btn.textContent='Charger';return;}
-    if(!users||!users.length){toast('Aucun utilisateur trouvé','e');btn.disabled=false;btn.textContent='Charger';return;}
-    var html=users.map(function(u){
-      var ini=(u.title||'?')[0].toUpperCase();
-      var av=u.thumb?'<img class="uavatar" src="'+esc(u.thumb)+'" onerror="this.outerHTML=\'<div class=uavatar-ph>'+ini+'</div>\'">'
-               :'<div class="uavatar-ph">'+ini+'</div>';
-      if(u.registered)return '<div class="ov-row">'+av+'<div class="ov-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div><div class="ov-actions"><span class="badge ok">+'+esc(u.phone)+'</span></div></div>';
-      return '<div class="ov-row">'+av+'<div class="ov-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div>'
-        +'<div class="ov-actions"><input class="ov-phone" type="text" placeholder="336xxxxxxxx" id="op_'+esc(u.id)+'">'
-        +'<button class="btn sm" onclick="addOvUser(\''+esc(u.email)+'\',\''+esc(u.thumb||'')+'\',\'op_'+esc(u.id)+'\',this)">Ajouter</button></div></div>';
-    }).join('');
-    document.getElementById('ovContent').innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">'+users.length+' utilisateurs Overseerr</div>'+html;
-    document.getElementById('ovList').style.display='block';
-    toast(users.length+' utilisateurs chargés');
-  }catch(e){console.error(e);toast('Erreur réseau','e');}
-  btn.disabled=false;btn.textContent='Recharger';
+
+async function loadOvUsers() {
+  document.getElementById('ovLoadBtn').textContent = '...';
+  let us=await api('/overseerr/users'); document.getElementById('ovLoadBtn').textContent = t('usr_load');
+  if(!us||us.error)return toast('Err','e');
+  document.getElementById('ovList').innerHTML = us.map(u=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,0.05)">
+    <img src="${u.thumb}" style="width:30px;border-radius:50%"> ${esc(u.title)}
+    ${u.registered?'<span class="badge ok">OK</span>':`<input type="text" id="ovp_${u.id}" placeholder="Num" style="flex:1;min-width:100px;margin:0"><select id="ovl_${u.id}" style="margin:0;width:auto;flex:none;"><option value="fr">FR</option><option value="en">EN</option></select><button class="btn sm" onclick="api('/users',{method:'POST',body:JSON.stringify({email:'${u.email}',phone:document.getElementById('ovp_${u.id}').value,lang:document.getElementById('ovl_${u.id}').value,avatar:'${u.thumb}'})}).then(()=>loadOvUsers())">Add</button>` }
+  </div>`).join('');
 }
-async function addOvUser(email,avatar,inputId,btn){var phone=document.getElementById(inputId).value.trim();if(!phone){toast('Entrez un numéro','e');return;}btn.disabled=true;btn.textContent='...';var r=await api('/users',{method:'POST',body:JSON.stringify({email:email,phone:phone,avatar:avatar})});if(r&&r.saved){toast(r.email+' ajouté');loadOvUsers();refreshUsers();}else{toast((r&&r.error)||'Erreur','e');btn.disabled=false;btn.textContent='Ajouter';}}
-async function refreshTemplate(){try{var d=await api('/config');var t=d.messageTemplate||'';document.getElementById('templateTxt').value=t;updatePreview(t);}catch(e){}}
-function updatePreview(t){t=t||document.getElementById('templateTxt').value;document.getElementById('tplPreview').textContent=t.replace(/{username}/g,'Jean Dupont').replace(/{title}/g,'Dune Part Two').replace(/{icon}/g,'[Film]').replace(/{type}/g,'Film');}
-document.getElementById('templateTxt').addEventListener('input',function(){updatePreview(this.value);});
-function insertVar(v){var ta=document.getElementById('templateTxt'),s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);ta.selectionStart=ta.selectionEnd=s+v.length;ta.focus();updatePreview();}
-async function saveTemplate(){var t=document.getElementById('templateTxt').value;var r=await api('/config/template',{method:'POST',body:JSON.stringify({template:t})});if(r&&r.saved){var p=document.getElementById('tplSaved');p.classList.add('show');setTimeout(function(){p.classList.remove('show');},2500);toast('Template sauvegardé');}}
-async function resetTemplate(){if(!confirm('Réinitialiser le template par défaut ?'))return;var r=await api('/config/template/reset',{method:'POST'});if(r&&r.saved){document.getElementById('templateTxt').value=r.template;updatePreview(r.template);toast('Template réinitialisé');}}
-function init(){refreshStatus();refreshHistory();refreshConfig();setInterval(refreshStatus,5000);setInterval(refreshHistory,20000);}
+
+function renderFull() {
+  if(!auth) {
+    document.getElementById('root').innerHTML = renderLogin();
+    document.getElementById('loginForm').onsubmit = async (e) => {
+      e.preventDefault(); auth = 'Basic '+btoa(document.getElementById('lu').value+':'+document.getElementById('lp').value);
+      let r = await fetch('/dashboard/api/status',{headers:{Authorization:auth}});
+      if(r.ok){ sessionStorage.setItem('wa_auth',auth); renderFull(); } else document.getElementById('loginMsg').textContent = 'Invalid credentials';
+    };
+  } else {
+    document.getElementById('root').innerHTML = renderApp();
+    refreshAll();
+    setInterval(refreshAll, 10000);
+  }
+}
+renderFull();
 </script>
-</body>
-</html>
+</body></html>

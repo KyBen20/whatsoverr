@@ -17,18 +17,23 @@ const {
 // Config
 // ---------------------------------------------------------------------------
 const PORT         = process.env.PORT || 3000;
-const USERS_FILE   = process.env.USERS_FILE || path.join(__dirname, 'data', 'users.json');
-const AVATARS_FILE = path.join(__dirname, 'data', 'avatars.json');
-const HISTORY_FILE = path.join(__dirname, 'data', 'history.json');
-const CONFIG_FILE  = path.join(__dirname, 'data', 'config.json');
+const DATA_DIR     = path.join(__dirname, 'data');
+const USERS_FILE   = path.join(DATA_DIR, 'users.json');
+const AVATARS_FILE = path.join(DATA_DIR, 'avatars.json');
+const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
+const CONFIG_FILE  = path.join(DATA_DIR, 'config.json');
+const QUEUE_FILE   = path.join(DATA_DIR, 'queue.json');
 const AUTH_PATH    = path.join(__dirname, 'auth_info');
 const MAX_HISTORY  = 50;
 
 const ADMIN_USER     = process.env.ADMIN_USER     || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme';
-if (ADMIN_PASSWORD === 'changeme') console.warn('[admin] ATTENTION : mot de passe par defaut !');
+if (ADMIN_PASSWORD === 'changeme') console.warn('[admin] ATTENTION : mot de passe par défaut !');
 
-const DEFAULT_TEMPLATE = "Salut *{username}*\n\n{icon} *{title}* que tu as demande est disponible !\nBon visionnage\n\n_- Message automatise_";
+const DEFAULT_TEMPLATES = {
+  fr: "Salut *{username}* 👋\n\n{icon} *{title}* que tu as demandé est disponible !\nBon visionnage 🍿\n\n_— Message automatisé_",
+  en: "Hi *{username}* 👋\n\n{icon} *{title}* you requested is now available!\nEnjoy 🍿\n\n_— Automated message_"
+};
 
 // ---------------------------------------------------------------------------
 // JSON helpers
@@ -40,27 +45,55 @@ function saveJson(file, data) {
   try {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
-  } catch (err) { console.error('[storage] Erreur ecriture', file, err.message); }
+  } catch (err) { console.error('[storage] Erreur écriture', file, err.message); }
 }
 
 // ---------------------------------------------------------------------------
-// State
+// State & Migrations
 // ---------------------------------------------------------------------------
 let history = loadJson(HISTORY_FILE, []);
+let queue   = loadJson(QUEUE_FILE, []);
+
 let config  = loadJson(CONFIG_FILE, {
   discordWebhookUrl: process.env.DISCORD_WEBHOOK_URL || '',
   overseerrUrl:      process.env.OVERSEERR_URL        || '',
   overseerrApiKey:   process.env.OVERSEERR_API_KEY    || '',
-  messageTemplate:   DEFAULT_TEMPLATE,
+  templates:         DEFAULT_TEMPLATES,
+  dnd:               { enabled: false, start: "23:00", end: "08:00" },
+  dashboardLang:     'fr'
 });
-if (!config.messageTemplate) config.messageTemplate = DEFAULT_TEMPLATE;
-if (!fs.existsSync(USERS_FILE)) { saveJson(USERS_FILE, {}); console.log('[startup] users.json cree.'); }
+
+// Migration v1 -> v2 for config
+let configMigrated = false;
+if (config.messageTemplate) {
+  if (!config.templates) config.templates = { ...DEFAULT_TEMPLATES };
+  config.templates.fr = config.messageTemplate;
+  delete config.messageTemplate;
+  configMigrated = true;
+}
+if (!config.dnd) { config.dnd = { enabled: false, start: "23:00", end: "08:00" }; configMigrated = true; }
+if (!config.dashboardLang) { config.dashboardLang = 'fr'; configMigrated = true; }
+if (configMigrated) saveJson(CONFIG_FILE, config);
+
+// Migration v1 -> v2 for users (string -> object)
+const users = loadJson(USERS_FILE, {});
+let usersMigrated = false;
+for (const [k, v] of Object.entries(users)) {
+  if (typeof v === 'string') {
+    users[k] = { phone: v, lang: 'fr' };
+    usersMigrated = true;
+  }
+}
+if (usersMigrated) saveJson(USERS_FILE, users);
+
 if (!fs.existsSync(AVATARS_FILE)) saveJson(AVATARS_FILE, {});
 fs.mkdirSync(AUTH_PATH, { recursive: true });
 
-// History - only actionable entries (no unknown_user spam)
+// ---------------------------------------------------------------------------
+// History
+// ---------------------------------------------------------------------------
 function pushHistory(entry) {
-  if (entry.status === 'unknown_user') return;
+  if (entry.status === 'unknown_user') return; // Silently ignore
   history.unshift({
     id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
     timestamp: new Date().toISOString(),
@@ -70,25 +103,53 @@ function pushHistory(entry) {
   saveJson(HISTORY_FILE, history);
 }
 
-// Discord - 30 min cooldown on ready notifications to avoid spam
+// ---------------------------------------------------------------------------
+// DND (Do Not Disturb) Logic
+// ---------------------------------------------------------------------------
+function isDND() {
+  if (!config.dnd || !config.dnd.enabled) return false;
+  const now = new Date();
+  const currentMins = now.getHours() * 60 + now.getMinutes();
+  const [sh, sm] = (config.dnd.start || "23:00").split(':').map(Number);
+  const [eh, em] = (config.dnd.end || "08:00").split(':').map(Number);
+  const startMins = sh * 60 + sm;
+  const endMins   = eh * 60 + em;
+
+  if (startMins <= endMins) return currentMins >= startMins && currentMins < endMins;
+  return currentMins >= startMins || currentMins < endMins;
+}
+
+// Process Queue
+setInterval(async () => {
+  if (!whatsappReady || !sock || queue.length === 0) return;
+  if (isDND()) return; // Still in DND
+  
+  const entry = queue.shift();
+  saveJson(QUEUE_FILE, queue);
+  console.log([queue] Traitement du message en attente pour );
+  await processSend(entry, true);
+}, 60000); // Check every minute
+
+// ---------------------------------------------------------------------------
+// Discord
+// ---------------------------------------------------------------------------
 let lastDiscordReadyNotif = 0;
 async function notifyDiscord(content, isReadyMsg = false) {
   const url = config.discordWebhookUrl;
   if (!url) return;
   if (isReadyMsg) {
     const now = Date.now();
-    if (now - lastDiscordReadyNotif < 30 * 60 * 1000) return;
+    if (now - lastDiscordReadyNotif < 30 * 60 * 1000) return; // Cooldown 30 min
     lastDiscordReadyNotif = now;
   }
   try {
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content }),
-    });
-  } catch (err) { console.error('[discord] Erreur:', err.message); }
+    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) });
+  } catch (err) {}
 }
 
+// ---------------------------------------------------------------------------
+// Express
+// ---------------------------------------------------------------------------
 const app = express();
 app.use(express.json());
 
@@ -106,6 +167,7 @@ async function connectWhatsApp() {
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_PATH);
     let version = [2, 3000, 1015920];
     try { ({ version } = await fetchLatestBaileysVersion()); } catch {}
+
     sock = makeWASocket({
       version,
       auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, waLogger) },
@@ -114,39 +176,42 @@ async function connectWhatsApp() {
       browser: ['Whatsoverr', 'Desktop', '2.0.0'],
       generateHighQualityLinkPreview: false,
       syncFullHistory: false,
-      markOnlineOnConnect: false, // Ne pas se declarer "en ligne" -> les notifs push continuent d'arriver sur le telephone
+      markOnlineOnConnect: false, // Prevents blocking push notifications on the user's phone
     });
+
     sock.ev.on('creds.update', saveCreds);
     sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
-      if (qr) { try { lastQrDataUrl = await QRCode.toDataURL(qr); } catch {} }
+      if (qr) try { lastQrDataUrl = await QRCode.toDataURL(qr); } catch {}
       if (connection === 'close') {
         whatsappReady = false;
         lastQrDataUrl = null;
-        const code = (lastDisconnect?.error instanceof Boom) ? lastDisconnect.error.output.statusCode : 0;
+        const code      = (lastDisconnect?.error instanceof Boom) ? lastDisconnect.error.output.statusCode : 0;
         const loggedOut = code === DisconnectReason.loggedOut;
         if (!loggedOut) setTimeout(connectWhatsApp, 5000);
-        else notifyDiscord('Session WhatsApp expiree. Rescan QR requis depuis le dashboard.');
+        else notifyDiscord('⚠️ Session WhatsApp expirée. Purge + rescan QR requis depuis le dashboard.');
       }
       if (connection === 'open') {
         whatsappReady = true;
         lastQrDataUrl = null;
-        console.log('[whatsapp] Connecte et pret.');
-        notifyDiscord('Bot WhatsApp connecte et pret.', true);
+        notifyDiscord('✅ Bot WhatsApp connecté et prêt.', true);
       }
     });
   } catch (err) { setTimeout(connectWhatsApp, 5000); }
 }
 
+// ---------------------------------------------------------------------------
+// Message Sender Logic
+// ---------------------------------------------------------------------------
 function toChatJid(phone) { return String(phone).replace(/\D/g, '') + '@s.whatsapp.net'; }
 
-function buildMessage({ requestedBy_username, media_title, media_type }) {
-  const icon = media_type === 'movie' ? '🎬' : '📺';
-  const template = config.messageTemplate || DEFAULT_TEMPLATE;
-  return template
-    .replace(/{username}/g, requestedBy_username || 'Inconnu')
-    .replace(/{title}/g, media_title || '')
-    .replace(/{icon}/g, icon)
-    .replace(/{type}/g, media_type === 'movie' ? 'Film' : 'Serie');
+function buildMessage(entry, lang = 'fr') {
+  const icon = entry.media_type === 'movie' ? '🎬' : '📺';
+  const tmpl = (config.templates && config.templates[lang]) ? config.templates[lang] : DEFAULT_TEMPLATES['fr'];
+  return tmpl
+    .replace(/{username}/g, entry.requestedBy_username || 'Unknown')
+    .replace(/{title}/g,    entry.media_title || '')
+    .replace(/{icon}/g,     icon)
+    .replace(/{type}/g,     entry.media_type === 'movie' ? 'Film' : 'Série');
 }
 
 async function fetchImageBuffer(url) {
@@ -159,52 +224,119 @@ async function fetchImageBuffer(url) {
   return { buffer: Buffer.from(await response.arrayBuffer()), mimeType: response.headers.get('content-type') || 'image/jpeg' };
 }
 
-app.get('/health', (req, res) => res.json({ status: 'ok', whatsapp_ready: whatsappReady }));
+async function processSend(entry, isFromQueue = false) {
+  const base = {
+    requestedBy_username: entry.requestedBy_username,
+    requestedBy_email:    entry.requestedBy_email,
+    media_title:          entry.media_title,
+    media_type:           entry.media_type,
+    media_poster:         entry.media_poster,
+  };
+  
+  if (entry.retriedFrom) base.retriedFrom = entry.retriedFrom;
 
-app.post('/webhook', async (req, res) => {
-  const { notification_type, subject: media_title, image: media_poster, media_type, requestedBy_username, requestedBy_email } = req.body || {};
-  if (notification_type && notification_type !== 'MEDIA_AVAILABLE') return res.status(200).json({ ignored: true });
-  const base = { requestedBy_username, requestedBy_email, media_title, media_type, media_poster };
-  if (!requestedBy_email || !media_title) { pushHistory({ ...base, status: 'error', error: 'Payload incomplet' }); return res.status(400).json({ error: 'Payload incomplet' }); }
-  if (!whatsappReady || !sock) { pushHistory({ ...base, status: 'error', error: 'WhatsApp non pret' }); return res.status(503).json({ error: 'WhatsApp non pret' }); }
-  const users = loadJson(USERS_FILE, null);
-  if (!users) return res.status(500).json({ error: 'users.json inaccessible' });
-  const emailKey = String(requestedBy_email).toLowerCase();
-  const userEntry = Object.keys(users).find(k => k.toLowerCase() === emailKey);
-  const phone = userEntry ? users[userEntry] : null;
-  if (!phone) { pushHistory({ ...base, status: 'unknown_user' }); return res.status(404).json({ error: 'Aucun numero' }); }
-  const jid = toChatJid(phone);
-  const text = buildMessage({ requestedBy_username, media_title, media_type });
+  const currentUsers = loadJson(USERS_FILE, {});
+  const emailKey  = String(entry.requestedBy_email).toLowerCase();
+  const userEntry = Object.keys(currentUsers).find(k => k.toLowerCase() === emailKey);
+  const userData  = userEntry ? currentUsers[userEntry] : null;
+
+  if (!userData || !userData.phone) {
+    if (!isFromQueue) pushHistory({ ...base, status: 'unknown_user' });
+    return { error: 'Aucun numéro', status: 404 };
+  }
+
+  // DND Check (unless explicitly retrying manually)
+  if (!entry.retriedFrom && !isFromQueue && isDND()) {
+    queue.push(entry);
+    saveJson(QUEUE_FILE, queue);
+    pushHistory({ ...base, status: 'queued_dnd' });
+    return { sent: false, queued: true };
+  }
+
+  const jid  = toChatJid(userData.phone);
+  const text = buildMessage(base, userData.lang || 'fr');
+
   try {
-    if (media_poster && media_poster.startsWith('http')) {
+    if (base.media_poster && base.media_poster.startsWith('http')) {
       try {
-        const { buffer, mimeType } = await fetchImageBuffer(media_poster);
+        const { buffer, mimeType } = await fetchImageBuffer(base.media_poster);
         await sock.sendMessage(jid, { image: buffer, caption: text, mimetype: mimeType });
         pushHistory({ ...base, status: 'sent_with_poster' });
-        return res.json({ sent: true, withPoster: true });
+        return { sent: true, withPoster: true };
       } catch (imgErr) {
         await sock.sendMessage(jid, { text });
         pushHistory({ ...base, status: 'sent_text_only', error: 'Poster: ' + imgErr.message });
-        return res.json({ sent: true, withPoster: false });
+        return { sent: true, withPoster: false };
       }
     } else {
       await sock.sendMessage(jid, { text });
       pushHistory({ ...base, status: 'sent_text_only' });
-      return res.json({ sent: true, withPoster: false });
+      return { sent: true, withPoster: false };
     }
   } catch (err) {
     pushHistory({ ...base, status: 'error', error: err.message });
-    notifyDiscord('Echec envoi WhatsApp pour ' + requestedBy_username + ' : ' + err.message);
-    return res.status(500).json({ error: err.message });
+    notifyDiscord(❌ Échec WhatsApp pour **** : );
+    return { error: err.message, status: 500 };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Public routes
+// ---------------------------------------------------------------------------
+app.get('/health', (req, res) => res.json({ status: 'ok', whatsapp_ready: whatsappReady }));
+
+app.post('/webhook', async (req, res) => {
+  const { notification_type, message, subject, image, media_type, requestedBy_username, requestedBy_email } = req.body || {};
+
+  // Overseerr Test Webhook
+  if (notification_type === 'TEST_NOTIFICATION') {
+    if (!whatsappReady || !sock) return res.status(503).json({ error: 'WhatsApp non prêt' });
+    // Find first registered user to send test to
+    const allUsers = loadJson(USERS_FILE, {});
+    const adminPhone = Object.values(allUsers)[0]?.phone;
+    if (!adminPhone) return res.status(404).json({ error: 'Aucun utilisateur enregistré pour le test' });
+    
+    try {
+      await sock.sendMessage(toChatJid(adminPhone), { text: '🔔 *Test Overseerr*\nLa connexion Webhook fonctionne parfaitement !' });
+      return res.json({ sent: true, message: 'Test envoye au premier utilisateur' });
+    } catch(err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  if (notification_type && notification_type !== 'MEDIA_AVAILABLE') {
+    return res.status(200).json({ ignored: true });
+  }
+
+  if (!requestedBy_email || !subject) {
+    pushHistory({ requestedBy_username, requestedBy_email, media_title: subject, status: 'error', error: 'Payload incomplet' });
+    return res.status(400).json({ error: 'Payload incomplet' });
+  }
+  if (!whatsappReady || !sock) {
+    pushHistory({ requestedBy_username, requestedBy_email, media_title: subject, status: 'error', error: 'WhatsApp non prêt' });
+    return res.status(503).json({ error: 'WhatsApp non prêt' });
+  }
+
+  const result = await processSend({
+    requestedBy_username,
+    requestedBy_email,
+    media_title: subject,
+    media_type,
+    media_poster: image
+  });
+
+  if (result.status) return res.status(result.status).json(result);
+  return res.json(result);
 });
 
-// Auth
+// ---------------------------------------------------------------------------
+// Admin auth
+// ---------------------------------------------------------------------------
 function checkAdminAuth(req) {
   const header = req.headers.authorization || '';
   if (!header.startsWith('Basic ')) return false;
   const decoded = Buffer.from(header.slice(6), 'base64').toString('utf-8');
-  const sepIdx = decoded.indexOf(':');
+  const sepIdx  = decoded.indexOf(':');
   return decoded.slice(0, sepIdx) === ADMIN_USER && decoded.slice(sepIdx + 1) === ADMIN_PASSWORD;
 }
 
@@ -212,56 +344,106 @@ const adminRouter = express.Router();
 adminRouter.use(express.static(path.join(__dirname, 'public')));
 adminRouter.use('/api', (req, res, next) => checkAdminAuth(req) ? next() : res.status(401).json({ error: 'Auth requise' }));
 
-adminRouter.get('/api/status', (req, res) => res.json({ whatsapp_ready: whatsappReady, qr: whatsappReady ? null : lastQrDataUrl, uptime_seconds: Math.floor((Date.now() - startedAt) / 1000) }));
+// ---------------------------------------------------------------------------
+// Admin Routes - Status & Config
+// ---------------------------------------------------------------------------
+adminRouter.get('/api/status', (req, res) => {
+  res.json({
+    whatsapp_ready: whatsappReady,
+    qr: whatsappReady ? null : lastQrDataUrl,
+    uptime_seconds: Math.floor((Date.now() - startedAt) / 1000),
+  });
+});
+
 adminRouter.get('/api/history', (req, res) => res.json(history));
 
 adminRouter.get('/api/config', (req, res) => {
   const discUrl = config.discordWebhookUrl || '';
-  const apiKey = config.overseerrApiKey || process.env.OVERSEERR_API_KEY || '';
+  const apiKey  = config.overseerrApiKey   || process.env.OVERSEERR_API_KEY || '';
   res.json({
-    hasWebhook: !!discUrl, maskedUrl: discUrl ? '........' + discUrl.slice(-8) : '',
-    overseerrUrl: config.overseerrUrl || process.env.OVERSEERR_URL || '',
-    hasOverseerrApiKey: !!apiKey, maskedApiKey: apiKey ? '........' + apiKey.slice(-4) : '',
-    messageTemplate: config.messageTemplate || DEFAULT_TEMPLATE,
+    hasWebhook:        !!discUrl,
+    maskedUrl:         discUrl  ? '••••••••' + discUrl.slice(-8)  : '',
+    overseerrUrl:      config.overseerrUrl || process.env.OVERSEERR_URL || '',
+    hasOverseerrApiKey: !!apiKey,
+    maskedApiKey:      apiKey   ? '••••••••' + apiKey.slice(-4)  : '',
+    templates:         config.templates || DEFAULT_TEMPLATES,
+    dnd:               config.dnd || { enabled: false, start: "23:00", end: "08:00" },
+    dashboardLang:     config.dashboardLang || 'fr'
   });
 });
 
 adminRouter.post('/api/config', (req, res) => {
-  if (typeof req.body.discordWebhookUrl !== 'string') return res.status(400).json({ error: 'discordWebhookUrl requis' });
-  config.discordWebhookUrl = req.body.discordWebhookUrl.trim();
+  const body = req.body || {};
+  if (body.discordWebhookUrl !== undefined) config.discordWebhookUrl = String(body.discordWebhookUrl).trim();
+  if (body.dashboardLang !== undefined) config.dashboardLang = String(body.dashboardLang).trim();
+  if (body.dnd !== undefined) config.dnd = body.dnd;
   saveJson(CONFIG_FILE, config);
   res.json({ saved: true });
 });
 
 adminRouter.post('/api/config/overseerr', (req, res) => {
   const { overseerrUrl, overseerrApiKey } = req.body || {};
-  if (overseerrUrl !== undefined) config.overseerrUrl = String(overseerrUrl).trim();
+  if (overseerrUrl    !== undefined) config.overseerrUrl    = String(overseerrUrl).trim();
   if (overseerrApiKey !== undefined) config.overseerrApiKey = String(overseerrApiKey).trim();
   saveJson(CONFIG_FILE, config);
   res.json({ saved: true });
 });
 
-adminRouter.post('/api/config/template', (req, res) => {
-  const { template } = req.body || {};
-  if (typeof template !== 'string') return res.status(400).json({ error: 'template requis' });
-  config.messageTemplate = template;
-  saveJson(CONFIG_FILE, config);
-  res.json({ saved: true });
+adminRouter.post('/api/config/templates', (req, res) => {
+  if (req.body.templates) {
+    config.templates = req.body.templates;
+    saveJson(CONFIG_FILE, config);
+    res.json({ saved: true });
+  } else res.status(400).json({ error: 'Mauvais format' });
 });
 
-adminRouter.post('/api/config/template/reset', (req, res) => {
-  config.messageTemplate = DEFAULT_TEMPLATE;
+adminRouter.post('/api/config/templates/reset', (req, res) => {
+  config.templates = { ...DEFAULT_TEMPLATES };
   saveJson(CONFIG_FILE, config);
-  res.json({ saved: true, template: DEFAULT_TEMPLATE });
+  res.json({ saved: true, templates: config.templates });
 });
 
 adminRouter.post('/api/config/test-discord', async (req, res) => {
-  if (!config.discordWebhookUrl) return res.status(400).json({ error: 'Aucun webhook configure' });
-  await notifyDiscord('Test Discord depuis Whatsoverr.');
+  if (!config.discordWebhookUrl) return res.status(400).json({ error: 'Aucun webhook' });
+  await notifyDiscord('✅ Test Discord Whatsoverr v2.');
   res.json({ sent: true });
 });
 
-adminRouter.post('/api/restart', (req, res) => { res.json({ restarting: true }); setTimeout(() => process.exit(1), 500); });
+// Export / Import API
+adminRouter.get('/api/config/export', (req, res) => {
+  const payload = {
+    version: 2,
+    config: config,
+    users: loadJson(USERS_FILE, {}),
+    avatars: loadJson(AVATARS_FILE, {})
+  };
+  res.json(payload);
+});
+
+adminRouter.post('/api/config/import', (req, res) => {
+  const payload = req.body || {};
+  if (payload.config) { config = payload.config; saveJson(CONFIG_FILE, config); }
+  if (payload.users)  saveJson(USERS_FILE, payload.users);
+  if (payload.avatars) saveJson(AVATARS_FILE, payload.avatars);
+  res.json({ imported: true });
+});
+
+// Direct WhatsApp Test
+adminRouter.post('/api/whatsapp/test', async (req, res) => {
+  const { phone, message } = req.body || {};
+  if (!phone || !message) return res.status(400).json({ error: 'phone/message requis' });
+  if (!whatsappReady || !sock) return res.status(503).json({ error: 'WhatsApp non prêt' });
+  try {
+    await sock.sendMessage(toChatJid(phone), { text: message });
+    res.json({ sent: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+adminRouter.post('/api/restart', (req, res) => {
+  res.json({ restarting: true }); setTimeout(() => process.exit(1), 500);
+});
 adminRouter.post('/api/restart-wipe', async (req, res) => {
   res.json({ restarting: true });
   try { sock.end(); } catch {}
@@ -269,42 +451,60 @@ adminRouter.post('/api/restart-wipe', async (req, res) => {
   setTimeout(() => process.exit(1), 500);
 });
 
-// Users CRUD
+// ---------------------------------------------------------------------------
+// Admin Routes - Users CRUD
+// ---------------------------------------------------------------------------
 adminRouter.get('/api/users', (req, res) => {
-  const users = loadJson(USERS_FILE, {});
+  const users   = loadJson(USERS_FILE, {});
   const avatars = loadJson(AVATARS_FILE, {});
-  res.json(Object.entries(users).map(([email, phone]) => ({ email, phone, avatar: avatars[email.toLowerCase()] || '' })));
+  res.json(
+    Object.entries(users).map(([email, data]) => ({
+      email,
+      phone:  typeof data === 'string' ? data : data.phone,
+      lang:   typeof data === 'string' ? 'fr' : (data.lang || 'fr'),
+      avatar: avatars[email.toLowerCase()] || '',
+    }))
+  );
 });
 
 adminRouter.post('/api/users', (req, res) => {
-  const { email, phone, avatar } = req.body || {};
+  const { email, phone, avatar, lang } = req.body || {};
   if (!email || !phone) return res.status(400).json({ error: 'email/phone requis' });
   const cleanEmail = String(email).trim().toLowerCase();
-  const cleanPhone = String(phone).replace(/\D/g, '');
   const users = loadJson(USERS_FILE, {});
-  users[cleanEmail] = cleanPhone;
+  users[cleanEmail] = { phone: String(phone).replace(/\D/g, ''), lang: lang || 'fr' };
   saveJson(USERS_FILE, users);
-  if (avatar) { const av = loadJson(AVATARS_FILE, {}); av[cleanEmail] = avatar; saveJson(AVATARS_FILE, av); }
-  res.json({ saved: true, email: cleanEmail, phone: cleanPhone });
+  if (avatar) {
+    const avatars = loadJson(AVATARS_FILE, {});
+    avatars[cleanEmail] = avatar;
+    saveJson(AVATARS_FILE, avatars);
+  }
+  res.json({ saved: true });
 });
 
 adminRouter.put('/api/users/:email', (req, res) => {
   const oldEmail = decodeURIComponent(req.params.email).toLowerCase();
-  const { email: newEmail, phone, avatar } = req.body || {};
-  const users = loadJson(USERS_FILE, {});
+  const { email: newEmail, phone, avatar, lang } = req.body || {};
+  const users    = loadJson(USERS_FILE, {});
+  const avatars  = loadJson(AVATARS_FILE, {});
   if (!users[oldEmail]) return res.status(404).json({ error: 'Introuvable' });
+  
   const finalEmail = newEmail ? String(newEmail).trim().toLowerCase() : oldEmail;
-  const finalPhone = phone ? String(phone).replace(/\D/g, '') : users[oldEmail];
+  const oldData    = typeof users[oldEmail] === 'string' ? { phone: users[oldEmail], lang: 'fr' } : users[oldEmail];
+  
   delete users[oldEmail];
-  users[finalEmail] = finalPhone;
+  users[finalEmail] = {
+    phone: phone ? String(phone).replace(/\D/g, '') : oldData.phone,
+    lang:  lang || oldData.lang
+  };
   saveJson(USERS_FILE, users);
+
   if (avatar !== undefined) {
-    const av = loadJson(AVATARS_FILE, {});
-    if (oldEmail !== finalEmail) delete av[oldEmail];
-    if (avatar) av[finalEmail] = avatar;
-    saveJson(AVATARS_FILE, av);
+    if (oldEmail !== finalEmail) delete avatars[oldEmail];
+    if (avatar) avatars[finalEmail] = avatar;
+    saveJson(AVATARS_FILE, avatars);
   }
-  res.json({ saved: true, email: finalEmail, phone: finalPhone });
+  res.json({ saved: true });
 });
 
 adminRouter.delete('/api/users/:email', (req, res) => {
@@ -312,13 +512,15 @@ adminRouter.delete('/api/users/:email', (req, res) => {
   const users = loadJson(USERS_FILE, {});
   delete users[email];
   saveJson(USERS_FILE, users);
-  const av = loadJson(AVATARS_FILE, {});
-  delete av[email];
-  saveJson(AVATARS_FILE, av);
+  const avatars = loadJson(AVATARS_FILE, {});
+  delete avatars[email];
+  saveJson(AVATARS_FILE, avatars);
   res.json({ deleted: true });
 });
 
+// ---------------------------------------------------------------------------
 // Overseerr Integration
+// ---------------------------------------------------------------------------
 function getOverseerrBase() {
   let url = config.overseerrUrl || process.env.OVERSEERR_URL || '';
   url = url.replace(/\/$/, '');
@@ -328,8 +530,8 @@ function getOverseerrBase() {
 
 adminRouter.post('/api/overseerr/test', async (req, res) => {
   const baseUrl = getOverseerrBase();
-  const apiKey = config.overseerrApiKey || process.env.OVERSEERR_API_KEY || '';
-  if (!baseUrl || !apiKey) return res.status(400).json({ error: 'URL ou Cle API non configuree' });
+  const apiKey  = config.overseerrApiKey || process.env.OVERSEERR_API_KEY || '';
+  if (!baseUrl || !apiKey) return res.status(400).json({ error: 'URL/Clé manquante' });
   try {
     const response = await fetch(baseUrl + '/api/v1/user?take=1', { headers: { 'X-Api-Key': apiKey, Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
     if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -340,22 +542,40 @@ adminRouter.post('/api/overseerr/test', async (req, res) => {
 
 adminRouter.get('/api/overseerr/users', async (req, res) => {
   const baseUrl = getOverseerrBase();
-  const apiKey = config.overseerrApiKey || process.env.OVERSEERR_API_KEY || '';
-  if (!baseUrl || !apiKey) return res.status(400).json({ error: 'URL ou Cle API non configuree' });
+  const apiKey  = config.overseerrApiKey || process.env.OVERSEERR_API_KEY || '';
+  if (!baseUrl || !apiKey) return res.status(400).json({ error: 'URL/Clé manquante' });
   try {
     const response = await fetch(baseUrl + '/api/v1/user?take=1000', { headers: { 'X-Api-Key': apiKey, Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
     if (!response.ok) throw new Error('HTTP ' + response.status);
-    const data = await response.json();
+    const data       = await response.json();
     const registered = loadJson(USERS_FILE, {});
-    const avatars = loadJson(AVATARS_FILE, {});
+    const avatars    = loadJson(AVATARS_FILE, {});
+
     const result = (data.results || []).filter(u => u.email).map(u => {
       const email = u.email.toLowerCase();
-      const key = Object.keys(registered).find(k => k.toLowerCase() === email);
-      let avatar = u.avatar || '';
+      const key   = Object.keys(registered).find(k => k.toLowerCase() === email);
+      let avatar  = u.avatar || '';
       if (avatar && avatar.startsWith('/')) avatar = baseUrl + avatar;
       if (avatar) avatars[email] = avatar;
-      return { id: u.id, title: u.displayName || u.plexUsername || 'Inconnu', email: u.email, thumb: avatar, registered: !!key, phone: key ? registered[key] : '' };
+      
+      let phone = '';
+      let lang = 'fr';
+      if (key) {
+        phone = typeof registered[key] === 'string' ? registered[key] : registered[key].phone;
+        lang  = typeof registered[key] === 'string' ? 'fr' : registered[key].lang;
+      }
+
+      return {
+        id:         u.id,
+        title:      u.displayName || u.plexUsername || 'Inconnu',
+        email:      u.email,
+        thumb:      avatar,
+        registered: !!key,
+        phone,
+        lang
+      };
     });
+
     saveJson(AVATARS_FILE, avatars);
     res.json(result);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -364,40 +584,15 @@ adminRouter.get('/api/overseerr/users', async (req, res) => {
 // Retry
 adminRouter.post('/api/retry/:id', async (req, res) => {
   const entry = history.find(h => h.id === req.params.id);
-  if (!entry) return res.status(404).json({ error: 'Entree introuvable' });
-  if (!whatsappReady || !sock) return res.status(503).json({ error: 'WhatsApp non pret' });
-  const users = loadJson(USERS_FILE, {});
-  const emailKey = String(entry.requestedBy_email).toLowerCase();
-  const userKey = Object.keys(users).find(k => k.toLowerCase() === emailKey);
-  const phone = userKey ? users[userKey] : null;
-  if (!phone) return res.status(404).json({ error: 'Aucun numero' });
-  const jid = toChatJid(phone);
-  const text = buildMessage(entry);
-  const base = { requestedBy_username: entry.requestedBy_username, requestedBy_email: entry.requestedBy_email, media_title: entry.media_title, media_type: entry.media_type, media_poster: entry.media_poster };
-  try {
-    if (entry.media_poster && entry.media_poster.startsWith('http')) {
-      try {
-        const { buffer, mimeType } = await fetchImageBuffer(entry.media_poster);
-        await sock.sendMessage(jid, { image: buffer, caption: text, mimetype: mimeType });
-        pushHistory({ ...base, status: 'sent_with_poster', retriedFrom: entry.id });
-        return res.json({ sent: true, withPoster: true });
-      } catch (imgErr) {
-        await sock.sendMessage(jid, { text });
-        pushHistory({ ...base, status: 'sent_text_only', error: imgErr.message, retriedFrom: entry.id });
-        return res.json({ sent: true, withPoster: false });
-      }
-    } else {
-      await sock.sendMessage(jid, { text });
-      pushHistory({ ...base, status: 'sent_text_only', retriedFrom: entry.id });
-      return res.json({ sent: true, withPoster: false });
-    }
-  } catch (err) {
-    pushHistory({ ...base, status: 'error', error: err.message, retriedFrom: entry.id });
-    return res.status(500).json({ error: err.message });
-  }
+  if (!entry) return res.status(404).json({ error: 'Entrée introuvable' });
+  if (!whatsappReady || !sock) return res.status(503).json({ error: 'WhatsApp non prêt' });
+  
+  const result = await processSend({ ...entry, retriedFrom: entry.id });
+  if (result.status) return res.status(result.status).json(result);
+  res.json(result);
 });
 
 app.use('/dashboard', adminRouter);
 app.use((req, res) => res.status(404).json({ error: 'Route inconnue' }));
-app.listen(PORT, () => console.log('[server] Port ' + PORT));
+app.listen(PORT, () => console.log([server] Port  | POST /webhook | Admin: /dashboard));
 connectWhatsApp();

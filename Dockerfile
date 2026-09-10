@@ -1,19 +1,9 @@
-FROM node:20-alpine
-
-# Dependances minimales pour les modules natifs de Baileys
-RUN apk add --no-cache python3 make g++ git
-
+﻿FROM node:20-alpine
+RUN apk add --no-cache git python3 make g++ curl
 WORKDIR /usr/src/app
-
-COPY package.json ./
-RUN npm install --omit=dev && npm cache clean --force
-
-COPY server.js ./
-COPY public ./public
-
-# Dossiers de persistance (montes en volumes via docker-compose)
-RUN mkdir -p /usr/src/app/auth_info /usr/src/app/data
-
+COPY package*.json ./
+RUN npm install
+COPY . .
 EXPOSE 3000
-
-CMD ["node", "server.js"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD curl -f http://localhost:3000/health || exit 1
+CMD ["npm", "start"]
