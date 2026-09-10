@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
@@ -18,13 +18,13 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellips
 .glass::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 50%);pointer-events:none;}
 #loginPage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
 #loginCard{width:100%;max-width:380px;padding:44px 38px;background:rgba(255,255,255,0.05);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border:1px solid rgba(255,255,255,0.12);border-radius:28px;box-shadow:0 32px 80px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.15);}
-#loginCard .logo{width:90px;height:90px;border-radius:22px;margin:0 auto 24px;display:block;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+#loginCard .logo{width:90px;height:90px;border-radius:22px;margin:0 auto 24px;display:block;box-shadow:0 8px 30px rgba(0,0,0,0.5);object-fit:contain;}
 #loginCard h1{font-size:22px;font-weight:700;text-align:center;margin-bottom:6px;}
 #loginCard .sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:30px;}
 #loginMsg{color:var(--red);font-size:12px;text-align:center;margin-top:14px;min-height:18px;}
 #app{display:none;position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:24px 20px 60px;}
 .header{display:flex;align-items:center;gap:16px;margin-bottom:28px;}
-.header img{width:56px;height:56px;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,0.5);}
+.header img{width:56px;height:56px;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,0.5);object-fit:contain;}
 .header h1{font-size:19px;font-weight:700;letter-spacing:-.3px;}
 .header .ver{color:var(--muted);font-size:11px;margin-top:3px;}
 .header-right{margin-left:auto;}
@@ -101,6 +101,7 @@ tr:last-child td{border-bottom:none;}
 #toast.i{background:rgba(96,165,250,0.15);color:var(--blue);border-color:rgba(96,165,250,0.3);}
 .divider{height:1px;background:rgba(255,255,255,0.06);margin:20px 0;}
 </style>
+<link rel="icon" type="image/png" href="logo.png">
 </head><body>
 <div id="loginPage">
   <div id="loginCard">
