@@ -13,7 +13,7 @@ Lorsqu'un média demandé sur Overseerr devient disponible, Whatsoverr envoie au
 
 ## ✨ Whatsoverr c'est quoi ? 
 
-Whatsoverr a été entièrement écrit sur la librairie **Baileys** (WebSocket), offrant une très faible consommation RAM de **~6 0Mo**.
+Whatsoverr a été entièrement écrit sur la librairie **Baileys** (WebSocket), offrant une très faible consommation RAM de **~60Mo**.
 
 *   📱 **Configuration simple** : Le dashboard permet de configurer le bot depuis une interface simple et intuitive.
 *   📱 **Dashboard PWA** : Une interface d'administration Web moderne, responsive (PWA installable sur smartphone).
