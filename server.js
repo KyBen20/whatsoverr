@@ -114,6 +114,7 @@ async function connectWhatsApp() {
       browser: ['Whatsoverr', 'Desktop', '2.0.0'],
       generateHighQualityLinkPreview: false,
       syncFullHistory: false,
+      markOnlineOnConnect: false, // Ne pas se declarer "en ligne" -> les notifs push continuent d'arriver sur le telephone
     });
     sock.ev.on('creds.update', saveCreds);
     sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
