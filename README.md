@@ -64,7 +64,7 @@ docker compose up -d
      Voici un exemple : 
 
 ```bash
-   {
+{
   "notification_type": "{{notification_type}}",
   "subject": "{{subject}}",
   "image": "{{image}}",
