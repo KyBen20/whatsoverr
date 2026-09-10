@@ -1,66 +1,79 @@
-﻿# Whatsoverr - Overseerr WhatsApp Notifications
+﻿# 🟢 Whatsoverr v2
 
-Un bot léger et autonome pour envoyer des notifications WhatsApp multi-utilisateurs basées sur les webhooks d'Overseerr.
+**Whatsoverr** est un relai Webhook ultra-léger conçu pour faire le pont entre **Overseerr** et **WhatsApp**. 
+Lorsqu'un média demandé sur Overseerr devient disponible, Whatsoverr envoie automatiquement une notification WhatsApp conviviale à l'utilisateur qui l'a demandé (avec l'affiche du film/série !).
 
-![Whatsoverr Dashboard](https://github.com/KyBen20/whatsoverr/blob/main/public/logo.png)
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![Docker](https://img.shields.io/badge/docker-ready-22d372.svg)
+![RAM](https://img.shields.io/badge/RAM-~50MB-purple.svg)
 
-## 🚀 Fonctionnalités
+---
 
-- **Extrêmement léger** : ~50Mo de RAM (utilise Baileys via WebSocket pur, *aucun navigateur Chrome n'est requis*).
-- **Dashboard d'administration** intégré et sécurisé.
-- **Intégration Overserr** : Importation des utilisateurs Overserr en 1 clic.
-- **Historique et Relances** : Visualisation des statuts d'envoi et bouton pour réessayer en cas d'erreur.
-- **Affiches (Posters)** : Récupération des images TMDB en miniature.
-- **Zero Configuration Code** : Tout est configurable via le dashboard Web ou variables d'environnement.
+## ✨ Nouveautés de la v2 (Ultimate Edition)
 
-## 📦 Installation via Docker
+Whatsoverr a été entièrement réécrit pour passer sur la librairie **Baileys** (WebSocket), faisant chuter la consommation RAM de ~400Mo à **~50Mo**.
 
-1. Clonez le dépôt :
-```bash
-git clone https://github.com/votre_pseudo/overseerr-whatsapp.git
-cd overseerr-whatsapp
+*   📱 **Dashboard PWA "Liquid Glass"** : Une interface d'administration Web moderne, responsive (PWA installable sur smartphone) avec mode sombre et effets glassmorphisme.
+*   🌍 **Multi-Langues (i18n)** : Assigne une langue (FR / EN) à chaque utilisateur. Whatsoverr utilisera le bon template de message automatiquement !
+*   🔕 **Mode "Ne Pas Déranger" (DND)** : Fini les notifications à 3h du matin. Définis une plage silencieuse ; les messages seront mis en file d'attente et distribués au petit matin.
+*   👥 **Import intelligent Overseerr** : Connecte Whatsoverr à l'API Overseerr pour importer tes utilisateurs (et leurs avatars) d'un simple clic.
+*   💾 **Sauvegarde en 1 clic** : Exporte et importe toute ta configuration (utilisateurs, numéros, templates) facilement depuis le dashboard.
+*   🤖 **Notifications Discord** : Alertes système (ex: WhatsApp déconnecté) via webhook Discord, avec un système d'anti-spam (cooldown de 30 minutes).
+
+## 🚀 Installation rapide (Docker)
+
+Plus besoin de compiler ! Une image Docker multi-architecture (`amd64` / `arm64`) est automatiquement générée.
+
+1. Crée un fichier `docker-compose.yml` :
+```yaml
+services:
+  whatsoverr:
+    image: ghcr.io/kyben20/whatsoverr:latest
+    container_name: whatsoverr
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - ADMIN_USER=admin
+      - ADMIN_PASSWORD=changeme
+      - TZ=Europe/Paris
+    volumes:
+      - ./data:/usr/src/app/data
+      - ./auth_info:/usr/src/app/auth_info
 ```
 
-2. Préparez vos variables d'environnement :
+2. Lance le conteneur :
 ```bash
-cp docker-compose.example.yml docker-compose.yml
-cp .env.example .env
-```
-
-3. Modifiez le fichier `.env` pour définir votre mot de passe d'administration :
-```env
-ADMIN_USER=admin
-ADMIN_PASSWORD=changez_moi
-```
-
-4. Lancez le container :
-```bash
-docker-compose up -d --build
+docker compose up -d
 ```
 
 ## ⚙️ Configuration
 
-1. Accédez au dashboard : `http://ip_de_votre_serveur:3001/dashboard`
-2. Connectez-vous avec vos identifiants.
-3. **Scannez le QR Code** avec votre application WhatsApp mobile (Appareils connectés -> Lier un appareil).
-4. Ajoutez vos utilisateurs dans l'onglet **Utilisateurs** (manuellement ou via l'import Overseerr).
+1. **Accès au Dashboard :** Ouvre `http://<IP_DE_TON_SERVEUR>:3000/dashboard` dans ton navigateur. Connecte-toi avec `admin` / `changeme`.
+2. **Lier WhatsApp :** Dans l'onglet *Statut*, scanne le QR Code avec l'application WhatsApp de ton bot (Appareils connectés > Lier un appareil).
+3. **Connecter Overseerr :** Dans *Réglages*, renseigne l'URL et la clé API de ton Overseerr, puis va dans l'onglet *Utilisateurs* pour les importer.
+4. **Configurer le Webhook Overseerr :** 
+   * Va dans les réglages de ton Overseerr > Notifications > Webhook.
+   * Coche `Demande Disponible` (Media Available).
+   * Webhook URL : `http://<IP_DE_WHATSOVERR>:3000/webhook`
+   * JSON Payload : Laisse par défaut ou assure-toi que `{{request.requestedBy_email}}`, `{{subject}}` et `{{image}}` soient présents.
 
-### Configuration Overseerr
-Dans Overseerr, allez dans **Settings > Notifications > Webhook** :
-- **Webhook URL** : `http://ip_de_votre_serveur:3001/webhook`
-- **JSON Payload** :
-```json
-{
-  "notification_type": "{{notification_type}}",
-  "subject": "{{subject}}",
-  "image": "{{image}}",
-  "media_type": "{{media_type}}",
-  "requestedBy_username": "{{requestedBy_username}}",
-  "requestedBy_email": "{{requestedBy_email}}"
-}
-```
+## 📝 Personnalisation des Templates
 
-## 🛠️ Stack Technique
-- Node.js & Express
-- [Baileys](https://github.com/WhiskeySockets/Baileys) (Client WhatsApp Web)
-- Docker & Docker Compose
+Dans l'onglet *Réglages*, tu peux personnaliser le message WhatsApp envoyé pour le français et l'anglais en utilisant ces variables :
+* `{username}` : Nom de l'utilisateur ayant fait la demande
+* `{title}` : Titre du film ou de la série
+* `{icon}` : Icône automatique (🎬 pour un film, 📺 pour une série)
+* `{type}` : Le mot "Film" ou "Série"
+
+*Exemple de template par défaut :*
+> Salut *{username}* 👋
+> 
+> {icon} *{title}* que tu as demandé est disponible !
+> Bon visionnage 🍿
+> 
+> _— Message automatisé_
+
+---
+
+**Développé avec passion pour la communauté de l'auto-hébergement.**
