@@ -1,7 +1,9 @@
-﻿# 🟢 Whatsoverr v2
+﻿# 🟢 Whatsoverr
 
-**Whatsoverr** est un relai Webhook ultra-léger conçu pour faire le pont entre **Overseerr** et **WhatsApp**. 
-Lorsqu'un média demandé sur Overseerr devient disponible, Whatsoverr envoie automatiquement une notification WhatsApp conviviale à l'utilisateur qui l'a demandé (avec l'affiche du film/série !).
+**Whatsoverr** est un relai Webhook ultra-léger conçu pour faire le pont entre **Overseerr** et **WhatsApp**.
+Amis, famille, tout le monde n'a pas Discord ou Telegram, ne trouvant rien qui repondait à mon besoin j'ai donc vibecodé ce petit projet qui est ultra léger.
+
+Lorsqu'un média demandé sur Overseerr devient disponible, Whatsoverr envoie automatiquement une notification WhatsApp à l'utilisateur qui l'a demandé (avec l'affiche du film/série).
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![Docker](https://img.shields.io/badge/docker-ready-22d372.svg)
@@ -9,16 +11,18 @@ Lorsqu'un média demandé sur Overseerr devient disponible, Whatsoverr envoie au
 
 ---
 
-## ✨ Nouveautés de la v2 (Ultimate Edition)
+## ✨ Whatsoverr c'est quoi ? 
 
-Whatsoverr a été entièrement réécrit pour passer sur la librairie **Baileys** (WebSocket), faisant chuter la consommation RAM de ~400Mo à **~50Mo**.
+Whatsoverr a été entièrement écrit sur la librairie **Baileys** (WebSocket), offrant une très faible consommation RAM de **~6 0Mo**.
 
-*   📱 **Dashboard PWA "Liquid Glass"** : Une interface d'administration Web moderne, responsive (PWA installable sur smartphone) avec mode sombre et effets glassmorphisme.
-*   🌍 **Multi-Langues (i18n)** : Assigne une langue (FR / EN) à chaque utilisateur. Whatsoverr utilisera le bon template de message automatiquement !
-*   🔕 **Mode "Ne Pas Déranger" (DND)** : Fini les notifications à 3h du matin. Définis une plage silencieuse ; les messages seront mis en file d'attente et distribués au petit matin.
-*   👥 **Import intelligent Overseerr** : Connecte Whatsoverr à l'API Overseerr pour importer tes utilisateurs (et leurs avatars) d'un simple clic.
+*   📱 **Configuration simple** : Le dashboard permet de configurer le bot depuis une interface simple et intuitive.
+*   📱 **Dashboard PWA** : Une interface d'administration Web moderne, responsive (PWA installable sur smartphone).
+*   🌍 **Multi-Langues** : Assigne une langue (FR / EN) à chaque utilisateur. Whatsoverr utilisera le bon template de message automatiquement !
+*   🔕 **Mode "Ne Pas Déranger"** : Définis une plage silencieuse ; les messages seront mis en file d'attente et distribués à la fin de la plage horaire.
+*   👥 **Import intelligent Overseerr** : Connecte Whatsoverr à l'API Overseerr pour importer tes utilisateurs et leurs avatars d'un simple clic.
 *   💾 **Sauvegarde en 1 clic** : Exporte et importe toute ta configuration (utilisateurs, numéros, templates) facilement depuis le dashboard.
-*   🤖 **Notifications Discord** : Alertes système (ex: WhatsApp déconnecté) via webhook Discord, avec un système d'anti-spam (cooldown de 30 minutes).
+*   🤖 **Notifications Discord** : Alertes système (ex: WhatsApp déconnecté) via webhook Discord, avec un système d'anti-spam.
+
 
 ## 🚀 Installation rapide (Docker)
 
@@ -76,4 +80,4 @@ Dans l'onglet *Réglages*, tu peux personnaliser le message WhatsApp envoyé pou
 
 ---
 
-**Développé avec passion pour la communauté de l'auto-hébergement.**
+**Développé avec Claude pour la communauté de l'auto-hébergement.**
