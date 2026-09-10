@@ -2,11 +2,8 @@
 
 on:
   push:
-    branches: ['main']
-    paths-ignore:
-      - 'README.md'
-      - 'docs/**'
-      - '.gitignore'
+    tags:
+      - 'v*'
 
 jobs:
   push_to_registry:
@@ -37,5 +34,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/kyben20/whatsoverr:latest
+          tags: ghcr.io/kyben20/whatsoverr:latest,ghcr.io/kyben20/whatsoverr:${{ github.ref_name }}
           platforms: linux/amd64,linux/arm64

@@ -45,14 +45,15 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellips
 .card-title{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
 label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500;}
 input,textarea,select{width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:var(--text);padding:10px 13px;font-size:13px;margin-bottom:12px;outline:none;font-family:inherit;}
-.input-row{display:flex;gap:10px;flex-wrap:wrap;} .input-row>*{flex:1;min-width:150px;}
+textarea { min-height: 140px; resize: vertical; line-height: 1.5; }
+.input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;} .input-row>*{flex:1;min-width:150px;}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:rgba(34,211,114,0.13);color:var(--green);border:1px solid rgba(34,211,114,0.28);border-radius:10px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:.18s;}
 .btn.ghost{background:rgba(255,255,255,0.05);color:var(--muted);border-color:rgba(255,255,255,0.09);}
 .btn.danger{background:rgba(255,79,110,0.12);color:var(--red);border-color:rgba(255,79,110,0.28);}
 .btn.blue{background:rgba(96,165,250,0.12);color:var(--blue);border-color:rgba(96,165,250,0.28);}
 .btn.sm{padding:5px 10px;font-size:11px;border-radius:7px;}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
-.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;display:inline-block;}
 .badge.ok{background:rgba(34,211,114,0.12);color:var(--green);}
 .badge.warn{background:rgba(245,158,11,0.12);color:var(--orange);}
 .badge.err{background:rgba(255,79,110,0.12);color:var(--red);}
@@ -71,19 +72,22 @@ input,textarea,select{width:100%;background:rgba(0,0,0,0.3);border:1px solid rgb
 /* Tables / Mobile Cards */
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-th,td{text-align:left;padding:11px 10px;border-bottom:1px solid rgba(255,255,255,0.04);}
+th,td{text-align:left;padding:11px 10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
 th{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--dimmed);border-bottom:1px solid rgba(255,255,255,0.06);}
 @media(max-width:640px){
   thead{display:none;}
   tr{display:block;padding:12px;background:rgba(255,255,255,0.02);border-radius:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.05);}
   td{display:block;border:none;padding:4px 0;}
-  td:last-child{display:flex;justify-content:flex-end;}
+  td:last-child{display:flex;justify-content:flex-end;gap:8px;}
 }
 .poster{width:32px;height:46px;object-fit:cover;border-radius:5px;}
-.uavatar{width:34px;height:34px;border-radius:50%;object-fit:cover;}
-.uavatar-ph{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--muted);}
+.uavatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.09);}
+.uavatar-ph{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--muted);border:1px solid rgba(255,255,255,0.09);}
 
 /* Modals & Toasts */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.modal-bg.open{display:flex;}
+.modal{background:rgba(11,13,22,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:22px;padding:30px;width:100%;max-width:430px;box-shadow:0 24px 80px rgba(0,0,0,0.8);}
 #toast{position:fixed;top:24px;left:50%;transform:translate(-50%, -20px);padding:12px 18px;border-radius:12px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:.22s;background:rgba(255,255,255,0.1);backdrop-filter:blur(20px);}
 #toast.show{opacity:1;transform:translate(-50%, 0);}
 #toast.s{color:var(--green);border:1px solid rgba(34,211,114,0.3);}
@@ -96,8 +100,7 @@ th{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--dimmed);b
 <script>
 const DICT = {
   fr: {
-    login: "Connexion", user: "Identifiant", pass: "Mot de passe",
-    logout: "Déconnexion",
+    login: "Connexion", user: "Identifiant", pass: "Mot de passe", logout: "Déconnexion",
     tab_status: "⚡ Statut", tab_hist: "📋 Historique", tab_users: "👥 Utilisateurs", tab_settings: "⚙️ Réglages",
     st_wa: "WhatsApp", st_wa_ok: "Connecté", st_wa_wait: "Attente QR", st_wa_off: "Déconnecté",
     st_restart: "Redémarrer", st_purge: "Purger session",
@@ -106,14 +109,15 @@ const DICT = {
     kpi_sent: "Envoyés", kpi_rate: "Succès", kpi_last: "Dernier notifié", kpi_up: "Uptime",
     hist_title: "Derniers envois", hist_refresh: "Actualiser",
     usr_import: "Import Overseerr", usr_load: "Charger", usr_add: "Ajouter manuellement",
-    usr_email: "Email", usr_phone: "Numéro (sans +)", usr_list: "Enregistrés",
-    set_tpl: "Templates du message", set_lang: "Langue Dashboard", set_dnd: "Ne Pas Déranger",
-    set_export: "Export / Sauvegarde", set_test: "Envoi Test Manuel",
-    btn_import: "Importer Backup", btn_export: "Télécharger Backup"
+    usr_email: "Email", usr_phone: "Numéro WhatsApp", usr_list: "Utilisateurs Enregistrés",
+    set_tpl: "Templates du message", set_lang: "Langue Dashboard", set_dnd: "Ne Pas Déranger (Plage Silencieuse)",
+    set_export: "Sauvegarde & Restauration", set_test: "Envoi Test Manuel",
+    btn_import: "Importer Backup", btn_export: "Télécharger Backup", btn_edit: "Modifier",
+    dnd_en: "Activer la plage", dnd_start: "Heure de début", dnd_end: "Heure de fin",
+    st_sent_img: "✅ Env. (Image)", st_sent_txt: "✅ Env. (Texte)", st_err: "❌ Erreur", st_queued: "🌙 En attente (Nuit)"
   },
   en: {
-    login: "Login", user: "Username", pass: "Password",
-    logout: "Logout",
+    login: "Login", user: "Username", pass: "Password", logout: "Logout",
     tab_status: "⚡ Status", tab_hist: "📋 History", tab_users: "👥 Users", tab_settings: "⚙️ Settings",
     st_wa: "WhatsApp", st_wa_ok: "Connected", st_wa_wait: "Waiting QR", st_wa_off: "Disconnected",
     st_restart: "Restart", st_purge: "Purge Session",
@@ -122,10 +126,12 @@ const DICT = {
     kpi_sent: "Sent", kpi_rate: "Success", kpi_last: "Last Notified", kpi_up: "Uptime",
     hist_title: "Recent Deliveries", hist_refresh: "Refresh",
     usr_import: "Import from Overseerr", usr_load: "Load", usr_add: "Add Manually",
-    usr_email: "Email", usr_phone: "Phone (no +)", usr_list: "Registered Users",
-    set_tpl: "Message Templates", set_lang: "Dashboard Language", set_dnd: "Do Not Disturb",
-    set_export: "Export / Backup", set_test: "Manual Test Send",
-    btn_import: "Import Backup", btn_export: "Download Backup"
+    usr_email: "Email", usr_phone: "WhatsApp Number", usr_list: "Registered Users",
+    set_tpl: "Message Templates", set_lang: "Dashboard Language", set_dnd: "Do Not Disturb (Silent Hours)",
+    set_export: "Backup & Restore", set_test: "Manual Test Send",
+    btn_import: "Import Backup", btn_export: "Download Backup", btn_edit: "Edit",
+    dnd_en: "Enable silent hours", dnd_start: "Start time", dnd_end: "End time",
+    st_sent_img: "✅ Sent (Image)", st_sent_txt: "✅ Sent (Text)", st_err: "❌ Error", st_queued: "🌙 Queued (Night)"
   }
 };
 
@@ -164,6 +170,8 @@ function renderApp() {
         <button class="tab-btn" onclick="switchTab(this,'users')">${t('tab_users')}</button>
         <button class="tab-btn" onclick="switchTab(this,'settings')">${t('tab_settings')}</button>
       </div>
+      
+      <!-- STATUT -->
       <div id="tab-status" class="tab-pane active">
         <div class="kpi-row" id="kpiBox"></div>
         <div class="grid2">
@@ -178,19 +186,21 @@ function renderApp() {
           </div>
           <div class="glass card">
             <div class="card-title">${t('st_disc')}</div>
-            <input type="text" id="discordUrl" placeholder="https://discord.com/api/webhooks/...">
-            <div class="btn-row"><button class="btn sm" onclick="saveDiscord()">${t('st_save')}</button><button class="btn ghost sm" onclick="api('/config/test-discord',{method:'POST'}).then(()=>toast('OK'))">${t('st_test')}</button></div>
+            <div><label class="lbl">Webhook URL</label><input type="text" id="discordUrl" placeholder="https://discord.com/api/webhooks/..."></div>
+            <div class="btn-row"><button class="btn sm" onclick="saveDiscord()">${t('st_save')}</button><button class="btn ghost sm" onclick="testDiscord()">${t('st_test')}</button></div>
           </div>
         </div>
         <div class="glass card" style="margin-top:16px;">
           <div class="card-title">${t('st_ov')}</div>
           <div class="input-row">
-            <div><label class="lbl">URL</label><input type="text" id="overseerrUrl"></div>
-            <div><label class="lbl">API Key</label><input type="text" id="overseerrApiKey"></div>
+            <div><label class="lbl">URL</label><input type="text" id="overseerrUrl" placeholder="http://192.168.1.1:5055"></div>
+            <div><label class="lbl">API Key</label><input type="text" id="overseerrApiKey" placeholder="••••••••••••••••"></div>
           </div>
           <div class="btn-row"><button class="btn" onclick="saveOverseerr()">${t('st_save')}</button><button class="btn ghost" onclick="testOverseerr()">${t('st_test')}</button></div>
         </div>
       </div>
+
+      <!-- HISTORIQUE -->
       <div id="tab-history" class="tab-pane">
         <div class="glass card">
           <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
@@ -202,16 +212,19 @@ function renderApp() {
           </div>
         </div>
       </div>
+
+      <!-- UTILISATEURS -->
       <div id="tab-users" class="tab-pane">
         <div class="glass card">
           <div class="card-title">${t('usr_add')}</div>
           <div class="input-row">
-            <input type="email" id="newEmail" placeholder="${t('usr_email')}">
-            <input type="text" id="newPhone" placeholder="${t('usr_phone')}">
-            <select id="newLang" style="width:auto;flex:none;min-width:70px;"><option value="fr">FR</option><option value="en">EN</option></select>
-            <button class="btn" onclick="addUser()">${t('usr_add')}</button>
+            <div><label class="lbl">${t('usr_email')}</label><input type="email" id="newEmail" placeholder="ami@gmail.com"></div>
+            <div><label class="lbl">${t('usr_phone')}</label><input type="text" id="newPhone" placeholder="33612345678 (sans +)"></div>
+            <div style="flex:0.5;min-width:70px"><label class="lbl">Lang</label><select id="newLang"><option value="fr">FR</option><option value="en">EN</option></select></div>
           </div>
+          <button class="btn" onclick="addUser()">${t('usr_add')}</button>
         </div>
+        
         <div class="glass card">
           <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
             <div class="card-title" style="margin:0">${t('usr_list')}</div>
@@ -219,6 +232,7 @@ function renderApp() {
           </div>
           <div class="table-wrap"><table><tbody id="usersBody"></tbody></table></div>
         </div>
+        
         <div class="glass card">
           <div style="display:flex;justify-content:space-between;">
             <div class="card-title" style="margin:0">${t('usr_import')}</div>
@@ -227,22 +241,28 @@ function renderApp() {
           <div id="ovList" style="margin-top:16px;"></div>
         </div>
       </div>
+
+      <!-- REGLAGES -->
       <div id="tab-settings" class="tab-pane">
         <div class="glass card">
           <div class="card-title">${t('set_tpl')}</div>
-          <label class="lbl">FR Template</label><textarea id="tpl_fr"></textarea>
-          <label class="lbl">EN Template</label><textarea id="tpl_en"></textarea>
-          <button class="btn" onclick="saveTemplates()">${t('st_save')}</button>
+          <div class="grid2">
+            <div><label class="lbl">FR Template</label><textarea id="tpl_fr"></textarea></div>
+            <div><label class="lbl">EN Template</label><textarea id="tpl_en"></textarea></div>
+          </div>
+          <div style="margin-top:10px;"><button class="btn" onclick="saveTemplates()">${t('st_save')}</button></div>
         </div>
+        
         <div class="glass card">
           <div class="card-title">${t('set_dnd')}</div>
           <div class="input-row">
-            <div><label class="lbl">Enabled</label><select id="dnd_en"><option value="true">Oui / Yes</option><option value="false">Non / No</option></select></div>
-            <div><label class="lbl">Start</label><input type="time" id="dnd_s"></div>
-            <div><label class="lbl">End</label><input type="time" id="dnd_e"></div>
+            <div><label class="lbl">${t('dnd_en')}</label><select id="dnd_en"><option value="true">Oui / Yes</option><option value="false">Non / No</option></select></div>
+            <div><label class="lbl">${t('dnd_start')}</label><input type="time" id="dnd_s"></div>
+            <div><label class="lbl">${t('dnd_end')}</label><input type="time" id="dnd_e"></div>
           </div>
           <button class="btn" onclick="saveConfig()">${t('st_save')}</button>
         </div>
+        
         <div class="grid2">
           <div class="glass card" style="margin:0">
             <div class="card-title">${t('set_lang')}</div>
@@ -250,15 +270,37 @@ function renderApp() {
           </div>
           <div class="glass card" style="margin:0">
             <div class="card-title">${t('set_test')}</div>
-            <div class="input-row"><input type="text" id="testPhone" placeholder="${t('usr_phone')}"><button class="btn sm" onclick="testManual()">Go</button></div>
+            <div><label class="lbl">${t('usr_phone')}</label><input type="text" id="testPhone" placeholder="33612345678"></div>
+            <button class="btn sm" onclick="testManual()">Go</button>
           </div>
         </div>
+        
         <div class="glass card" style="margin-top:16px;">
           <div class="card-title">${t('set_export')}</div>
-          <div class="btn-row"><button class="btn ghost" onclick="exportData()">${t('btn_export')}</button><input type="file" id="importFile" style="display:none" onchange="importData(event)"><button class="btn blue" onclick="document.getElementById('importFile').click()">${t('btn_import')}</button></div>
+          <div class="btn-row">
+            <button class="btn ghost" onclick="exportData()">${t('btn_export')}</button>
+            <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+            <button class="btn blue" onclick="document.getElementById('importFile').click()">${t('btn_import')}</button>
+          </div>
         </div>
       </div>
     </div>
+    
+    <!-- EDIT MODAL -->
+    <div class="modal-bg" id="editModal">
+      <div class="modal">
+        <h3 style="margin-bottom:16px;font-weight:600;">${t('btn_edit')} Utilisateur</h3>
+        <input type="hidden" id="editOld">
+        <label class="lbl">${t('usr_email')}</label><input type="email" id="editEmail">
+        <label class="lbl">${t('usr_phone')}</label><input type="text" id="editPhone">
+        <label class="lbl">Lang</label><select id="editLang"><option value="fr">FR</option><option value="en">EN</option></select>
+        <div class="btn-row" style="margin-top:16px;">
+          <button class="btn" onclick="saveEdit()">${t('st_save')}</button>
+          <button class="btn ghost" onclick="closeEdit()">Annuler</button>
+        </div>
+      </div>
+    </div>
+    
     <div id="toast"></div>
   `;
 }
@@ -283,11 +325,23 @@ function switchTab(btn, n) {
 function doRestart(wipe) { if(confirm(wipe?'Purger?':'Restart?')){ api(wipe?'/restart-wipe':'/restart',{method:'POST'}); toast('Reboot...'); setTimeout(()=>location.reload(), 4000); } }
 
 async function saveDiscord(){ await api('/config',{method:'POST',body:JSON.stringify({discordWebhookUrl:document.getElementById('discordUrl').value})}); toast('OK'); }
+async function testDiscord(){ 
+  let r = await api('/config/test-discord',{method:'POST'}); 
+  if(r.error) toast(r.error, 'e'); else toast('OK'); 
+}
+
 async function saveOverseerr(){ await api('/config/overseerr',{method:'POST',body:JSON.stringify({overseerrUrl:document.getElementById('overseerrUrl').value, overseerrApiKey:document.getElementById('overseerrApiKey').value})}); toast('OK'); }
-async function testOverseerr(){ let r=await api('/overseerr/test',{method:'POST'}); if(r.ok)toast('OK'); else toast('Err','e'); }
+async function testOverseerr(){ let r=await api('/overseerr/test',{method:'POST'}); if(r.ok)toast('OK'); else toast(r.error||'Err','e'); }
+
 async function saveTemplates(){ await api('/config/templates',{method:'POST',body:JSON.stringify({templates:{fr:document.getElementById('tpl_fr').value,en:document.getElementById('tpl_en').value}})}); toast('OK'); }
 async function saveConfig(){ await api('/config',{method:'POST',body:JSON.stringify({dnd:{enabled:document.getElementById('dnd_en').value==='true',start:document.getElementById('dnd_s').value,end:document.getElementById('dnd_e').value}})}); toast('OK'); }
-async function testManual(){ await api('/whatsapp/test',{method:'POST',body:JSON.stringify({phone:document.getElementById('testPhone').value,message:'TEST WhatsApp Bot'})}); toast('OK'); }
+
+async function testManual(){ 
+  let p = document.getElementById('testPhone').value;
+  if(!p) return toast('Entrez un numéro', 'e');
+  let r = await api('/whatsapp/test',{method:'POST',body:JSON.stringify({phone:p, message:'TEST WhatsApp Bot'})}); 
+  if(r.error) toast(r.error, 'e'); else toast('Test Envoyé'); 
+}
 
 function changeDashLang() {
   currentLang = document.getElementById('dashLang').value;
@@ -313,23 +367,13 @@ async function importData(e) {
   r.readAsText(f);
 }
 
-async function refreshAll() {
-  let st = await api('/status');
-  document.getElementById('statusDot').className = st.whatsapp_ready?'pulse on':(st.qr?'pulse wait':'pulse off');
-  document.getElementById('statusTxt').textContent = st.whatsapp_ready?t('st_wa_ok'):(st.qr?t('st_wa_wait'):t('st_wa_off'));
-  let qr = document.getElementById('qrImg'); if(st.qr){qr.src=st.qr;qr.style.display='block';}else{qr.style.display='none';}
-
-  let cf = await api('/config');
-  if(cf.dashboardLang && cf.dashboardLang !== currentLang) { currentLang = cf.dashboardLang; renderFull(); return; }
-  document.getElementById('discordUrl').placeholder = cf.hasWebhook?cf.maskedUrl:'';
-  document.getElementById('overseerrUrl').placeholder = cf.overseerrUrl||'';
-  document.getElementById('overseerrApiKey').placeholder = cf.hasOverseerrApiKey?cf.maskedApiKey:'';
-  document.getElementById('dashLang').value = currentLang;
-  
-  if(cf.templates) { document.getElementById('tpl_fr').value = cf.templates.fr||''; document.getElementById('tpl_en').value = cf.templates.en||''; }
-  if(cf.dnd) { document.getElementById('dnd_en').value = cf.dnd.enabled?'true':'false'; document.getElementById('dnd_s').value = cf.dnd.start; document.getElementById('dnd_e').value = cf.dnd.end; }
-
-  refreshHistory(); refreshUsers();
+// Translations for statuses
+function transStatus(st) {
+  if (st === 'sent_with_poster') return t('st_sent_img');
+  if (st === 'sent_text_only') return t('st_sent_txt');
+  if (st === 'queued_dnd') return t('st_queued');
+  if (st === 'error') return t('st_err');
+  return st;
 }
 
 async function refreshHistory() {
@@ -337,8 +381,8 @@ async function refreshHistory() {
   if(!hs) return;
   document.getElementById('histBody').innerHTML = hs.map(h=>{
     let c = h.status.includes('sent')?'ok':(h.status.includes('dnd')?'warn':'err');
-    let p = h.media_poster?'<img class="poster" src="'+esc(h.media_poster)+'">':'';
-    return `<tr><td style="width:40px">${p}</td><td>${esc(h.requestedBy_username||'?')}</td><td>${esc(h.media_title||'?')}</td><td><span class="badge ${c}">${esc(h.status)}</span></td></tr>`;
+    let p = h.media_poster?'<img class="poster" src="'+esc(h.media_poster)+'">':'<div class="poster"></div>';
+    return `<tr><td style="width:40px">${p}</td><td>${esc(h.requestedBy_username||'?')}</td><td>${esc(h.media_title||'?')}</td><td style="text-align:right"><span class="badge ${c}">${esc(transStatus(h.status))}</span></td></tr>`;
   }).join('');
   
   let sent = hs.filter(h=>h.status.includes('sent')).length;
@@ -357,23 +401,89 @@ async function refreshUsers() {
   document.getElementById('usersBody').innerHTML = us.map(u=>{
     let av = u.avatar?'<img class="uavatar" src="'+esc(u.avatar)+'">':'<div class="uavatar-ph">'+u.email[0].toUpperCase()+'</div>';
     return `<tr><td style="width:40px">${av}</td><td>${esc(u.email)}<br><span style="color:var(--muted);font-size:11px">+${esc(u.phone)} · ${esc(u.lang).toUpperCase()}</span></td>
-    <td style="text-align:right"><button class="btn danger sm" onclick="api('/users/'+encodeURIComponent('${esc(u.email)}'),{method:'DELETE'}).then(refreshUsers)">X</button></td></tr>`;
+    <td style="text-align:right">
+      <button class="btn ghost sm" onclick="openEdit('${esc(u.email)}','${esc(u.phone)}','${esc(u.lang)}')">${t('btn_edit')}</button>
+      <button class="btn danger sm" onclick="api('/users/'+encodeURIComponent('${esc(u.email)}'),{method:'DELETE'}).then(refreshUsers)">X</button>
+    </td></tr>`;
   }).join('');
+}
+
+// EDIT USER MODAL
+function openEdit(email, phone, lang) {
+  document.getElementById('editOld').value = email;
+  document.getElementById('editEmail').value = email;
+  document.getElementById('editPhone').value = phone;
+  document.getElementById('editLang').value = lang || 'fr';
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
+async function saveEdit() {
+  let old = document.getElementById('editOld').value;
+  let email = document.getElementById('editEmail').value;
+  let phone = document.getElementById('editPhone').value;
+  let lang = document.getElementById('editLang').value;
+  let r = await api('/users/'+encodeURIComponent(old), {method:'PUT', body:JSON.stringify({email, phone, lang})});
+  if(r.saved) { closeEdit(); toast('OK'); refreshUsers(); } else toast(r.error||'Err', 'e');
 }
 
 async function addUser() {
   let r=await api('/users',{method:'POST',body:JSON.stringify({email:document.getElementById('newEmail').value,phone:document.getElementById('newPhone').value,lang:document.getElementById('newLang').value})});
-  if(r.saved){toast('OK');document.getElementById('newEmail').value='';document.getElementById('newPhone').value='';refreshUsers();}else toast('Err','e');
+  if(r.saved){toast('OK');document.getElementById('newEmail').value='';document.getElementById('newPhone').value='';refreshUsers();}else toast(r.error||'Err','e');
 }
 
 async function loadOvUsers() {
   document.getElementById('ovLoadBtn').textContent = '...';
   let us=await api('/overseerr/users'); document.getElementById('ovLoadBtn').textContent = t('usr_load');
-  if(!us||us.error)return toast('Err','e');
-  document.getElementById('ovList').innerHTML = us.map(u=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,0.05)">
+  if(!us||us.error)return toast(us?.error||'Err','e');
+  
+  // Rendu de la liste
+  document.getElementById('ovList').innerHTML = us.map(u=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,0.05)" id="ovrow_${u.id}">
     <img src="${u.thumb}" style="width:30px;border-radius:50%"> ${esc(u.title)}
-    ${u.registered?'<span class="badge ok">OK</span>':`<input type="text" id="ovp_${u.id}" placeholder="Num" style="flex:1;min-width:100px;margin:0"><select id="ovl_${u.id}" style="margin:0;width:auto;flex:none;"><option value="fr">FR</option><option value="en">EN</option></select><button class="btn sm" onclick="api('/users',{method:'POST',body:JSON.stringify({email:'${u.email}',phone:document.getElementById('ovp_${u.id}').value,lang:document.getElementById('ovl_${u.id}').value,avatar:'${u.thumb}'})}).then(()=>loadOvUsers())">Add</button>` }
+    ${u.registered?'<span class="badge ok" style="margin-left:auto">OK</span>':`
+    <div style="margin-left:auto;display:flex;gap:4px;">
+      <input type="text" id="ovp_${u.id}" placeholder="336..." style="width:90px;margin:0">
+      <select id="ovl_${u.id}" style="width:50px;margin:0"><option value="fr">FR</option><option value="en">EN</option></select>
+      <button class="btn sm" onclick="addOvDirect('${u.id}', '${esc(u.email)}', '${esc(u.thumb)}')">Add</button>
+    </div>` }
   </div>`).join('');
+}
+
+// Add directly from Overseerr list without reloading everything
+async function addOvDirect(id, email, thumb) {
+  let phone = document.getElementById('ovp_'+id).value;
+  let lang = document.getElementById('ovl_'+id).value;
+  if (!phone) return toast('Numéro requis', 'e');
+  
+  let r = await api('/users', {method:'POST', body:JSON.stringify({email, phone, lang, avatar:thumb})});
+  if (r.error) {
+    toast(r.error, 'e');
+  } else {
+    toast('OK');
+    // Update just this row DOM instead of full reload!
+    document.getElementById('ovrow_'+id).innerHTML = `<img src="${thumb}" style="width:30px;border-radius:50%"> ${esc(email)} <span class="badge ok" style="margin-left:auto">OK</span>`;
+    refreshUsers(); // Refresh background list
+  }
+}
+
+async function refreshAll() {
+  let st = await api('/status');
+  document.getElementById('statusDot').className = st.whatsapp_ready?'pulse on':(st.qr?'pulse wait':'pulse off');
+  document.getElementById('statusTxt').textContent = st.whatsapp_ready?t('st_wa_ok'):(st.qr?t('st_wa_wait'):t('st_wa_off'));
+  let qr = document.getElementById('qrImg'); if(st.qr){qr.src=st.qr;qr.style.display='block';}else{qr.style.display='none';}
+
+  let cf = await api('/config');
+  if(cf.dashboardLang && cf.dashboardLang !== currentLang) { currentLang = cf.dashboardLang; renderFull(); return; }
+  
+  // Use properties for placeholder instead of clearing value
+  document.getElementById('discordUrl').placeholder = cf.hasWebhook?cf.maskedUrl:'https://discord.com/api/webhooks/...';
+  document.getElementById('overseerrApiKey').placeholder = cf.hasOverseerrApiKey?cf.maskedApiKey:'••••••••••••••••';
+  document.getElementById('dashLang').value = currentLang;
+  
+  if(cf.templates) { document.getElementById('tpl_fr').value = cf.templates.fr||''; document.getElementById('tpl_en').value = cf.templates.en||''; }
+  if(cf.dnd) { document.getElementById('dnd_en').value = cf.dnd.enabled?'true':'false'; document.getElementById('dnd_s').value = cf.dnd.start; document.getElementById('dnd_e').value = cf.dnd.end; }
+  if(cf.overseerrUrl) { document.getElementById('overseerrUrl').value = cf.overseerrUrl; }
+
+  refreshHistory(); refreshUsers();
 }
 
 function renderFull() {
