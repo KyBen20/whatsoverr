@@ -1,523 +1,384 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Whatsoverr - Dashboard</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Whatsoverr</title>
 <style>
-  :root {
-    --bg:#0b0f14;--panel:#131820;--border:#1e2633;--text:#e6e8ec;--muted:#8b94a7;
-    --brand:#20b471;--brand-hover:#1b9b60;--red:#ff5c5c;--orange:#f59e0b;--blue:#3b82f6;--yellow:#eab308;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;}
-  #loginOverlay{position:fixed;inset:0;background:rgba(11,15,20,0.97);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(8px);}
-  .login-box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:360px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
-  .login-box img{width:110px;margin-bottom:20px;}
-  .login-box h2{margin:0 0 20px;font-size:20px;font-weight:600;}
-  #appContainer{display:none;max-width:980px;margin:0 auto;padding:20px;}
-  header{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
-  header img{width:44px;border-radius:8px;}
-  header h1{font-size:20px;font-weight:700;margin:0;}
-  .sub{color:var(--muted);font-size:12px;}
-  .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);}
-  .tab-btn{background:none;border:none;color:var(--muted);padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s;}
-  .tab-btn:hover{color:var(--text);}
-  .tab-btn.active{color:var(--brand);border-bottom-color:var(--brand);}
-  .tab-pane{display:none;}
-  .tab-pane.active{display:block;}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
-  @media(max-width:640px){.grid{grid-template-columns:1fr;}}
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
-  .card:last-child{margin-bottom:0;}
-  .card h2{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 16px;font-weight:600;}
-  .status-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:15px;font-weight:500;}
-  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-  .dot.ok{background:var(--brand);box-shadow:0 0 10px var(--brand);}
-  .dot.ko{background:var(--red);box-shadow:0 0 10px var(--red);}
-  #qrArea{text-align:center;margin:15px 0;background:#fff;padding:15px;border-radius:12px;display:inline-block;}
-  #qrImg{width:180px;height:180px;}
-  .btn{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:.15s;white-space:nowrap;}
-  .btn:hover{background:var(--brand-hover);}
-  .btn:disabled{opacity:.4;cursor:not-allowed;}
-  .btn.secondary{background:var(--panel);border:1px solid var(--border);color:var(--text);}
-  .btn.secondary:hover{border-color:var(--brand);color:var(--brand);}
-  .btn.danger{background:rgba(255,92,92,.1);color:var(--red);border:1px solid rgba(255,92,92,.3);}
-  .btn.danger:hover{background:var(--red);color:#fff;}
-  .btn.sm{padding:5px 10px;font-size:11px;}
-  .btn.w-full{width:100%;}
-  .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
-  input[type=text],input[type=email],input[type=password]{width:100%;background:#0b0f14;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;margin-bottom:12px;font-size:14px;transition:border .2s;}
-  input:focus{outline:none;border-color:var(--brand);}
-  .table-wrap{overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
-  th{color:var(--muted);font-weight:500;font-size:11px;text-transform:uppercase;}
-  tr:last-child td{border-bottom:none;}
-  .poster{width:34px;height:50px;object-fit:cover;border-radius:4px;background:#1e2633;display:block;}
-  .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block;}
-  .badge.ok{background:rgba(32,180,113,.15);color:var(--brand);}
-  .badge.warn{background:rgba(245,158,11,.15);color:var(--orange);}
-  .badge.err{background:rgba(255,92,92,.15);color:var(--red);}
-  .badge.info{background:rgba(59,130,246,.15);color:var(--blue);}
-  .ov-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
-  .ov-row:last-child{border-bottom:none;}
-  .ov-avatar{width:36px;height:36px;border-radius:50%;background:var(--border);object-fit:cover;flex-shrink:0;}
-  .ov-info{flex:1;min-width:0;}
-  .ov-info strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .ov-info span{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
-  .ov-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-  .ov-phone-input{background:#0b0f14;border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:12px;width:150px;margin-bottom:0;}
-  .ov-phone-input:focus{outline:none;border-color:var(--brand);}
-  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:150;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-  .modal-backdrop.open{display:flex;}
-  .modal{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:420px;box-shadow:0 16px 40px rgba(0,0,0,.6);}
-  .modal h3{margin:0 0 20px;font-size:16px;}
-  .modal-actions{display:flex;gap:10px;margin-top:4px;}
-  #toast{position:fixed;bottom:24px;right:24px;background:#1e2633;border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.4);opacity:0;transform:translateY(10px);transition:opacity .25s,transform .25s;pointer-events:none;z-index:300;}
-  #toast.show{opacity:1;transform:translateY(0);}
-  #toast.success{border-color:var(--brand);color:var(--brand);}
-  #toast.error{border-color:var(--red);color:var(--red);}
-  #toast.info{border-color:var(--blue);color:var(--blue);}
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg0:#08090f;--glass-bg:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.09);
+  --text:#eef0f8;--muted:#7a82a0;--dimmed:#424a65;
+  --green:#22d372;--red:#ff4f6e;--orange:#f59e0b;--blue:#60a5fa;--purple:#a78bfa;
+  --r:16px;--r-sm:10px;
+}
+body{background:var(--bg0);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-size:14px;min-height:100vh;}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(34,211,114,0.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(96,165,250,0.05) 0%,transparent 60%);pointer-events:none;z-index:0;}
+.glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.09);border-radius:var(--r);position:relative;overflow:hidden;}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 50%);pointer-events:none;}
+#loginPage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+#loginCard{width:100%;max-width:380px;padding:44px 38px;background:rgba(255,255,255,0.05);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border:1px solid rgba(255,255,255,0.12);border-radius:28px;box-shadow:0 32px 80px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.15);}
+#loginCard .logo{width:90px;height:90px;border-radius:22px;margin:0 auto 24px;display:block;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+#loginCard h1{font-size:22px;font-weight:700;text-align:center;margin-bottom:6px;}
+#loginCard .sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:30px;}
+#loginMsg{color:var(--red);font-size:12px;text-align:center;margin-top:14px;min-height:18px;}
+#app{display:none;position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:24px 20px 60px;}
+.header{display:flex;align-items:center;gap:16px;margin-bottom:28px;}
+.header img{width:56px;height:56px;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,0.5);}
+.header h1{font-size:19px;font-weight:700;letter-spacing:-.3px;}
+.header .ver{color:var(--muted);font-size:11px;margin-top:3px;}
+.header-right{margin-left:auto;}
+.tabs{display:flex;gap:2px;margin-bottom:22px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:4px;}
+.tab-btn{flex:1;background:none;border:none;color:var(--muted);padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;border-radius:11px;transition:all .18s;white-space:nowrap;font-family:inherit;}
+.tab-btn:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+.tab-btn.active{background:rgba(34,211,114,0.12);color:var(--green);box-shadow:0 0 0 1px rgba(34,211,114,0.2);}
+.tab-pane{display:none;}.tab-pane.active{display:block;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+.card{padding:22px 24px;margin-bottom:16px;}.card:last-child{margin-bottom:0;}
+.card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:18px;}
+.pulse{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.pulse.on{background:var(--green);box-shadow:0 0 0 3px rgba(34,211,114,0.2),0 0 14px var(--green);animation:pa 2s infinite;}
+.pulse.off{background:var(--red);box-shadow:0 0 0 3px rgba(255,79,110,0.2);}
+.pulse.wait{background:var(--orange);animation:pa 1s infinite;}
+@keyframes pa{0%,100%{opacity:1;}50%{opacity:.3;}}
+.status-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.status-txt{font-size:15px;font-weight:600;}
+.uptime{color:var(--muted);font-size:12px;margin-bottom:18px;}
+#qrWrap{display:none;text-align:center;margin:14px 0;}
+#qrWrap .qr-hint{font-size:12px;color:var(--muted);margin-bottom:10px;}
+#qrImg{width:175px;height:175px;border-radius:12px;background:#fff;padding:8px;}
+label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500;}
+input[type=text],input[type=email],input[type=password],textarea{width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:var(--text);padding:10px 13px;font-size:13px;font-family:inherit;transition:border .2s;margin-bottom:12px;outline:none;}
+input:focus,textarea:focus{border-color:rgba(34,211,114,0.5);box-shadow:0 0 0 3px rgba(34,211,114,0.08);}
+textarea{resize:vertical;min-height:120px;line-height:1.6;}
+.input-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}.input-row input{flex:1;min-width:150px;margin-bottom:0;}
+.btn{display:inline-flex;align-items:center;gap:6px;background:rgba(34,211,114,0.13);color:var(--green);border:1px solid rgba(34,211,114,0.28);border-radius:10px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;white-space:nowrap;font-family:inherit;}
+.btn:hover{background:rgba(34,211,114,0.22);box-shadow:0 0 18px rgba(34,211,114,0.2);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn.ghost{background:rgba(255,255,255,0.05);color:var(--muted);border-color:rgba(255,255,255,0.09);}
+.btn.ghost:hover{color:var(--text);background:rgba(255,255,255,0.1);}
+.btn.danger{background:rgba(255,79,110,0.12);color:var(--red);border-color:rgba(255,79,110,0.28);}
+.btn.danger:hover{background:rgba(255,79,110,0.22);}
+.btn.blue{background:rgba(96,165,250,0.12);color:var(--blue);border-color:rgba(96,165,250,0.28);}
+.btn.sm{padding:5px 10px;font-size:11px;border-radius:7px;}
+.btn.w-full{width:100%;justify-content:center;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;}
+.badge.ok{background:rgba(34,211,114,0.12);color:var(--green);}
+.badge.warn{background:rgba(245,158,11,0.12);color:var(--orange);}
+.badge.err{background:rgba(255,79,110,0.12);color:var(--red);}
+.badge.retry{background:rgba(167,139,250,0.12);color:var(--purple);}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--dimmed);border-bottom:1px solid rgba(255,255,255,0.06);}
+td{text-align:left;padding:11px 10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.poster{width:32px;height:46px;object-fit:cover;border-radius:5px;background:rgba(255,255,255,0.05);display:block;}
+.uavatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);}
+.uavatar-ph{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--muted);}
+.ov-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.ov-row:last-child{border-bottom:none;}
+.ov-info{flex:1;min-width:0;}
+.ov-info strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ov-info span{color:var(--muted);font-size:11px;display:block;overflow:hidden;text-overflow:ellipsis;}
+.ov-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.ov-phone{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.09);border-radius:8px;color:var(--text);padding:7px 10px;font-size:12px;width:148px;outline:none;font-family:inherit;}
+.ov-phone:focus{border-color:rgba(34,211,114,0.4);}
+.template-vars{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
+.var-chip{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2);border-radius:6px;padding:3px 9px;font-size:11px;font-family:monospace;cursor:pointer;transition:.15s;}
+.var-chip:hover{background:rgba(96,165,250,0.2);}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.modal-bg.open{display:flex;}
+.modal{background:rgba(11,13,22,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:22px;padding:30px;width:100%;max-width:430px;}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:20px;}
+.saved-pill{display:none;align-items:center;font-size:12px;color:var(--green);background:rgba(34,211,114,0.1);border:1px solid rgba(34,211,114,0.2);border-radius:20px;padding:3px 10px;}
+.saved-pill.show{display:inline-flex;}
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:500;pointer-events:none;z-index:999;opacity:0;transform:translateY(8px);transition:all .22s;backdrop-filter:blur(20px);border:1px solid transparent;}
+#toast.show{opacity:1;transform:translateY(0);}
+#toast.s{background:rgba(34,211,114,0.15);color:var(--green);border-color:rgba(34,211,114,0.3);}
+#toast.e{background:rgba(255,79,110,0.15);color:var(--red);border-color:rgba(255,79,110,0.3);}
+#toast.i{background:rgba(96,165,250,0.15);color:var(--blue);border-color:rgba(96,165,250,0.3);}
+.divider{height:1px;background:rgba(255,255,255,0.06);margin:20px 0;}
 </style>
-</head>
-<body>
-
-<div id="loginOverlay">
-  <div class="login-box">
-    <img src="logo.png" alt="Logo">
-    <h2>Whatsoverr</h2>
-    <form id="loginForm">
-      <input type="text"     id="loginUser" placeholder="Identifiant" required>
-      <input type="password" id="loginPass" placeholder="Mot de passe" required>
-      <button type="submit" class="btn w-full">Acceder au Dashboard</button>
+</head><body>
+<div id="loginPage">
+  <div id="loginCard">
+    <img class="logo" src="logo.png" onerror="this.style.display='none'" alt="">
+    <h1>Whatsoverr</h1>
+    <div class="sub">Dashboard d'administration</div>
+    <form id="loginForm" style="margin-top:28px;">
+      <label class="lbl">Identifiant</label>
+      <input type="text" id="lu" required autocomplete="username">
+      <label class="lbl">Mot de passe</label>
+      <input type="password" id="lp" required autocomplete="current-password">
+      <button type="submit" class="btn w-full" style="margin-top:4px;">Connexion</button>
     </form>
-    <div id="loginMsg" style="margin-top:14px;color:var(--red);font-size:13px;"></div>
+    <div id="loginMsg"></div>
   </div>
 </div>
-
-<div id="appContainer">
-  <header>
-    <img src="logo.png" alt="Logo">
-    <div><h1>WHATSOVERR</h1><div class="sub">Relais Overseerr &middot; WhatsApp &mdash; Baileys (sans navigateur)</div></div>
-  </header>
-
+<div id="app">
+  <div class="header">
+    <img src="logo.png" onerror="this.style.display='none'" alt="">
+    <div><h1>WHATSOVERR</h1><div class="ver">Overseerr &rarr; WhatsApp &middot; Baileys</div></div>
+    <div class="header-right"><button class="btn ghost sm" onclick="logout()">D&eacute;connexion</button></div>
+  </div>
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab(this,'status')">Statut</button>
-    <button class="tab-btn"        onclick="switchTab(this,'history')">Historique</button>
-    <button class="tab-btn"        onclick="switchTab(this,'users')">Utilisateurs</button>
+    <button class="tab-btn active" onclick="switchTab(this,'status')">&#9889; Statut</button>
+    <button class="tab-btn" onclick="switchTab(this,'history')">&#128203; Historique</button>
+    <button class="tab-btn" onclick="switchTab(this,'users')">&#128101; Utilisateurs</button>
+    <button class="tab-btn" onclick="switchTab(this,'settings')">&#9881; R&eacute;glages</button>
   </div>
-
-  <!-- STATUT -->
   <div id="tab-status" class="tab-pane active">
-    <div class="grid">
-      <div class="card" style="margin-bottom:0;">
-        <h2>Etat du service</h2>
-        <div class="status-row"><span id="statusDot" class="dot ko"></span><span id="statusText">Verification...</span></div>
-        <div style="color:var(--muted);margin-bottom:16px;" id="uptimeText"></div>
-        <div id="qrAreaWrap" style="display:none;text-align:center;">
-          <div style="color:var(--muted);font-size:12px;margin-bottom:8px;">Scannez avec WhatsApp :</div>
-          <div id="qrArea"><img id="qrImg" src="" /></div>
+    <div class="grid2" style="margin-bottom:16px;">
+      <div class="glass card" style="margin-bottom:0;">
+        <div class="card-title">WhatsApp</div>
+        <div class="status-row"><div class="pulse wait" id="statusDot"></div><div class="status-txt" id="statusTxt">V&eacute;rification&hellip;</div></div>
+        <div class="uptime" id="uptimeTxt"></div>
+        <div id="qrWrap">
+          <div class="qr-hint">Scannez avec WhatsApp :<br><small style="color:#424a65">Appareils connect&eacute;s &rarr; Lier un appareil</small></div>
+          <img id="qrImg" src="" alt="QR">
         </div>
-        <div class="btn-row" style="margin-top:10px;">
-          <button class="btn secondary" onclick="restart(false)">Redemarrer</button>
-          <button class="btn danger"    onclick="restart(true)">Purger session</button>
+        <div class="btn-row" style="margin-top:16px;">
+          <button class="btn ghost" onclick="doRestart(false)">&#8634; Red&eacute;marrer</button>
+          <button class="btn danger" onclick="doRestart(true)">Purger session</button>
         </div>
       </div>
-      <div class="card" style="margin-bottom:0;">
-        <h2>Notifications Discord</h2>
-        <div style="color:var(--muted);font-size:12px;margin-bottom:12px;">Alertes systeme (deconnexion, erreurs) :</div>
-        <input type="text" id="discordUrl" placeholder="https://discord.com/api/webhooks/..." />
+      <div class="glass card" style="margin-bottom:0;">
+        <div class="card-title">Discord</div>
+        <div style="color:var(--muted);font-size:12px;margin-bottom:14px;">Alertes syst&egrave;me (cooldown 30min pour &eacute;viter le spam) :</div>
+        <label class="lbl">URL Webhook</label>
+        <input type="text" id="discordUrl" placeholder="https://discord.com/api/webhooks/...">
+        <div id="discordCurrent" style="font-size:11px;color:var(--muted);margin-bottom:14px;"></div>
         <div class="btn-row">
-          <button class="btn"           onclick="saveDiscord()">Sauvegarder</button>
-          <button class="btn secondary" onclick="testDiscord()">Tester</button>
+          <button class="btn" onclick="saveDiscord()">Sauvegarder</button>
+          <button class="btn ghost" onclick="testDiscord()">Tester</button>
         </div>
-        <div id="discordCurrent" style="color:var(--muted);font-size:12px;margin-top:12px;"></div>
       </div>
     </div>
-
-    <!-- Plex Config Card -->
-    <div class="card" style="margin-top:16px;">
-      <h2>Integration Plex</h2>
-      <div style="color:var(--muted);font-size:12px;margin-bottom:14px;">
-        Connectez votre compte Overseerr pour importer tous vos utilisateurs..<br>
-        <div style="color:var(--blue);font-size:11px;">(La clé API se trouve dans Settings > General dans Overseerr)</div>
+    <div class="glass card">
+      <div class="card-title">Connexion Overseerr</div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:16px;">La cl&eacute; API se trouve dans Overseerr &rarr; Settings &rarr; General &rarr; API Key</div>
+      <div class="input-row" style="align-items:flex-start;">
+        <div style="flex:1;min-width:200px;"><label class="lbl">URL Overseerr</label><input type="text" id="overseerrUrl" placeholder="http://192.168.1.x:5055" style="margin-bottom:0;"></div>
+        <div style="flex:1;min-width:180px;"><label class="lbl">Cl&eacute; API</label><input type="text" id="overseerrApiKey" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" style="margin-bottom:0;"></div>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:180px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">URL Overseerr</div>
-          <input type="text" id="overseerrUrl" placeholder="http://192.168.1.x:5055" style="margin-bottom:0;" />
-        </div>
-        <div style="flex:1;min-width:180px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Clé API Overseerr *</div>
-          <input type="text" id="overseerrApiKey" placeholder="xxxxxxxxxxxx" style="margin-bottom:0;" />
-        </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn" onclick="saveOverseerr()">Sauvegarder</button>
+        <button class="btn ghost" onclick="testOverseerr()">Tester la connexion</button>
       </div>
-      <div class="btn-row" style="margin-top:12px;">
-        <button class="btn"           onclick="saveOverseerr()">Sauvegarder</button>
-        <button class="btn secondary" onclick="testOverseerr()">Tester la connexion</button>
-      </div>
-      <div id="overseerrStatus" style="color:var(--muted);font-size:12px;margin-top:10px;"></div>
+      <div id="overseerrStatus" style="font-size:11px;color:var(--muted);margin-top:10px;"></div>
     </div>
   </div>
-
-  <!-- HISTORIQUE -->
   <div id="tab-history" class="tab-pane">
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <h2 style="margin:0;">Derniers envois</h2>
-        <button class="btn secondary sm" onclick="refreshHistory()">Actualiser</button>
+    <div class="glass card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div class="card-title" style="margin-bottom:0;">Derniers envois</div>
+        <button class="btn ghost sm" onclick="refreshHistory()">Actualiser</button>
       </div>
       <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th style="width:44px;"></th><th>Date</th><th>Demandeur</th><th>Contenu</th><th>Resultat</th><th style="width:110px;"></th>
-          </tr></thead>
-          <tbody id="historyBody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Chargement...</td></tr></tbody>
-        </table>
+        <table><thead><tr><th style="width:44px;"></th><th>Heure</th><th>Demandeur</th><th>Contenu</th><th>R&eacute;sultat</th><th style="width:80px;"></th></tr></thead>
+        <tbody id="histBody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">Chargement&hellip;</td></tr></tbody></table>
       </div>
     </div>
   </div>
-
-  <!-- UTILISATEURS -->
   <div id="tab-users" class="tab-pane">
-    <!-- Import Plex -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <h2 style="margin:0;">Importer depuis Overseerr</h2>
-        <button class="btn secondary sm" onclick="loadOverseerrUsers()" id="overLoadBtn">Charger les users Overseerr</button>
+    <div class="glass card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="card-title" style="margin-bottom:0;">Import depuis Overseerr</div>
+        <button class="btn blue sm" onclick="loadOvUsers()" id="ovLoadBtn">Charger</button>
       </div>
-      <div id="plexImportInfo" style="color:var(--muted);font-size:12px;margin-bottom:12px;">
-        Cliquez sur "Charger" pour recuperer la liste de vos utilisateurs Overseerr et assigner leurs numeros WhatsApp.
-      </div>
-      <div id="ovUsersList" style="display:none;">
-        <div id="ovUsersContent"></div>
-      </div>
+      <div id="ovImportHint" style="color:var(--muted);font-size:12px;margin-bottom:10px;">Cliquez sur Charger pour voir vos utilisateurs Overseerr et assigner leurs num&eacute;ros WhatsApp.</div>
+      <div id="ovList" style="display:none;"><div id="ovContent"></div></div>
     </div>
-
-    <!-- Ajout manuel -->
-    <div class="card">
-      <h2>Ajouter manuellement</h2>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;">
-        <input type="email" id="newEmail" placeholder="email@exemple.com"               style="flex:1;min-width:200px;margin-bottom:0;" />
-        <input type="text"  id="newPhone" placeholder="33612345678 (sans + ni espaces)" style="flex:1;min-width:180px;margin-bottom:0;" />
+    <div class="glass card">
+      <div class="card-title">Ajouter manuellement</div>
+      <div class="input-row">
+        <input type="email" id="newEmail" placeholder="email@exemple.com">
+        <input type="text" id="newPhone" placeholder="336xxxxxxxx (sans +)">
         <button class="btn" onclick="addUser()">Ajouter</button>
       </div>
-      <div style="color:var(--muted);font-size:11px;margin-top:8px;">Format international sans le + (ex: 33612345678 pour la France)</div>
+      <div style="font-size:11px;color:var(--dimmed);">Format international sans + (ex: 33612345678)</div>
     </div>
-
-    <!-- Liste -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <h2 style="margin:0;">Utilisateurs enregistres</h2>
-        <button class="btn secondary sm" onclick="refreshUsers()">Actualiser</button>
+    <div class="glass card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div class="card-title" style="margin-bottom:0;">Utilisateurs enregistr&eacute;s</div>
+        <button class="btn ghost sm" onclick="refreshUsers()">Actualiser</button>
       </div>
       <div class="table-wrap">
-        <table>
-          <thead><tr><th>Email Overseerr</th><th>Numero WhatsApp</th><th style="width:140px;"></th></tr></thead>
-          <tbody id="usersBody"><tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">Chargement...</td></tr></tbody>
-        </table>
+        <table><thead><tr><th style="width:50px;"></th><th>Email</th><th>Num&eacute;ro WhatsApp</th><th style="width:140px;"></th></tr></thead>
+        <tbody id="usersBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:28px;">Chargement&hellip;</td></tr></tbody></table>
       </div>
     </div>
   </div>
-</div>
-
-<!-- MODAL EDIT -->
-<div class="modal-backdrop" id="editModal">
-  <div class="modal">
-    <h3>Modifier l'utilisateur</h3>
-    <input type="hidden" id="editOldEmail" />
-    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Email Overseerr</label>
-    <input type="email" id="editEmail" placeholder="email@exemple.com" />
-    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Numero WhatsApp</label>
-    <input type="text"  id="editPhone" placeholder="33612345678" />
-    <div class="modal-actions">
-      <button class="btn"           onclick="saveEditUser()">Enregistrer</button>
-      <button class="btn secondary" onclick="closeEditModal()">Annuler</button>
+  <div id="tab-settings" class="tab-pane">
+    <div class="glass card">
+      <div class="card-title">Template du message WhatsApp</div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:14px;">Personnalisez le message envoy&eacute;. Cliquez sur une variable pour l'ins&eacute;rer :</div>
+      <div class="template-vars">
+        <span class="var-chip" onclick="insertVar('{username}')">{username}</span>
+        <span class="var-chip" onclick="insertVar('{title}')">{title}</span>
+        <span class="var-chip" onclick="insertVar('{icon}')">{icon}</span>
+        <span class="var-chip" onclick="insertVar('{type}')">{type}</span>
+      </div>
+      <label class="lbl">Message (\n = saut de ligne)</label>
+      <textarea id="templateTxt"></textarea>
+      <div class="btn-row">
+        <button class="btn" onclick="saveTemplate()">Sauvegarder</button>
+        <button class="btn ghost" onclick="resetTemplate()">R&eacute;initialiser</button>
+        <span class="saved-pill" id="tplSaved">&#10003; Sauvegard&eacute;</span>
+      </div>
+      <div class="divider"></div>
+      <div class="card-title">Aper&ccedil;u</div>
+      <div id="tplPreview" style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;font-size:13px;white-space:pre-wrap;line-height:1.6;color:var(--muted);min-height:80px;"></div>
     </div>
   </div>
 </div>
-
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <h3>Modifier l'utilisateur</h3>
+    <input type="hidden" id="editOld">
+    <label class="lbl">Email</label><input type="email" id="editEmail">
+    <label class="lbl">Num&eacute;ro WhatsApp</label><input type="text" id="editPhone">
+    <div class="btn-row" style="margin-top:4px;">
+      <button class="btn" onclick="saveEdit()">Enregistrer</button>
+      <button class="btn ghost" onclick="closeEdit()">Annuler</button>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
-var authHeader = sessionStorage.getItem('whatsoverr_auth') || null;
-
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
+var auth=sessionStorage.getItem('wa_auth')||'';
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+document.getElementById('loginForm').addEventListener('submit',async function(e){
   e.preventDefault();
-  var u = document.getElementById('loginUser').value;
-  var p = document.getElementById('loginPass').value;
-  authHeader = 'Basic ' + btoa(u + ':' + p);
-  try {
-    var res = await fetch('/dashboard/api/status', { headers: { Authorization: authHeader } });
-    if (res.ok) { sessionStorage.setItem('whatsoverr_auth', authHeader); showApp(); }
-    else document.getElementById('loginMsg').textContent = 'Identifiants incorrects';
-  } catch(e) { document.getElementById('loginMsg').textContent = 'Erreur reseau'; }
+  auth='Basic '+btoa(document.getElementById('lu').value+':'+document.getElementById('lp').value);
+  var r=await fetch('/dashboard/api/status',{headers:{Authorization:auth}});
+  if(r.ok){sessionStorage.setItem('wa_auth',auth);showApp();}
+  else document.getElementById('loginMsg').textContent='Identifiants incorrects';
 });
-
-if (authHeader) {
-  fetch('/dashboard/api/status', { headers: { Authorization: authHeader } })
-    .then(function(r) { if (r.ok) showApp(); }).catch(function(){});
+if(auth){fetch('/dashboard/api/status',{headers:{Authorization:auth}}).then(function(r){if(r.ok)showApp();}).catch(function(){});}
+function showApp(){document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';init();}
+function logout(){sessionStorage.removeItem('wa_auth');location.reload();}
+async function api(url,opts){
+  opts=opts||{};
+  var r=await fetch('/dashboard/api'+url,Object.assign({},opts,{headers:Object.assign({Authorization:auth,'Content-Type':'application/json'},opts.headers||{})}));
+  if(r.status===401){sessionStorage.removeItem('wa_auth');location.reload();}
+  return r.json();
 }
-
-function showApp() {
-  document.getElementById('loginOverlay').style.display = 'none';
-  document.getElementById('appContainer').style.display = 'block';
-  initDashboard();
+function switchTab(btn,name){
+  document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('tab-'+name).classList.add('active');btn.classList.add('active');
+  if(name==='history')refreshHistory();
+  if(name==='users')refreshUsers();
+  if(name==='settings')refreshTemplate();
 }
-
-async function apiCall(endpoint, options) {
-  options = options || {};
-  var res = await fetch('/dashboard/api' + endpoint, Object.assign({}, options, {
-    headers: Object.assign({}, options.headers || {}, { Authorization: authHeader, 'Content-Type': 'application/json' })
-  }));
-  if (res.status === 401) { sessionStorage.removeItem('whatsoverr_auth'); location.reload(); return; }
-  return res.json();
+var toastT;
+function toast(msg,type){type=type||'s';var el=document.getElementById('toast');el.textContent=msg;el.className='show '+type;clearTimeout(toastT);toastT=setTimeout(function(){el.className='';},3200);}
+function fmtUptime(s){if(s<60)return s+'s';var h=Math.floor(s/3600),m=Math.floor((s%3600)/60);if(h===0)return m+'min';return h+'h '+m+'min';}
+function timeAgo(iso){var d=Math.floor((Date.now()-new Date(iso))/1000);if(d<60)return 'il y a '+d+'s';if(d<3600)return 'il y a '+Math.floor(d/60)+'min';if(d<86400)return 'il y a '+Math.floor(d/3600)+'h'+Math.floor((d%3600)/60)+'min';return new Date(iso).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
+async function refreshStatus(){
+  try{
+    var d=await api('/status');
+    var dot=document.getElementById('statusDot'),txt=document.getElementById('statusTxt'),qw=document.getElementById('qrWrap');
+    if(d.whatsapp_ready){dot.className='pulse on';txt.textContent='Connecté';qw.style.display='none';}
+    else if(d.qr){dot.className='pulse wait';txt.textContent='En attente de scan QR';document.getElementById('qrImg').src=d.qr;qw.style.display='block';}
+    else{dot.className='pulse off';txt.textContent='Déconnecté';qw.style.display='none';}
+    document.getElementById('uptimeTxt').textContent='Uptime : '+fmtUptime(d.uptime_seconds);
+  }catch(e){}
 }
-
-function switchTab(btn, name) {
-  document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
-  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-  document.getElementById('tab-' + name).classList.add('active');
-  btn.classList.add('active');
-  if (name === 'history') refreshHistory();
-  if (name === 'users')   refreshUsers();
+async function refreshConfig(){
+  try{
+    var d=await api('/config');
+    document.getElementById('discordCurrent').textContent=d.hasWebhook?'Actif : '+d.maskedUrl:'Non configuré';
+    if(d.overseerrUrl)document.getElementById('overseerrUrl').value=d.overseerrUrl;
+    document.getElementById('overseerrStatus').textContent=d.hasOverseerrApiKey?'Clé : '+d.maskedApiKey:'Clé API non configurée';
+  }catch(e){}
 }
-
-var toastTimer;
-function toast(msg, type) {
-  type = type || 'success';
-  var el = document.getElementById('toast');
-  el.textContent = msg; el.className = 'show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(function() { el.className = ''; }, 3200);
+async function saveDiscord(){var url=document.getElementById('discordUrl').value.trim();await api('/config',{method:'POST',body:JSON.stringify({discordWebhookUrl:url})});document.getElementById('discordUrl').value='';refreshConfig();toast('Webhook Discord sauvegardé');}
+async function testDiscord(){try{await api('/config/test-discord',{method:'POST'});toast('Test envoyé sur Discord');}catch(e){toast('Erreur','e');}}
+async function saveOverseerr(){
+  var url=document.getElementById('overseerrUrl').value.trim(),key=document.getElementById('overseerrApiKey').value.trim();
+  if(!url||!key){toast('URL et clé API requis','e');return;}
+  await api('/config/overseerr',{method:'POST',body:JSON.stringify({overseerrUrl:url,overseerrApiKey:key})});
+  document.getElementById('overseerrApiKey').value='';refreshConfig();toast('Config Overseerr sauvegardée');
 }
-
-function timeAgo(iso) {
-  var diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (diff < 60)    return 'il y a ' + diff + 's';
-  if (diff < 3600)  return 'il y a ' + Math.floor(diff/60) + 'min';
-  if (diff < 86400) return 'il y a ' + Math.floor(diff/3600) + 'h';
-  return new Date(iso).toLocaleString('fr-FR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+async function testOverseerr(){
+  var btn=event.target;btn.disabled=true;btn.textContent='...';
+  try{var r=await api('/overseerr/test',{method:'POST'});if(r.ok)toast('Connexion OK - '+r.userCount+' utilisateur(s)');else toast(r.error||'Erreur Overseerr','e');}
+  catch(e){toast('Erreur réseau','e');}
+  btn.disabled=false;btn.textContent='Tester la connexion';
 }
-function esc(str) {
-  return String(str).replace(/[&<>"']/g, function(c) {
-    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-  });
+async function doRestart(wipe){
+  if(!confirm(wipe?'Effacer la session WhatsApp et redémarrer ?':'Redémarrer le bot ?'))return;
+  await api(wipe?'/restart-wipe':'/restart',{method:'POST'});
+  toast('Redémarrage en cours...','i');setTimeout(function(){location.reload();},5000);
 }
-
-// STATUS
-async function refreshStatus() {
-  try {
-    var data = await apiCall('/status');
-    var dot = document.getElementById('statusDot'), txt = document.getElementById('statusText'), qrW = document.getElementById('qrAreaWrap');
-    if (data.whatsapp_ready) { dot.className='dot ok'; txt.textContent='En ligne et connecte'; qrW.style.display='none'; }
-    else {
-      dot.className='dot ko';
-      txt.textContent = data.qr ? 'Action requise : Scan QR Code' : 'Deconnecte / Demarrage...';
-      if (data.qr) { document.getElementById('qrImg').src = data.qr; qrW.style.display='block'; }
-      else qrW.style.display='none';
-    }
-    var m = Math.floor(data.uptime_seconds/60), s = data.uptime_seconds%60;
-    document.getElementById('uptimeText').textContent = 'Uptime : ' + m + 'min ' + s + 's';
-  } catch(e) {}
-}
-
-async function refreshConfig() {
-  try {
-    var data = await apiCall('/config');
-    document.getElementById('discordCurrent').textContent = data.hasWebhook ? ('Actif : ' + data.maskedUrl) : 'Non configure';
-    document.getElementById('overseerrUrl').placeholder = data.overseerrUrl || 'http://192.168.1.x:5055';
-    if (data.overseerrUrl) document.getElementById('overseerrUrl').value = data.overseerrUrl;
-    document.getElementById('overseerrStatus').textContent = data.hasOverseerrApiKey ? ('Token : ' + data.maskedApiKey) : 'Token non configure';
-  } catch(e) {}
-}
-
-async function saveDiscord() {
-  var url = document.getElementById('discordUrl').value;
-  await apiCall('/config', { method:'POST', body:JSON.stringify({ discordWebhookUrl:url }) });
-  document.getElementById('discordUrl').value = '';
-  refreshConfig(); toast('Webhook Discord sauvegarde');
-}
-async function testDiscord() {
-  try { await apiCall('/config/test-discord', { method:'POST' }); toast('Test envoye sur Discord'); }
-  catch(e) { toast('Erreur', 'error'); }
-}
-
-async function saveOverseerr() {
-  var url   = document.getElementById('overseerrUrl').value.trim();
-  var token = document.getElementById('overseerrApiKey').value.trim();
-  if (!token) { toast('Clé API Overseerr requise', 'error'); return; }
-  await apiCall('/config/overseerr', { method:'POST', body:JSON.stringify({ overseerrUrl:url, overseerrApiKey:token }) });
-  document.getElementById('overseerrApiKey').value = '';
-  refreshConfig(); toast('Config Overseerr sauvegardée');
-}
-
-async function testOverseerr() {
-  var btn = event.target; btn.disabled = true; btn.textContent = '...';
-  try {
-    var res = await apiCall('/overseerr/test', { method:'POST' });
-    if (res.ok) toast('Connexion Overseerr OK — ' + res.userCount + ' utilisateur(s) trouves');
-    else toast(res.error || 'Erreur Overseerr', 'error');
-  } catch(e) { toast('Erreur reseau', 'error'); }
-  btn.disabled = false; btn.textContent = 'Tester la connexion';
-}
-
-async function restart(wipe) {
-  if (!confirm(wipe ? 'Effacer la session WhatsApp et redemarrer ?' : 'Redemarrer le bot ?')) return;
-  await apiCall(wipe ? '/restart-wipe' : '/restart', { method:'POST' });
-  toast('Redemarrage en cours...');
-  setTimeout(function() { location.reload(); }, 5000);
-}
-
-// HISTORIQUE
-async function refreshHistory() {
-  try {
-    var items = await apiCall('/history');
-    var body = document.getElementById('historyBody');
-    if (!items || !items.length) { body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Aucun envoi recent</td></tr>'; return; }
-    body.innerHTML = items.map(function(item) {
-      var badgeCls, badgeTxt;
-      if      (item.status==='sent_with_poster') { badgeCls='ok';   badgeTxt='Image'; }
-      else if (item.status==='sent_text_only')   { badgeCls='warn'; badgeTxt='Texte'; }
-      else if (item.status==='unknown_user')     { badgeCls='info'; badgeTxt='Inconnu'; }
-      else                                       { badgeCls='err';  badgeTxt='Erreur'; }
-      var isErr = badgeCls==='err';
-      var poster = item.media_poster ? '<img class="poster" src="'+esc(item.media_poster)+'" onerror="this.style.display=\'none\'" alt="">' : '<div class="poster" style="background:var(--border);"></div>';
-      var icon = item.media_type==='movie' ? '🎬' : item.media_type==='tv' ? '📺' : '';
-      var retryBadge = item.retriedFrom ? ' <span class="badge info" style="font-size:10px;">↺</span>' : '';
-      var retryBtn = isErr ? '<button class="btn sm" onclick="retryEntry(\''+item.id+'\',this)" title="'+esc(item.error||'')+'">Reessayer</button>' : '';
-      return '<tr><td>'+poster+'</td><td style="color:var(--muted);font-size:12px;white-space:nowrap;">'+timeAgo(item.timestamp)+'</td><td style="font-weight:500;">'+esc(item.requestedBy_username||'---')+'</td><td>'+icon+' '+esc(item.media_title||'---')+'</td><td><span class="badge '+badgeCls+'" title="'+esc(item.error||'')+'">'+badgeTxt+'</span>'+retryBadge+'</td><td style="text-align:right;">'+retryBtn+'</td></tr>';
+async function refreshHistory(){
+  try{
+    var items=await api('/history'),body=document.getElementById('histBody');
+    if(!items||!items.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">Aucun envoi enregistré</td></tr>';return;}
+    body.innerHTML=items.map(function(item){
+      var bc,bt;
+      if(item.status==='sent_with_poster'){bc='ok';bt='&#10003; Image';}
+      else if(item.status==='sent_text_only'){bc='warn';bt='&#10003; Texte';}
+      else{bc='err';bt='&#10007; Erreur';}
+      var poster=item.media_poster?'<img class="poster" src="'+esc(item.media_poster)+'" onerror="this.style.display=\'none\'">':'<div class="poster"></div>';
+      var retryBtn=(item.status==='error')?'<button class="btn sm danger" onclick="retryEntry(\''+item.id+'\',this)">&#8634;</button>':'';
+      var retryBadge=item.retriedFrom?' <span class="badge retry">&#8634;</span>':'';
+      return '<tr><td>'+poster+'</td><td style="color:var(--muted);white-space:nowrap;font-size:12px;">'+timeAgo(item.timestamp)+'</td><td style="font-weight:500;">'+esc(item.requestedBy_username||'--')+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(item.media_title||'--')+'</td><td><span class="badge '+bc+'" title="'+esc(item.error||'')+'">'+bt+'</span>'+retryBadge+'</td><td style="text-align:right;">'+retryBtn+'</td></tr>';
     }).join('');
-  } catch(e) {}
+  }catch(e){}
 }
-
-async function retryEntry(id, btn) {
-  btn.disabled=true; btn.textContent='...';
-  try {
-    var res = await apiCall('/retry/'+id, { method:'POST' });
-    if (res&&res.sent) { toast(res.withPoster ? 'Renvoye avec image' : 'Renvoye (texte seul)'); refreshHistory(); }
-    else { toast((res&&res.error)||'Erreur','error'); btn.disabled=false; btn.textContent='Reessayer'; }
-  } catch(e) { toast('Erreur reseau','error'); btn.disabled=false; btn.textContent='Reessayer'; }
-}
-
-// UTILISATEURS
-async function refreshUsers() {
-  try {
-    var users = await apiCall('/users');
-    var body = document.getElementById('usersBody');
-    if (!users||!users.length) { body.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">Aucun utilisateur. Ajoutez-en ci-dessus ou importez depuis Plex.</td></tr>'; return; }
-    body.innerHTML = users.map(function(u) {
-      return '<tr><td style="font-size:13px;">'+esc(u.email)+'</td><td><code style="background:var(--bg);padding:3px 8px;border-radius:6px;font-size:12px;">+'+esc(u.phone)+'</code></td><td style="text-align:right;"><div class="btn-row" style="justify-content:flex-end;"><button class="btn secondary sm" onclick="openEditModal(\''+esc(u.email)+'\',\''+esc(u.phone)+'\')">Modifier</button><button class="btn danger sm" onclick="deleteUser(\''+esc(u.email)+'\')">Supprimer</button></div></td></tr>';
+async function retryEntry(id,btn){btn.disabled=true;btn.textContent='...';try{var r=await api('/retry/'+id,{method:'POST'});if(r&&r.sent){toast(r.withPoster?'Renvoyé avec image':'Renvoyé (texte seul)');refreshHistory();}else{toast((r&&r.error)||'Erreur','e');btn.disabled=false;btn.textContent='&#8634;';}}catch(e){toast('Erreur','e');btn.disabled=false;btn.textContent='&#8634;';}}
+function renderAv(av,email){var ini=(email||'?')[0].toUpperCase();if(av)return '<img class="uavatar" src="'+esc(av)+'" onerror="this.outerHTML=\'<div class=uavatar-ph>'+ini+'</div>\'">';return '<div class="uavatar-ph">'+ini+'</div>';}
+async function refreshUsers(){
+  try{
+    var users=await api('/users'),body=document.getElementById('usersBody');
+    if(!users||!users.length){body.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:28px;">Aucun utilisateur. Ajoutez-en ci-dessus ou importez depuis Overseerr.</td></tr>';return;}
+    body.innerHTML=users.map(function(u){
+      return '<tr><td>'+renderAv(u.avatar,u.email)+'</td><td style="font-size:13px;">'+esc(u.email)+'</td><td><code style="background:rgba(0,0,0,0.3);padding:3px 8px;border-radius:6px;font-size:12px;">+'+esc(u.phone)+'</code></td><td style="text-align:right;"><div class="btn-row" style="justify-content:flex-end;gap:6px;"><button class="btn ghost sm" onclick="openEdit(\''+esc(u.email)+'\',\''+esc(u.phone)+'\')">Modifier</button><button class="btn danger sm" onclick="deleteUser(\''+esc(u.email)+'\')">&#215;</button></div></td></tr>';
     }).join('');
-  } catch(e) {}
+  }catch(e){}
 }
-
-async function addUser() {
-  var email = document.getElementById('newEmail').value.trim();
-  var phone = document.getElementById('newPhone').value.trim();
-  if (!email||!phone) { toast('Email et numero requis','error'); return; }
-  try {
-    var res = await apiCall('/users', { method:'POST', body:JSON.stringify({ email:email, phone:phone }) });
-    if (res&&res.saved) { document.getElementById('newEmail').value=''; document.getElementById('newPhone').value=''; toast(res.email+' ajoute'); refreshUsers(); }
-    else toast((res&&res.error)||'Erreur','error');
-  } catch(e) { toast('Erreur reseau','error'); }
-}
-
-function openEditModal(email, phone) {
-  document.getElementById('editOldEmail').value = email;
-  document.getElementById('editEmail').value    = email;
-  document.getElementById('editPhone').value    = phone;
-  document.getElementById('editModal').classList.add('open');
-}
-function closeEditModal() { document.getElementById('editModal').classList.remove('open'); }
-
-async function saveEditUser() {
-  var oldEmail = document.getElementById('editOldEmail').value;
-  var newEmail = document.getElementById('editEmail').value.trim();
-  var newPhone = document.getElementById('editPhone').value.trim();
-  if (!newEmail||!newPhone) { toast('Champs requis','error'); return; }
-  try {
-    var res = await apiCall('/users/'+encodeURIComponent(oldEmail), { method:'PUT', body:JSON.stringify({ email:newEmail, phone:newPhone }) });
-    if (res&&res.saved) { closeEditModal(); toast('Utilisateur modifie'); refreshUsers(); }
-    else toast((res&&res.error)||'Erreur','error');
-  } catch(e) { toast('Erreur reseau','error'); }
-}
-
-async function deleteUser(email) {
-  if (!confirm('Supprimer '+email+' ?')) return;
-  try {
-    var res = await apiCall('/users/'+encodeURIComponent(email), { method:'DELETE' });
-    if (res&&res.deleted) { toast('Supprime'); refreshUsers(); }
-    else toast((res&&res.error)||'Erreur','error');
-  } catch(e) { toast('Erreur reseau','error'); }
-}
-
-document.getElementById('editModal').addEventListener('click', function(e) {
-  if (e.target===e.currentTarget) closeEditModal();
-});
-
-// IMPORT PLEX
-async function loadOverseerrUsers() {
-  var btn = document.getElementById('overLoadBtn');
-  btn.disabled = true; btn.textContent = 'Chargement...';
-  toast('Connexion à Overseerr...','info');
-  try {
-    var users = await apiCall('/overseerr/users');
-    if (users && users.error) { toast(users.error,'error'); btn.disabled=false; btn.textContent='Charger les users Overseerr'; return; }
-    if (!users || !users.length) { toast('Aucun utilisateur Overseerr trouvé','error'); btn.disabled=false; btn.textContent='Charger les users Overseerr'; return; }
-
-    var html = users.map(function(u) {
-      var avatarSrc = u.thumb || '';
-      var avatar = avatarSrc
-        ? '<img class="ov-avatar" src="'+esc(avatarSrc)+'" onerror="this.src=\'\';this.style.background=\'var(--border)\'" alt="">'
-        : '<div class="ov-avatar"></div>';
-      if (u.registered) {
-        return '<div class="ov-row">'+avatar+'<div class="ov-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div><div class="ov-actions"><span class="badge ok">+'+esc(u.phone)+'</span></div></div>';
-      } else {
-        return '<div class="ov-row">'+avatar+
-          '<div class="ov-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div>'+
-          '<div class="ov-actions">'+
-            '<input class="ov-phone-input" type="text" placeholder="33612345678" id="ovPhone_'+esc(u.id)+'">'+
-            '<button class="btn sm" onclick="addOvUser(\''+esc(u.email)+'\',\'ovPhone_'+esc(u.id)+'\',this)">Ajouter</button>'+
-          '</div>'+
-        '</div>';
-      }
+async function addUser(){var email=document.getElementById('newEmail').value.trim(),phone=document.getElementById('newPhone').value.trim();if(!email||!phone){toast('Email et numéro requis','e');return;}var r=await api('/users',{method:'POST',body:JSON.stringify({email:email,phone:phone})});if(r&&r.saved){document.getElementById('newEmail').value='';document.getElementById('newPhone').value='';toast(email+' ajouté');refreshUsers();}else toast((r&&r.error)||'Erreur','e');}
+function openEdit(email,phone){document.getElementById('editOld').value=email;document.getElementById('editEmail').value=email;document.getElementById('editPhone').value=phone;document.getElementById('editModal').classList.add('open');}
+function closeEdit(){document.getElementById('editModal').classList.remove('open');}
+document.getElementById('editModal').addEventListener('click',function(e){if(e.target===e.currentTarget)closeEdit();});
+async function saveEdit(){var old=document.getElementById('editOld').value,email=document.getElementById('editEmail').value.trim(),phone=document.getElementById('editPhone').value.trim();if(!email||!phone){toast('Champs requis','e');return;}var r=await api('/users/'+encodeURIComponent(old),{method:'PUT',body:JSON.stringify({email:email,phone:phone})});if(r&&r.saved){closeEdit();toast('Modifié');refreshUsers();}else toast((r&&r.error)||'Erreur','e');}
+async function deleteUser(email){if(!confirm('Supprimer '+email+' ?'))return;var r=await api('/users/'+encodeURIComponent(email),{method:'DELETE'});if(r&&r.deleted){toast('Supprimé');refreshUsers();}else toast((r&&r.error)||'Erreur','e');}
+async function loadOvUsers(){
+  var btn=document.getElementById('ovLoadBtn');btn.disabled=true;btn.textContent='Chargement...';
+  toast('Connexion à Overseerr...','i');
+  try{
+    var users=await api('/overseerr/users');
+    if(users&&users.error){toast(users.error,'e');btn.disabled=false;btn.textContent='Charger';return;}
+    if(!users||!users.length){toast('Aucun utilisateur trouvé','e');btn.disabled=false;btn.textContent='Charger';return;}
+    var html=users.map(function(u){
+      var ini=(u.title||'?')[0].toUpperCase();
+      var av=u.thumb?'<img class="uavatar" src="'+esc(u.thumb)+'" onerror="this.outerHTML=\'<div class=uavatar-ph>'+ini+'</div>\'">'
+               :'<div class="uavatar-ph">'+ini+'</div>';
+      if(u.registered)return '<div class="ov-row">'+av+'<div class="ov-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div><div class="ov-actions"><span class="badge ok">+'+esc(u.phone)+'</span></div></div>';
+      return '<div class="ov-row">'+av+'<div class="ov-info"><strong>'+esc(u.title)+'</strong><span>'+esc(u.email)+'</span></div>'
+        +'<div class="ov-actions"><input class="ov-phone" type="text" placeholder="336xxxxxxxx" id="op_'+esc(u.id)+'">'
+        +'<button class="btn sm" onclick="addOvUser(\''+esc(u.email)+'\',\''+esc(u.thumb||'')+'\',\'op_'+esc(u.id)+'\',this)">Ajouter</button></div></div>';
     }).join('');
-
-    document.getElementById('ovUsersContent').innerHTML = '<div style="margin-bottom:10px;color:var(--muted);font-size:12px;">'+users.length+' utilisateur(s) Overseerr — les ✓ sont deja enregistres</div>' + html;
-    document.getElementById('ovUsersList').style.display = 'block';
-    toast(users.length + ' utilisateurs Overseerr chargés');
-  } catch(e) { toast('Erreur reseau','error'); }
-  btn.disabled=false; btn.textContent='Recharger';
+    document.getElementById('ovContent').innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">'+users.length+' utilisateurs Overseerr</div>'+html;
+    document.getElementById('ovList').style.display='block';
+    toast(users.length+' utilisateurs chargés');
+  }catch(e){console.error(e);toast('Erreur réseau','e');}
+  btn.disabled=false;btn.textContent='Recharger';
 }
-
-
-
-async function addOvUser(email, inputId, btn) {
-  var phone = document.getElementById(inputId).value.trim();
-  if (!phone) { toast('Entrez un numero','error'); return; }
-  btn.disabled = true; btn.textContent = '...';
-  try {
-    var res = await apiCall('/users', { method:'POST', body:JSON.stringify({ email:email, phone:phone }) });
-    if (res&&res.saved) {
-      toast(res.email + ' ajoute');
-      loadOverseerrUsers(); // recharger la liste pour mettre a jour le statut
-      refreshUsers();
-    } else {
-      toast((res&&res.error)||'Erreur','error');
-      btn.disabled=false; btn.textContent='Ajouter';
-    }
-  } catch(e) { toast('Erreur reseau','error'); btn.disabled=false; btn.textContent='Ajouter'; }
-}
-
-function initDashboard() {
-  refreshStatus(); refreshHistory(); refreshConfig();
-  setInterval(refreshStatus, 5000);
-  setInterval(refreshHistory, 15000);
-}
+async function addOvUser(email,avatar,inputId,btn){var phone=document.getElementById(inputId).value.trim();if(!phone){toast('Entrez un numéro','e');return;}btn.disabled=true;btn.textContent='...';var r=await api('/users',{method:'POST',body:JSON.stringify({email:email,phone:phone,avatar:avatar})});if(r&&r.saved){toast(r.email+' ajouté');loadOvUsers();refreshUsers();}else{toast((r&&r.error)||'Erreur','e');btn.disabled=false;btn.textContent='Ajouter';}}
+async function refreshTemplate(){try{var d=await api('/config');var t=d.messageTemplate||'';document.getElementById('templateTxt').value=t;updatePreview(t);}catch(e){}}
+function updatePreview(t){t=t||document.getElementById('templateTxt').value;document.getElementById('tplPreview').textContent=t.replace(/{username}/g,'Jean Dupont').replace(/{title}/g,'Dune Part Two').replace(/{icon}/g,'[Film]').replace(/{type}/g,'Film');}
+document.getElementById('templateTxt').addEventListener('input',function(){updatePreview(this.value);});
+function insertVar(v){var ta=document.getElementById('templateTxt'),s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);ta.selectionStart=ta.selectionEnd=s+v.length;ta.focus();updatePreview();}
+async function saveTemplate(){var t=document.getElementById('templateTxt').value;var r=await api('/config/template',{method:'POST',body:JSON.stringify({template:t})});if(r&&r.saved){var p=document.getElementById('tplSaved');p.classList.add('show');setTimeout(function(){p.classList.remove('show');},2500);toast('Template sauvegardé');}}
+async function resetTemplate(){if(!confirm('Réinitialiser le template par défaut ?'))return;var r=await api('/config/template/reset',{method:'POST'});if(r&&r.saved){document.getElementById('templateTxt').value=r.template;updatePreview(r.template);toast('Template réinitialisé');}}
+function init(){refreshStatus();refreshHistory();refreshConfig();setInterval(refreshStatus,5000);setInterval(refreshHistory,20000);}
 </script>
 </body>
 </html>
-
-
