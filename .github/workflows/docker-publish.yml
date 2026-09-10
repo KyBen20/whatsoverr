@@ -1,8 +1,12 @@
-name: Publish Docker image
+﻿name: Publish Docker image
 
 on:
   push:
     branches: ['main']
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '.gitignore'
 
 jobs:
   push_to_registry:

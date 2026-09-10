@@ -1,17 +1,17 @@
 ﻿# Node
 node_modules/
+npm-debug.log
 
-# Données persistantes (Sécurité : NE JAMAIS PUBLIER)
+# App Data
 data/
 auth_info/
-
-# Configuration locale
-docker-compose.yml
-.env
-
-# OS
-.DS_Store
-Thumbs.db
 wwebjs_auth/
 
+# Config
+.env
+docker-compose.yml
+
+# OS & Temp
+.DS_Store
+Thumbs.db
 .gemini/
