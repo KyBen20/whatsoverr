@@ -13,88 +13,140 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
-  --bg0:#08090f;--glass-bg:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.09);
-  --text:#eef0f8;--muted:#7a82a0;--dimmed:#424a65;
-  --green:#22d372;--red:#ff4f6e;--orange:#f59e0b;--blue:#60a5fa;--purple:#a78bfa;
-  --r:16px;--r-sm:10px;
+  --bg0:#08090f;--text:#eef0f8;--muted:#7a82a0;--dimmed:#424a65;
+  --green:#22d372;--red:#ff4f6e;--orange:#f59e0b;--blue:#60a5fa;
+  --r:16px;
 }
 body{background:var(--bg0);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-size:14px;min-height:100vh;padding-bottom:80px;}
-body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(34,211,114,0.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(96,165,250,0.05) 0%,transparent 60%);pointer-events:none;z-index:0;}
-.glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.09);border-radius:var(--r);position:relative;overflow:hidden;}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(34,211,114,0.06),transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(96,165,250,0.05),transparent 60%);pointer-events:none;z-index:0;}
+.glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.09);border-radius:var(--r);}
+/* Login */
 #loginPage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;background:var(--bg0);}
 #loginCard{width:100%;max-width:380px;padding:44px 38px;background:rgba(255,255,255,0.05);backdrop-filter:blur(40px);border:1px solid rgba(255,255,255,0.12);border-radius:28px;}
-#loginCard .logo{width:90px;height:90px;border-radius:22px;margin:0 auto 24px;display:block;object-fit:contain;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+#loginCard img.logo{width:90px;height:90px;border-radius:22px;margin:0 auto 24px;display:block;object-fit:contain;box-shadow:0 8px 30px rgba(0,0,0,.5);}
 #loginCard h1{font-size:22px;font-weight:700;text-align:center;margin-bottom:6px;}
+/* App shell */
 #app{display:none;position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:24px 20px 60px;}
 .header{display:flex;align-items:center;gap:16px;margin-bottom:28px;}
-.header img{width:56px;height:56px;border-radius:16px;object-fit:contain;box-shadow:0 6px 24px rgba(0,0,0,0.5);}
+.header img{width:56px;height:56px;border-radius:16px;object-fit:contain;box-shadow:0 6px 24px rgba(0,0,0,.5);}
 .header h1{font-size:19px;font-weight:700;letter-spacing:-.3px;}
-.header-right{margin-left:auto;display:flex;gap:8px;}
+.header-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+/* Tabs */
 .tabs{display:flex;gap:2px;margin-bottom:22px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:4px;}
 .tab-btn{flex:1;background:none;border:none;color:var(--muted);padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;border-radius:11px;transition:.18s;}
 .tab-btn.active{background:rgba(34,211,114,0.12);color:var(--green);}
 .tab-pane{display:none;}.tab-pane.active{display:block;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 @media(max-width:768px){
-  .grid2{grid-template-columns:1fr;}
-  .tabs{position:fixed;bottom:0;left:0;right:0;margin:0;border-radius:0 0 0 0;border:none;border-top:1px solid rgba(255,255,255,0.09);background:rgba(8,9,15,0.85);backdrop-filter:blur(20px);z-index:90;padding-bottom:env(safe-area-inset-bottom);}
-  .tab-btn{display:flex;flex-direction:column;align-items:center;padding:10px 0;font-size:11px;border-radius:8px;gap:4px;}
+  .grid2{grid-template-columns:1fr !important;}
+  .tabs{position:fixed;bottom:0;left:0;right:0;margin:0;border-radius:0;border:none;border-top:1px solid rgba(255,255,255,0.09);background:rgba(8,9,15,0.9);backdrop-filter:blur(20px);z-index:90;padding-bottom:env(safe-area-inset-bottom);}
+  .tab-btn{display:flex;flex-direction:column;align-items:center;padding:10px 0;font-size:10px;border-radius:8px;gap:4px;}
   .tab-btn.active{background:transparent;color:var(--green);}
 }
+/* Layout */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .card{padding:22px 24px;margin-bottom:16px;}
 .card-title{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
+/* Form */
 label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500;}
-input,textarea,select{width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:var(--text);padding:10px 13px;font-size:13px;margin-bottom:12px;outline:none;font-family:inherit;}
-textarea { min-height: 140px; resize: vertical; line-height: 1.5; }
-.input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;} .input-row>*{flex:1;min-width:150px;}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:rgba(34,211,114,0.13);color:var(--green);border:1px solid rgba(34,211,114,0.28);border-radius:10px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:.18s;}
-.btn.ghost{background:rgba(255,255,255,0.05);color:var(--muted);border-color:rgba(255,255,255,0.09);}
-.btn.danger{background:rgba(255,79,110,0.12);color:var(--red);border-color:rgba(255,79,110,0.28);}
-.btn.blue{background:rgba(96,165,250,0.12);color:var(--blue);border-color:rgba(96,165,250,0.28);}
+input,textarea,select{width:100%;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.09);border-radius:10px;color:var(--text);padding:10px 13px;font-size:13px;margin-bottom:12px;outline:none;font-family:inherit;}
+textarea{min-height:140px;resize:vertical;line-height:1.5;}
+.input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;}.input-row>*{flex:1;min-width:150px;}
+.phone-grp{display:flex;gap:6px;margin-bottom:12px;}
+.phone-grp select{width:90px;margin-bottom:0;border-radius:10px;}
+.phone-grp input{flex:1;margin-bottom:0;border-radius:10px;}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:rgba(34,211,114,.13);color:var(--green);border:1px solid rgba(34,211,114,.28);border-radius:10px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:.18s;white-space:nowrap;}
+.btn:hover{opacity:.85;}
+.btn.ghost{background:rgba(255,255,255,.05);color:var(--muted);border-color:rgba(255,255,255,.09);}
+.btn.danger{background:rgba(255,79,110,.12);color:var(--red);border-color:rgba(255,79,110,.28);}
+.btn.blue{background:rgba(96,165,250,.12);color:var(--blue);border-color:rgba(96,165,250,.28);}
+.btn.orange{background:rgba(245,158,11,.12);color:var(--orange);border-color:rgba(245,158,11,.28);}
 .btn.sm{padding:5px 10px;font-size:11px;border-radius:7px;}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+/* Badges */
 .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;display:inline-block;}
-.badge.ok{background:rgba(34,211,114,0.12);color:var(--green);}
-.badge.warn{background:rgba(245,158,11,0.12);color:var(--orange);}
-.badge.err{background:rgba(255,79,110,0.12);color:var(--red);}
+.badge.ok{background:rgba(34,211,114,.12);color:var(--green);}
+.badge.warn{background:rgba(245,158,11,.12);color:var(--orange);}
+.badge.err{background:rgba(255,79,110,.12);color:var(--red);}
+/* Status Pulse */
 .pulse{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .pulse.on{background:var(--green);box-shadow:0 0 14px var(--green);animation:pa 2s infinite;}
 .pulse.off{background:var(--red);}
 .pulse.wait{background:var(--orange);animation:pa 1s infinite;}
 @keyframes pa{0%,100%{opacity:1;}50%{opacity:.3;}}
-.kpi-row{display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:12px;margin-bottom:16px;}
-.kpi-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;}
-.kpi-val{font-size:20px;font-weight:700;}
-.kpi-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;}
+/* KPIs */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px;}
+.kpi-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;}
+.kpi-val{font-size:18px;font-weight:700;line-height:1.2;}
+.kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+/* Table */
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-th,td{text-align:left;padding:11px 10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
-th{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--dimmed);border-bottom:1px solid rgba(255,255,255,0.06);}
-@media(max-width:640px){
-  thead{display:none;}
-  tr{display:block;padding:12px;background:rgba(255,255,255,0.02);border-radius:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.05);}
-  td{display:block;border:none;padding:4px 0;}
-  td:last-child{display:flex;justify-content:flex-end;gap:8px;}
-}
-.poster{width:32px;height:46px;object-fit:cover;border-radius:5px;}
-.uavatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.09);}
-.uavatar-ph{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--muted);border:1px solid rgba(255,255,255,0.09);}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+th{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--dimmed);border-bottom:1px solid rgba(255,255,255,.06);}
+/* Pagination */
+.pager{display:flex;align-items:center;justify-content:space-between;padding-top:12px;font-size:12px;color:var(--muted);}
+/* Avatars */
+.uavatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.09);}
+.uavatar-ph{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--muted);}
+.poster{width:32px;height:46px;object-fit:cover;border-radius:5px;flex-shrink:0;}
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
 .modal-bg.open{display:flex;}
-.modal{background:rgba(11,13,22,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:22px;padding:30px;width:100%;max-width:430px;box-shadow:0 24px 80px rgba(0,0,0,0.8);}
-#toast{position:fixed;top:24px;left:50%;transform:translate(-50%, -20px);padding:12px 18px;border-radius:12px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:.22s;background:rgba(255,255,255,0.1);backdrop-filter:blur(20px);}
-#toast.show{opacity:1;transform:translate(-50%, 0);}
-#toast.s{color:var(--green);border:1px solid rgba(34,211,114,0.3);}
-#toast.e{color:var(--red);border:1px solid rgba(255,79,110,0.3);}
-#toast.i{color:var(--blue);border:1px solid rgba(96,165,250,0.3);}
-.phone-grp { display:flex; gap:6px; margin-bottom:12px; }
-.phone-grp select { width: 90px; margin-bottom:0; border-radius: 10px; }
-.phone-grp input { flex: 1; margin-bottom:0; border-radius: 10px; }
+.modal{background:rgba(11,13,22,.97);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:28px;width:calc(100% - 40px);max-width:430px;box-shadow:0 24px 80px rgba(0,0,0,.8);}
+/* Toast */
+#toast{position:fixed;top:24px;left:50%;transform:translate(-50%,-20px);padding:11px 18px;border-radius:12px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:.22s;background:rgba(20,22,35,.95);backdrop-filter:blur(20px);pointer-events:none;}
+#toast.show{opacity:1;transform:translate(-50%,0);}
+#toast.s{color:var(--green);border:1px solid rgba(34,211,114,.3);}
+#toast.e{color:var(--red);border:1px solid rgba(255,79,110,.3);}
+#toast.i{color:var(--blue);border:1px solid rgba(96,165,250,.3);}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
+// ─── i18n ─────────────────────────────────────────────────────────────────
+const DICT = {
+  fr:{
+    login:"Connexion",user:"Identifiant",pass:"Mot de passe",logout:"Déconnexion",
+    tab_status:"⚡ Statut",tab_hist:"📋 Historique",tab_users:"👥 Utilisateurs",tab_settings:"⚙️ Réglages",
+    st_wa:"WhatsApp",st_wa_ok:"Connecté",st_wa_wait:"Attente QR",st_wa_off:"Déconnecté",
+    st_restart:"Redémarrer",st_purge:"Purger session",
+    st_disc:"Discord",st_save:"Sauvegarder",st_test:"Tester",
+    st_ov:"Connexion Overseerr",
+    kpi_sent:"Envoyés",kpi_rate:"Succès",kpi_last:"Dernier",kpi_up:"Uptime",
+    hist_title:"Derniers envois",hist_refresh:"Actualiser",hist_clear:"Tout effacer",
+    usr_import:"Import Overseerr",usr_load:"Charger",usr_add:"Ajouter manuellement",
+    usr_email:"Email",usr_phone:"Numéro WhatsApp",usr_list:"Utilisateurs Enregistrés",
+    set_tpl:"Templates du message",set_lang:"Langue Dashboard",set_dnd:"Ne Pas Déranger",
+    set_export:"Sauvegarde & Restauration",set_test:"Envoi Test Manuel",
+    btn_import:"Importer Backup",btn_export:"Télécharger Backup",btn_edit:"Modifier",
+    dnd_en:"Activer la plage",dnd_start:"Heure de début",dnd_end:"Heure de fin",
+    st_sent_img:"✅ Envoyé (Image)",st_sent_txt:"✅ Envoyé (Texte)",st_err:"❌ Erreur",st_queued:"🌙 File d'attente",
+    btn_retry:"Relancer",btn_del:"Suppr.",
+    prev:"Préc.",next:"Suiv."
+  },
+  en:{
+    login:"Login",user:"Username",pass:"Password",logout:"Logout",
+    tab_status:"⚡ Status",tab_hist:"📋 History",tab_users:"👥 Users",tab_settings:"⚙️ Settings",
+    st_wa:"WhatsApp",st_wa_ok:"Connected",st_wa_wait:"Waiting QR",st_wa_off:"Disconnected",
+    st_restart:"Restart",st_purge:"Purge Session",
+    st_disc:"Discord",st_save:"Save",st_test:"Test",
+    st_ov:"Overseerr Connection",
+    kpi_sent:"Sent",kpi_rate:"Success",kpi_last:"Last",kpi_up:"Uptime",
+    hist_title:"Recent Deliveries",hist_refresh:"Refresh",hist_clear:"Clear All",
+    usr_import:"Import from Overseerr",usr_load:"Load",usr_add:"Add Manually",
+    usr_email:"Email",usr_phone:"WhatsApp Number",usr_list:"Registered Users",
+    set_tpl:"Message Templates",set_lang:"Dashboard Language",set_dnd:"Do Not Disturb",
+    set_export:"Backup & Restore",set_test:"Manual Test Send",
+    btn_import:"Import Backup",btn_export:"Download Backup",btn_edit:"Edit",
+    dnd_en:"Enable silent hours",dnd_start:"Start time",dnd_end:"End time",
+    st_sent_img:"✅ Sent (Image)",st_sent_txt:"✅ Sent (Text)",st_err:"❌ Error",st_queued:"🌙 Queued (Night)",
+    btn_retry:"Retry",btn_del:"Delete",
+    prev:"Prev",next:"Next"
+  }
+};
+
 const PREFIX_OPTS = `
   <option value="33">🇫🇷 +33</option>
   <option value="32">🇧🇪 +32</option>
@@ -111,453 +163,506 @@ const PREFIX_OPTS = `
   <option value="221">🇸🇳 +221</option>
 `;
 
-const DICT = {
-  fr: {
-    login: "Connexion", user: "Identifiant", pass: "Mot de passe", logout: "Déconnexion",
-    tab_status: "⚡ Statut", tab_hist: "📋 Historique", tab_users: "👥 Utilisateurs", tab_settings: "⚙️ Réglages",
-    st_wa: "WhatsApp", st_wa_ok: "Connecté", st_wa_wait: "Attente QR", st_wa_off: "Déconnecté",
-    st_restart: "Redémarrer", st_purge: "Purger session",
-    st_disc: "Discord", st_disc_hint: "Alertes système",
-    st_ov: "Connexion Overseerr", st_save: "Sauvegarder", st_test: "Tester",
-    kpi_sent: "Envoyés", kpi_rate: "Succès", kpi_last: "Dernier notifié", kpi_up: "Uptime",
-    hist_title: "Derniers envois", hist_refresh: "Actualiser",
-    usr_import: "Import Overseerr", usr_load: "Charger", usr_add: "Ajouter manuellement",
-    usr_email: "Email", usr_phone: "Numéro WhatsApp", usr_list: "Utilisateurs Enregistrés",
-    set_tpl: "Templates du message", set_lang: "Langue Dashboard", set_dnd: "Ne Pas Déranger (Plage Silencieuse)",
-    set_export: "Sauvegarde & Restauration", set_test: "Envoi Test Manuel",
-    btn_import: "Importer Backup", btn_export: "Télécharger Backup", btn_edit: "Modifier",
-    dnd_en: "Activer la plage", dnd_start: "Heure de début", dnd_end: "Heure de fin",
-    st_sent_img: "✅ Env. (Image)", st_sent_txt: "✅ Env. (Texte)", st_err: "❌ Erreur", st_queued: "🌙 En attente (Nuit)"
-  },
-  en: {
-    login: "Login", user: "Username", pass: "Password", logout: "Logout",
-    tab_status: "⚡ Status", tab_hist: "📋 History", tab_users: "👥 Users", tab_settings: "⚙️ Settings",
-    st_wa: "WhatsApp", st_wa_ok: "Connected", st_wa_wait: "Waiting QR", st_wa_off: "Disconnected",
-    st_restart: "Restart", st_purge: "Purge Session",
-    st_disc: "Discord", st_disc_hint: "System alerts",
-    st_ov: "Overseerr Connection", st_save: "Save", st_test: "Test",
-    kpi_sent: "Sent", kpi_rate: "Success", kpi_last: "Last Notified", kpi_up: "Uptime",
-    hist_title: "Recent Deliveries", hist_refresh: "Refresh",
-    usr_import: "Import from Overseerr", usr_load: "Load", usr_add: "Add Manually",
-    usr_email: "Email", usr_phone: "WhatsApp Number", usr_list: "Registered Users",
-    set_tpl: "Message Templates", set_lang: "Dashboard Language", set_dnd: "Do Not Disturb (Silent Hours)",
-    set_export: "Backup & Restore", set_test: "Manual Test Send",
-    btn_import: "Import Backup", btn_export: "Download Backup", btn_edit: "Edit",
-    dnd_en: "Enable silent hours", dnd_start: "Start time", dnd_end: "End time",
-    st_sent_img: "✅ Sent (Image)", st_sent_txt: "✅ Sent (Text)", st_err: "❌ Error", st_queued: "🌙 Queued (Night)"
-  }
-};
-
+// ─── State ────────────────────────────────────────────────────────────────
 let currentLang = 'fr';
 let auth = sessionStorage.getItem('wa_auth') || '';
+let histPage = 0;
+let allHistory = [];
+let refreshInterval = null; // Fix: prevent interval leak
+const PAGE_SIZE = 10;
 
-function t(key) { return DICT[currentLang][key] || key; }
+function t(k){ return DICT[currentLang][k] || k; }
+
+// ─── Helpers ──────────────────────────────────────────────────────────────
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function formatUptime(sec) {
+  if (sec < 60) return sec + 's';
+  if (sec < 3600) return Math.floor(sec/60) + 'mn';
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  return h + 'h ' + String(m).padStart(2,'0') + 'mn';
+}
 
 function formatPhone(prefix, num) {
-  let p = prefix.replace(/\D/g, '');
-  let n = num.replace(/\D/g, '');
-  if (n.startsWith('0')) n = n.substring(1);
-  return p + n;
+  let p = prefix.replace(/\D/g,''), n = num.replace(/\D/g,'');
+  if(n.startsWith('0')) n = n.substring(1);
+  return p+n;
 }
 
-function splitPhone(fullPhone) {
-  let prefixes = ['33','32','41','1','44','49','34','39','212','213','216','225','221'];
-  for(let p of prefixes) {
-    if(fullPhone.startsWith(p)) return { prefix: p, num: '0' + fullPhone.substring(p.length) };
+function splitPhone(full) {
+  for(let p of ['33','32','41','212','213','216','225','221','44','49','34','39','1']) {
+    if(full.startsWith(p)) return {prefix:p, num:'0'+full.substring(p.length)};
   }
-  return { prefix: '33', num: fullPhone };
+  return {prefix:'33',num:full};
 }
 
-function renderLogin() {
-  return `
-    <div id="loginPage">
-      <div id="loginCard">
-        <img class="logo" src="logo.png" alt="">
-        <h1>Whatsoverr</h1>
-        <form id="loginForm" style="margin-top:28px;">
-          <label class="lbl">${t('user')}</label><input type="text" id="lu" required>
-          <label class="lbl">${t('pass')}</label><input type="password" id="lp" required>
-          <button type="submit" class="btn w-full" style="width:100%">${t('login')}</button>
-        </form>
-        <div id="loginMsg" style="color:var(--red);text-align:center;margin-top:10px;font-size:12px;"></div>
-      </div>
-    </div>`;
+function transStatus(st){
+  const m = {sent_with_poster:'st_sent_img',sent_text_only:'st_sent_txt',queued_dnd:'st_queued',error:'st_err'};
+  return t(m[st]||'st_err');
 }
 
-function renderApp() {
-  return `
-    <div id="app" style="display:block;">
-      <div class="header">
-        <img src="logo.png" alt="">
-        <div><h1>WHATSOVERR</h1><div style="font-size:11px;color:var(--muted)">v2.0 PWA Edition</div></div>
-        <div class="header-right"><button class="btn ghost sm" onclick="logout()">${t('logout')}</button></div>
-      </div>
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab(this,'status')">${t('tab_status')}</button>
-        <button class="tab-btn" onclick="switchTab(this,'history')">${t('tab_hist')}</button>
-        <button class="tab-btn" onclick="switchTab(this,'users')">${t('tab_users')}</button>
-        <button class="tab-btn" onclick="switchTab(this,'settings')">${t('tab_settings')}</button>
-      </div>
-      
-      <!-- STATUT -->
-      <div id="tab-status" class="tab-pane active">
-        <div class="kpi-row" id="kpiBox"></div>
-        <div class="grid2">
-          <div class="glass card">
-            <div class="card-title">${t('st_wa')}</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div class="pulse wait" id="statusDot"></div><div id="statusTxt" style="font-weight:600">...</div></div>
-            <img id="qrImg" src="" style="display:none;width:150px;border-radius:12px;margin-bottom:10px;">
-            <div class="btn-row">
-              <button class="btn ghost sm" onclick="doRestart(false)">${t('st_restart')}</button>
-              <button class="btn danger sm" onclick="doRestart(true)">${t('st_purge')}</button>
-            </div>
-          </div>
-          <div class="glass card">
-            <div class="card-title">${t('st_disc')}</div>
-            <div><label class="lbl">Webhook URL</label><input type="text" id="discordUrl" placeholder="https://discord.com/api/webhooks/..."></div>
-            <div class="btn-row"><button class="btn sm" onclick="saveDiscord()">${t('st_save')}</button><button class="btn ghost sm" onclick="testDiscord()">${t('st_test')}</button></div>
-          </div>
-        </div>
-        <div class="glass card" style="margin-top:16px;">
-          <div class="card-title">${t('st_ov')}</div>
-          <div class="input-row">
-            <div><label class="lbl">URL</label><input type="text" id="overseerrUrl" placeholder="http://192.168.1.1:5055"></div>
-            <div><label class="lbl">API Key</label><input type="text" id="overseerrApiKey" placeholder="••••••••••••••••"></div>
-          </div>
-          <div class="btn-row"><button class="btn" onclick="saveOverseerr()">${t('st_save')}</button><button class="btn ghost" onclick="testOverseerr()">${t('st_test')}</button></div>
-        </div>
-      </div>
-
-      <!-- HISTORIQUE -->
-      <div id="tab-history" class="tab-pane">
-        <div class="glass card">
-          <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
-            <div class="card-title" style="margin:0">${t('hist_title')}</div>
-            <button class="btn ghost sm" onclick="refreshHistory()">${t('hist_refresh')}</button>
-          </div>
-          <div class="table-wrap">
-            <table><tbody id="histBody"></tbody></table>
-          </div>
-        </div>
-      </div>
-
-      <!-- UTILISATEURS -->
-      <div id="tab-users" class="tab-pane">
-        <div class="glass card">
-          <div class="card-title">${t('usr_add')}</div>
-          <div class="input-row">
-            <div><label class="lbl">${t('usr_email')}</label><input type="email" id="newEmail" placeholder="ami@gmail.com"></div>
-            <div>
-              <label class="lbl">${t('usr_phone')}</label>
-              <div class="phone-grp">
-                <select id="newPrefix">${PREFIX_OPTS}</select>
-                <input type="text" id="newPhone" placeholder="0634619737">
-              </div>
-            </div>
-            <div style="flex:0.5;min-width:70px"><label class="lbl">Lang</label><select id="newLang"><option value="fr">FR</option><option value="en">EN</option></select></div>
-          </div>
-          <button class="btn" onclick="addUser()">${t('usr_add')}</button>
-        </div>
-        
-        <div class="glass card">
-          <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
-            <div class="card-title" style="margin:0">${t('usr_list')}</div>
-            <button class="btn ghost sm" onclick="refreshUsers()">${t('hist_refresh')}</button>
-          </div>
-          <div class="table-wrap"><table><tbody id="usersBody"></tbody></table></div>
-        </div>
-        
-        <div class="glass card">
-          <div style="display:flex;justify-content:space-between;">
-            <div class="card-title" style="margin:0">${t('usr_import')}</div>
-            <button class="btn blue sm" onclick="loadOvUsers()" id="ovLoadBtn">${t('usr_load')}</button>
-          </div>
-          <div id="ovList" style="margin-top:16px;"></div>
-        </div>
-      </div>
-
-      <!-- REGLAGES -->
-      <div id="tab-settings" class="tab-pane">
-        <div class="glass card">
-          <div class="card-title">${t('set_tpl')}</div>
-          <div class="grid2">
-            <div><label class="lbl">FR Template</label><textarea id="tpl_fr"></textarea></div>
-            <div><label class="lbl">EN Template</label><textarea id="tpl_en"></textarea></div>
-          </div>
-          <div style="margin-top:10px;"><button class="btn" onclick="saveTemplates()">${t('st_save')}</button></div>
-        </div>
-        
-        <div class="glass card">
-          <div class="card-title">${t('set_dnd')}</div>
-          <div class="input-row">
-            <div><label class="lbl">${t('dnd_en')}</label><select id="dnd_en"><option value="true">Oui / Yes</option><option value="false">Non / No</option></select></div>
-            <div><label class="lbl">${t('dnd_start')}</label><input type="time" id="dnd_s"></div>
-            <div><label class="lbl">${t('dnd_end')}</label><input type="time" id="dnd_e"></div>
-          </div>
-          <button class="btn" onclick="saveConfig()">${t('st_save')}</button>
-        </div>
-        
-        <div class="grid2">
-          <div class="glass card" style="margin:0">
-            <div class="card-title">${t('set_lang')}</div>
-            <select id="dashLang" onchange="changeDashLang()"><option value="fr">Français</option><option value="en">English</option></select>
-          </div>
-          <div class="glass card" style="margin:0">
-            <div class="card-title">${t('set_test')}</div>
-            <div>
-              <label class="lbl">${t('usr_phone')}</label>
-              <div class="phone-grp">
-                <select id="testPrefix">${PREFIX_OPTS}</select>
-                <input type="text" id="testPhone" placeholder="0634619737">
-              </div>
-            </div>
-            <button class="btn sm" onclick="testManual()">Go</button>
-          </div>
-        </div>
-        
-        <div class="glass card" style="margin-top:16px;">
-          <div class="card-title">${t('set_export')}</div>
-          <div class="btn-row">
-            <button class="btn ghost" onclick="exportData()">${t('btn_export')}</button>
-            <input type="file" id="importFile" style="display:none" onchange="importData(event)">
-            <button class="btn blue" onclick="document.getElementById('importFile').click()">${t('btn_import')}</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- EDIT MODAL -->
-    <div class="modal-bg" id="editModal">
-      <div class="modal">
-        <h3 style="margin-bottom:16px;font-weight:600;">${t('btn_edit')} Utilisateur</h3>
-        <input type="hidden" id="editOld">
-        <label class="lbl">${t('usr_email')}</label>
-        <input type="email" id="editEmail" style="margin-bottom:12px">
-        <label class="lbl">${t('usr_phone')}</label>
-        <div class="phone-grp">
-          <select id="editPrefix">${PREFIX_OPTS}</select>
-          <input type="text" id="editPhone" placeholder="0634619737">
-        </div>
-        <label class="lbl">Lang</label>
-        <select id="editLang" style="margin-bottom:12px"><option value="fr">FR</option><option value="en">EN</option></select>
-        <div class="btn-row" style="margin-top:16px;">
-          <button class="btn" onclick="saveEdit()">${t('st_save')}</button>
-          <button class="btn ghost" onclick="closeEdit()">Annuler</button>
-        </div>
-      </div>
-    </div>
-    
-    <div id="toast"></div>
-  `;
-}
-
-// --- Logic ---
+// ─── Toast ────────────────────────────────────────────────────────────────
 let toastT;
-function toast(m, c='s') { let e=document.getElementById('toast'); e.textContent=m; e.className='show '+c; clearTimeout(toastT); toastT=setTimeout(()=>e.className='', 3000); }
-async function api(url, o={}) {
-  let r = await fetch('/dashboard/api'+url, { ...o, headers: { Authorization: auth, 'Content-Type': 'application/json', ...(o.headers||{}) }});
-  if(r.status===401) { sessionStorage.removeItem('wa_auth'); location.reload(); }
-  return r.json();
+function toast(m,c='s'){ let e=document.getElementById('toast'); e.textContent=m; e.className='show '+c; clearTimeout(toastT); toastT=setTimeout(()=>e.className='',3000); }
+
+// ─── API ──────────────────────────────────────────────────────────────────
+async function api(url,o={}){
+  try {
+    let r=await fetch('/dashboard/api'+url,{...o,headers:{Authorization:auth,'Content-Type':'application/json',...(o.headers||{})}});
+    if(r.status===401){sessionStorage.removeItem('wa_auth');location.reload();}
+    return r.json();
+  } catch(e) { toast('Erreur réseau','e'); return {}; }
 }
 
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// ─── Auth ─────────────────────────────────────────────────────────────────
 function logout(){ sessionStorage.removeItem('wa_auth'); location.reload(); }
-function switchTab(btn, n) {
+
+// ─── Navigation ───────────────────────────────────────────────────────────
+function switchTab(btn,n){
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+n).classList.add('active'); btn.classList.add('active');
 }
 
-function doRestart(wipe) { if(confirm(wipe?'Purger?':'Restart?')){ api(wipe?'/restart-wipe':'/restart',{method:'POST'}); toast('Reboot...'); setTimeout(()=>location.reload(), 4000); } }
-
-async function saveDiscord(){ await api('/config',{method:'POST',body:JSON.stringify({discordWebhookUrl:document.getElementById('discordUrl').value})}); toast('OK'); }
-async function testDiscord(){ 
-  let r = await api('/config/test-discord',{method:'POST'}); 
-  if(r.error) toast(r.error, 'e'); else toast('OK'); 
+// ─── WhatsApp actions ─────────────────────────────────────────────────────
+function doRestart(wipe){
+  if(!confirm(wipe?'Purger la session WhatsApp ?':'Redémarrer le bot ?')) return;
+  api(wipe?'/restart-wipe':'/restart',{method:'POST'});
+  toast('Redémarrage...','i');
+  setTimeout(()=>location.reload(),4000);
 }
 
-async function saveOverseerr(){ await api('/config/overseerr',{method:'POST',body:JSON.stringify({overseerrUrl:document.getElementById('overseerrUrl').value, overseerrApiKey:document.getElementById('overseerrApiKey').value})}); toast('OK'); }
-async function testOverseerr(){ let r=await api('/overseerr/test',{method:'POST'}); if(r.ok)toast('OK'); else toast(r.error||'Err','e'); }
-
-async function saveTemplates(){ await api('/config/templates',{method:'POST',body:JSON.stringify({templates:{fr:document.getElementById('tpl_fr').value,en:document.getElementById('tpl_en').value}})}); toast('OK'); }
-async function saveConfig(){ await api('/config',{method:'POST',body:JSON.stringify({dnd:{enabled:document.getElementById('dnd_en').value==='true',start:document.getElementById('dnd_s').value,end:document.getElementById('dnd_e').value}})}); toast('OK'); }
-
-async function testManual(){ 
-  let num = document.getElementById('testPhone').value;
-  let pref = document.getElementById('testPrefix').value;
-  if(!num) return toast('Entrez un numéro', 'e');
-  let finalPhone = formatPhone(pref, num);
-  let r = await api('/whatsapp/test',{method:'POST',body:JSON.stringify({phone:finalPhone, message:'TEST WhatsApp Bot'})}); 
-  if(r.error) toast(r.error, 'e'); else toast('Test Envoyé'); 
+// ─── Config ───────────────────────────────────────────────────────────────
+async function saveDiscord(){ await api('/config',{method:'POST',body:JSON.stringify({discordWebhookUrl:document.getElementById('discordUrl').value})}); toast('Sauvegardé'); }
+async function testDiscord(){ let r=await api('/config/test-discord',{method:'POST'}); r.error?toast(r.error,'e'):toast('Discord OK'); }
+async function saveOverseerr(){ await api('/config/overseerr',{method:'POST',body:JSON.stringify({overseerrUrl:document.getElementById('overseerrUrl').value,overseerrApiKey:document.getElementById('overseerrApiKey').value})}); toast('Sauvegardé'); }
+async function testOverseerr(){ let r=await api('/overseerr/test',{method:'POST'}); r.ok?toast('Overseerr OK'):toast(r.error||'Erreur','e'); }
+async function saveTemplates(){ await api('/config/templates',{method:'POST',body:JSON.stringify({templates:{fr:document.getElementById('tpl_fr').value,en:document.getElementById('tpl_en').value}})}); toast('Sauvegardé'); }
+async function saveConfig(){ await api('/config',{method:'POST',body:JSON.stringify({dnd:{enabled:document.getElementById('dnd_en').value==='true',start:document.getElementById('dnd_s').value,end:document.getElementById('dnd_e').value}})}); toast('Sauvegardé'); }
+async function testManual(){
+  let num=document.getElementById('testPhone').value,pref=document.getElementById('testPrefix').value;
+  if(!num) return toast('Entrez un numéro','e');
+  let r=await api('/whatsapp/test',{method:'POST',body:JSON.stringify({phone:formatPhone(pref,num),message:'🔔 Test Whatsoverr — connexion WhatsApp OK !'})});
+  r.error?toast(r.error,'e'):toast('Message envoyé !');
 }
-
-function changeDashLang() {
-  currentLang = document.getElementById('dashLang').value;
+function changeDashLang(){
+  currentLang=document.getElementById('dashLang').value;
   api('/config',{method:'POST',body:JSON.stringify({dashboardLang:currentLang})});
   renderFull();
 }
 
-async function exportData() {
-  let d = await api('/config/export');
-  let b = new Blob([JSON.stringify(d, null, 2)], {type:'application/json'});
-  let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'whatsoverr_backup.json'; a.click();
+// ─── Export / Import ──────────────────────────────────────────────────────
+async function exportData(){
+  let d=await api('/config/export');
+  let b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  let a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='whatsoverr_backup.json'; a.click();
 }
-async function importData(e) {
-  let f = e.target.files[0]; if(!f) return;
-  let r = new FileReader();
-  r.onload = async (ev) => {
+async function importData(e){
+  let f=e.target.files[0]; if(!f) return;
+  new FileReader().onload=async ev=>{
     try {
-      let j = JSON.parse(ev.target.result);
+      let j=JSON.parse(ev.target.result);
       await api('/config/import',{method:'POST',body:JSON.stringify(j)});
-      toast('Import OK, rebooting...'); setTimeout(()=>api('/restart',{method:'POST'}).then(()=>setTimeout(()=>location.reload(),3000)), 1000);
-    } catch(err) { toast('Invalid file','e'); }
+      toast('Import OK, redémarrage...','i');
+      setTimeout(()=>api('/restart',{method:'POST'}).then(()=>setTimeout(()=>location.reload(),3000)),1000);
+    } catch{ toast('Fichier invalide','e'); }
   };
-  r.readAsText(f);
+  (new FileReader()).onload; // noop reset
+  let fr=new FileReader(); fr.onload=async ev=>{
+    try { let j=JSON.parse(ev.target.result); await api('/config/import',{method:'POST',body:JSON.stringify(j)}); toast('Import OK','i'); setTimeout(()=>api('/restart',{method:'POST'}).then(()=>setTimeout(()=>location.reload(),3000)),1000); } catch { toast('Fichier invalide','e'); }
+  }; fr.readAsText(f);
 }
 
-function transStatus(st) {
-  if (st === 'sent_with_poster') return t('st_sent_img');
-  if (st === 'sent_text_only') return t('st_sent_txt');
-  if (st === 'queued_dnd') return t('st_queued');
-  if (st === 'error') return t('st_err');
-  return st;
-}
-
-async function refreshHistory() {
-  let hs = await api('/history');
-  if(!hs) return;
-  document.getElementById('histBody').innerHTML = hs.map(h=>{
-    let c = h.status.includes('sent')?'ok':(h.status.includes('dnd')?'warn':'err');
-    let p = h.media_poster?'<img class="poster" src="'+esc(h.media_poster)+'">':'<div class="poster"></div>';
-    return `<tr><td style="width:40px">${p}</td><td>${esc(h.requestedBy_username||'?')}</td><td>${esc(h.media_title||'?')}</td><td style="text-align:right"><span class="badge ${c}">${esc(transStatus(h.status))}</span></td></tr>`;
+// ─── History ──────────────────────────────────────────────────────────────
+function renderHistory(){
+  const start=histPage*PAGE_SIZE, slice=allHistory.slice(start,start+PAGE_SIZE), total=allHistory.length;
+  const tbody=document.getElementById('histBody');
+  if(!tbody) return;
+  tbody.innerHTML = slice.map(h=>{
+    let cls=h.status.includes('sent')?'ok':h.status.includes('dnd')?'warn':'err';
+    let poster=h.media_poster?`<img class="poster" src="${esc(h.media_poster)}" onerror="this.style.display='none'">`:'<div class="poster" style="background:rgba(255,255,255,.04);border-radius:5px;"></div>';
+    let canRetry=h.status==='error'||h.status==='queued_dnd';
+    let retryBtn=canRetry?`<button class="btn orange sm" onclick="retryEntry('${esc(h.id)}')">${t('btn_retry')}</button>`:'';
+    return `<tr>
+      <td style="width:40px">${poster}</td>
+      <td>${esc(h.requestedBy_username||'?')}<br><span style="font-size:10px;color:var(--muted)">${esc(h.media_title||'')}</span></td>
+      <td><span class="badge ${cls}">${esc(transStatus(h.status))}</span></td>
+      <td style="text-align:right;white-space:nowrap">${retryBtn}<button class="btn danger sm" onclick="deleteEntry('${esc(h.id)}')">${t('btn_del')}</button></td>
+    </tr>`;
   }).join('');
-  
-  let sent = hs.filter(h=>h.status.includes('sent')).length;
-  let rate = hs.length ? Math.round((sent/hs.length)*100) : 0;
-  let last = hs.length ? hs[0].requestedBy_username : '--';
-  document.getElementById('kpiBox').innerHTML = `
-    <div class="kpi-card"><span class="kpi-lbl">${t('kpi_sent')}</span><span class="kpi-val">${sent}</span></div>
-    <div class="kpi-card"><span class="kpi-lbl">${t('kpi_rate')}</span><span class="kpi-val">${rate}%</span></div>
-    <div class="kpi-card"><span class="kpi-lbl">${t('kpi_last')}</span><span class="kpi-val" style="font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(last)}</span></div>
-  `;
+  // Pager
+  const pager=document.getElementById('histPager');
+  if(pager){
+    const pages=Math.ceil(total/PAGE_SIZE)||1;
+    pager.innerHTML=`<span>${start+1}–${Math.min(start+PAGE_SIZE,total)} / ${total}</span>
+    <div class="btn-row">
+      <button class="btn ghost sm" onclick="histPage=Math.max(0,histPage-1);renderHistory()" ${histPage===0?'disabled':''}>${t('prev')}</button>
+      <button class="btn ghost sm" onclick="histPage=Math.min(${pages-1},histPage+1);renderHistory()" ${histPage>=pages-1?'disabled':''}>${t('next')}</button>
+    </div>`;
+  }
 }
 
-async function refreshUsers() {
-  let us = await api('/users');
-  if(!us) return;
-  document.getElementById('usersBody').innerHTML = us.map(u=>{
-    let av = u.avatar?'<img class="uavatar" src="'+esc(u.avatar)+'">':'<div class="uavatar-ph">'+u.email[0].toUpperCase()+'</div>';
-    return `<tr><td style="width:40px">${av}</td><td>${esc(u.email)}<br><span style="color:var(--muted);font-size:11px">+${esc(u.phone)} · ${esc(u.lang).toUpperCase()}</span></td>
-    <td style="text-align:right">
-      <button class="btn ghost sm" onclick="openEdit('${esc(u.email)}','${esc(u.phone)}','${esc(u.lang)}')">${t('btn_edit')}</button>
-      <button class="btn danger sm" onclick="api('/users/'+encodeURIComponent('${esc(u.email)}'),{method:'DELETE'}).then(refreshUsers)">X</button>
-    </td></tr>`;
+async function refreshHistory(){
+  let hs=await api('/history'); if(!hs||!Array.isArray(hs)) return;
+  allHistory=hs;
+  renderHistory();
+  // Update KPIs
+  let sent=hs.filter(h=>h.status.includes('sent')).length;
+  let rate=hs.length?Math.round((sent/hs.length)*100):0;
+  let last=hs.length?hs[0].requestedBy_username:'—';
+  let kpi=document.getElementById('kpiBox'); if(!kpi) return;
+  kpi.querySelectorAll('.kpi-val').forEach((el,i)=>{
+    if(i===0) el.textContent=sent;
+    else if(i===1) el.textContent=rate+'%';
+    else if(i===2) el.textContent=last;
+  });
+}
+
+async function retryEntry(id){
+  let r=await api('/retry/'+id,{method:'POST'});
+  if(r.error) toast(r.error,'e'); else { toast('Renvoyé !'); await refreshHistory(); }
+}
+
+async function deleteEntry(id){
+  let r=await api('/history/'+id,{method:'DELETE'});
+  if(r.error) toast(r.error,'e'); else { allHistory=allHistory.filter(h=>h.id!==id); if(histPage>0&&histPage*PAGE_SIZE>=allHistory.length) histPage--; renderHistory(); }
+}
+
+async function clearHistory(){
+  if(!confirm('Effacer tout l'historique ?')) return;
+  await api('/history',{method:'DELETE'}); allHistory=[]; histPage=0; renderHistory(); toast('Historique effacé');
+}
+
+// ─── Users ────────────────────────────────────────────────────────────────
+async function refreshUsers(){
+  let us=await api('/users'); if(!us||!Array.isArray(us)) return;
+  let tbody=document.getElementById('usersBody'); if(!tbody) return;
+  tbody.innerHTML=us.map(u=>{
+    let av=u.avatar?`<img class="uavatar" src="${esc(u.avatar)}" onerror="this.style.display='none'">`:`<div class="uavatar-ph">${u.email[0].toUpperCase()}</div>`;
+    return `<tr>
+      <td style="width:40px">${av}</td>
+      <td>${esc(u.email)}<br><span style="color:var(--muted);font-size:11px">+${esc(u.phone)} · ${esc(u.lang||'fr').toUpperCase()}</span></td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn ghost sm" onclick="openEdit('${esc(u.email)}','${esc(u.phone)}','${esc(u.lang||'fr')}')">${t('btn_edit')}</button>
+        <button class="btn danger sm" onclick="deleteUser('${esc(u.email)}')">✕</button>
+      </td>
+    </tr>`;
   }).join('');
 }
 
-// EDIT USER MODAL
-function openEdit(email, phone, lang) {
-  let parts = splitPhone(phone);
-  document.getElementById('editOld').value = email;
-  document.getElementById('editEmail').value = email;
-  document.getElementById('editPrefix').value = parts.prefix;
-  document.getElementById('editPhone').value = parts.num;
-  document.getElementById('editLang').value = lang || 'fr';
+async function addUser(){
+  let email=document.getElementById('newEmail').value.trim();
+  let phone=formatPhone(document.getElementById('newPrefix').value,document.getElementById('newPhone').value);
+  let lang=document.getElementById('newLang').value;
+  if(!email||!phone) return toast('Email et numéro requis','e');
+  let r=await api('/users',{method:'POST',body:JSON.stringify({email,phone,lang})});
+  if(r.saved){ toast('Utilisateur ajouté'); document.getElementById('newEmail').value=''; document.getElementById('newPhone').value=''; refreshUsers(); }
+  else toast(r.error||'Erreur','e');
+}
+
+async function deleteUser(email){
+  if(!confirm('Supprimer '+email+' ?')) return;
+  await api('/users/'+encodeURIComponent(email),{method:'DELETE'}); refreshUsers();
+}
+
+// Edit modal
+function openEdit(email,phone,lang){
+  let p=splitPhone(phone);
+  document.getElementById('editOld').value=email;
+  document.getElementById('editEmail').value=email;
+  document.getElementById('editPrefix').value=p.prefix;
+  document.getElementById('editPhone').value=p.num;
+  document.getElementById('editLang').value=lang;
   document.getElementById('editModal').classList.add('open');
 }
-function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
-async function saveEdit() {
-  let old = document.getElementById('editOld').value;
-  let email = document.getElementById('editEmail').value;
-  let pref = document.getElementById('editPrefix').value;
-  let num = document.getElementById('editPhone').value;
-  let lang = document.getElementById('editLang').value;
-  
-  let finalPhone = formatPhone(pref, num);
-  let r = await api('/users/'+encodeURIComponent(old), {method:'PUT', body:JSON.stringify({email, phone:finalPhone, lang})});
-  if(r.saved) { closeEdit(); toast('OK'); refreshUsers(); } else toast(r.error||'Err', 'e');
+function closeEdit(){ document.getElementById('editModal').classList.remove('open'); }
+async function saveEdit(){
+  let old=document.getElementById('editOld').value;
+  let email=document.getElementById('editEmail').value.trim();
+  let phone=formatPhone(document.getElementById('editPrefix').value,document.getElementById('editPhone').value);
+  let lang=document.getElementById('editLang').value;
+  let r=await api('/users/'+encodeURIComponent(old),{method:'PUT',body:JSON.stringify({email,phone,lang})});
+  if(r.saved){ closeEdit(); toast('Mis à jour'); refreshUsers(); } else toast(r.error||'Erreur','e');
 }
 
-async function addUser() {
-  let pref = document.getElementById('newPrefix').value;
-  let num = document.getElementById('newPhone').value;
-  let email = document.getElementById('newEmail').value;
-  let lang = document.getElementById('newLang').value;
-  if (!num || !email) return toast('Remplir les champs', 'e');
-  
-  let finalPhone = formatPhone(pref, num);
-  let r=await api('/users',{method:'POST',body:JSON.stringify({email, phone:finalPhone, lang})});
-  if(r.saved){toast('OK');document.getElementById('newEmail').value='';document.getElementById('newPhone').value='';refreshUsers();}else toast(r.error||'Err','e');
+// Overseerr import
+async function loadOvUsers(){
+  let btn=document.getElementById('ovLoadBtn'); btn.textContent='...';
+  let us=await api('/overseerr/users'); btn.textContent=t('usr_load');
+  if(!us||us.error) return toast(us?.error||'Erreur de chargement','e');
+  document.getElementById('ovList').innerHTML=us.map(u=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.05)" id="ovrow_${u.id}">
+      <img src="${esc(u.thumb)}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'">
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.title)}</span>
+      ${u.registered?'<span class="badge ok">OK</span>':`
+      <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+        <select id="ovpref_${u.id}" style="width:72px;margin:0;padding:6px;font-size:11px">${PREFIX_OPTS}</select>
+        <input type="text" id="ovp_${u.id}" placeholder="06..." style="width:85px;margin:0;padding:6px">
+        <select id="ovl_${u.id}" style="width:50px;margin:0;padding:6px"><option value="fr">FR</option><option value="en">EN</option></select>
+        <button class="btn sm" onclick="addOvDirect('${u.id}','${esc(u.email)}','${esc(u.thumb)}')">Add</button>
+      </div>`}
+    </div>`).join('');
 }
 
-async function loadOvUsers() {
-  document.getElementById('ovLoadBtn').textContent = '...';
-  let us=await api('/overseerr/users'); document.getElementById('ovLoadBtn').textContent = t('usr_load');
-  if(!us||us.error)return toast(us?.error||'Err','e');
-  
-  document.getElementById('ovList').innerHTML = us.map(u=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,0.05)" id="ovrow_${u.id}">
-    <img src="${u.thumb}" style="width:30px;border-radius:50%"> ${esc(u.title)}
-    ${u.registered?'<span class="badge ok" style="margin-left:auto">OK</span>':`
-    <div style="margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-      <select id="ovpref_${u.id}" style="width:70px;margin:0;padding:6px;font-size:11px;">${PREFIX_OPTS}</select>
-      <input type="text" id="ovp_${u.id}" placeholder="06..." style="width:90px;margin:0;padding:6px;">
-      <select id="ovl_${u.id}" style="width:50px;margin:0;padding:6px;"><option value="fr">FR</option><option value="en">EN</option></select>
-      <button class="btn sm" onclick="addOvDirect('${u.id}', '${esc(u.email)}', '${esc(u.thumb)}')">Add</button>
-    </div>` }
-  </div>`).join('');
+async function addOvDirect(id,email,thumb){
+  let pref=document.getElementById('ovpref_'+id).value;
+  let num=document.getElementById('ovp_'+id).value;
+  let lang=document.getElementById('ovl_'+id).value;
+  if(!num) return toast('Numéro requis','e');
+  let r=await api('/users',{method:'POST',body:JSON.stringify({email,phone:formatPhone(pref,num),lang,avatar:thumb})});
+  if(r.error){ toast(r.error,'e'); return; }
+  toast('Ajouté !');
+  document.getElementById('ovrow_'+id).innerHTML=`<span class="badge ok">OK</span> ${esc(email)}`;
+  refreshUsers();
 }
 
-async function addOvDirect(id, email, thumb) {
-  let pref = document.getElementById('ovpref_'+id).value;
-  let num = document.getElementById('ovp_'+id).value;
-  let lang = document.getElementById('ovl_'+id).value;
-  if (!num) return toast('Numéro requis', 'e');
-  
-  let finalPhone = formatPhone(pref, num);
-  let r = await api('/users', {method:'POST', body:JSON.stringify({email, phone:finalPhone, lang, avatar:thumb})});
-  if (r.error) {
-    toast(r.error, 'e');
-  } else {
-    toast('OK');
-    document.getElementById('ovrow_'+id).innerHTML = `<img src="${thumb}" style="width:30px;border-radius:50%"> ${esc(email)} <span class="badge ok" style="margin-left:auto">OK</span>`;
-    refreshUsers(); 
+// ─── Status refresh ───────────────────────────────────────────────────────
+async function refreshAll(){
+  let st=await api('/status');
+  if(!st) return;
+
+  // Version display (first call only)
+  if(st.version){ let vEl=document.getElementById('appVersion'); if(vEl) vEl.textContent='v'+st.version; }
+
+  // WA status
+  let dot=document.getElementById('statusDot'), txt=document.getElementById('statusTxt');
+  if(dot&&txt){
+    dot.className='pulse '+(st.whatsapp_ready?'on':st.qr?'wait':'off');
+    txt.textContent=st.whatsapp_ready?t('st_wa_ok'):st.qr?t('st_wa_wait'):t('st_wa_off');
   }
+  let qrImg=document.getElementById('qrImg');
+  if(qrImg){ if(st.qr){qrImg.src=st.qr;qrImg.style.display='block';}else qrImg.style.display='none'; }
+
+  // Uptime KPI
+  let upEl=document.getElementById('kpiUptime'); if(upEl) upEl.textContent=formatUptime(st.uptime_seconds||0);
+
+  // Config
+  let cf=await api('/config');
+  if(!cf) return;
+  if(cf.dashboardLang&&cf.dashboardLang!==currentLang){ currentLang=cf.dashboardLang; renderFull(); return; }
+
+  let du=document.getElementById('discordUrl'); if(du&&!du.value) du.placeholder=cf.hasWebhook?cf.maskedUrl:'https://discord.com/api/webhooks/...';
+  let ou=document.getElementById('overseerrUrl'); if(ou) ou.value=cf.overseerrUrl||'';
+  let ak=document.getElementById('overseerrApiKey'); if(ak&&!ak.value) ak.placeholder=cf.hasOverseerrApiKey?cf.maskedApiKey:'••••••••••••';
+  let dl=document.getElementById('dashLang'); if(dl) dl.value=currentLang;
+  if(cf.templates){ let tf=document.getElementById('tpl_fr'),te=document.getElementById('tpl_en'); if(tf)tf.value=cf.templates.fr||''; if(te)te.value=cf.templates.en||''; }
+  if(cf.dnd){ let de=document.getElementById('dnd_en'),ds=document.getElementById('dnd_s'),dd=document.getElementById('dnd_e'); if(de)de.value=cf.dnd.enabled?'true':'false'; if(ds)ds.value=cf.dnd.start||''; if(dd)dd.value=cf.dnd.end||''; }
+
+  refreshHistory();
+  refreshUsers();
 }
 
-async function refreshAll() {
-  let st = await api('/status');
-  document.getElementById('statusDot').className = st.whatsapp_ready?'pulse on':(st.qr?'pulse wait':'pulse off');
-  document.getElementById('statusTxt').textContent = st.whatsapp_ready?t('st_wa_ok'):(st.qr?t('st_wa_wait'):t('st_wa_off'));
-  let qr = document.getElementById('qrImg'); if(st.qr){qr.src=st.qr;qr.style.display='block';}else{qr.style.display='none';}
-
-  let cf = await api('/config');
-  if(cf.dashboardLang && cf.dashboardLang !== currentLang) { currentLang = cf.dashboardLang; renderFull(); return; }
-  
-  document.getElementById('discordUrl').placeholder = cf.hasWebhook?cf.maskedUrl:'https://discord.com/api/webhooks/...';
-  document.getElementById('overseerrApiKey').placeholder = cf.hasOverseerrApiKey?cf.maskedApiKey:'••••••••••••••••';
-  document.getElementById('dashLang').value = currentLang;
-  
-  if(cf.templates) { document.getElementById('tpl_fr').value = cf.templates.fr||''; document.getElementById('tpl_en').value = cf.templates.en||''; }
-  if(cf.dnd) { document.getElementById('dnd_en').value = cf.dnd.enabled?'true':'false'; document.getElementById('dnd_s').value = cf.dnd.start; document.getElementById('dnd_e').value = cf.dnd.end; }
-  if(cf.overseerrUrl) { document.getElementById('overseerrUrl').value = cf.overseerrUrl; }
-
-  refreshHistory(); refreshUsers();
+// ─── Templates ────────────────────────────────────────────────────────────
+function renderLogin(){
+  return `<div id="loginPage">
+    <div id="loginCard">
+      <img class="logo" src="logo.png" alt="">
+      <h1>Whatsoverr</h1>
+      <form id="loginForm" style="margin-top:28px">
+        <label class="lbl">${t('user')}</label><input type="text" id="lu" autocomplete="username" required>
+        <label class="lbl">${t('pass')}</label><input type="password" id="lp" autocomplete="current-password" required>
+        <button type="submit" class="btn" style="width:100%">${t('login')}</button>
+      </form>
+      <div id="loginMsg" style="color:var(--red);text-align:center;margin-top:10px;font-size:12px"></div>
+    </div>
+  </div>`;
 }
 
-function renderFull() {
-  if(!auth) {
-    document.getElementById('root').innerHTML = renderLogin();
-    document.getElementById('loginForm').onsubmit = async (e) => {
-      e.preventDefault(); auth = 'Basic '+btoa(document.getElementById('lu').value+':'+document.getElementById('lp').value);
-      let r = await fetch('/dashboard/api/status',{headers:{Authorization:auth}});
-      if(r.ok){ sessionStorage.setItem('wa_auth',auth); renderFull(); } else document.getElementById('loginMsg').textContent = 'Invalid credentials';
+function renderApp(){
+  return `
+  <div id="app" style="display:block">
+    <div class="header">
+      <img src="logo.png" alt="">
+      <div>
+        <h1>WHATSOVERR</h1>
+        <div style="font-size:11px;color:var(--muted)"><span id="appVersion">v2.0.4</span></div>
+      </div>
+      <div class="header-right"><button class="btn ghost sm" onclick="logout()">${t('logout')}</button></div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this,'status')">${t('tab_status')}</button>
+      <button class="tab-btn" onclick="switchTab(this,'history')">${t('tab_hist')}</button>
+      <button class="tab-btn" onclick="switchTab(this,'users')">${t('tab_users')}</button>
+      <button class="tab-btn" onclick="switchTab(this,'settings')">${t('tab_settings')}</button>
+    </div>
+
+    <!-- STATUT -->
+    <div id="tab-status" class="tab-pane active">
+      <div class="kpi-row" id="kpiBox">
+        <div class="kpi-card"><span class="kpi-lbl">${t('kpi_sent')}</span><span class="kpi-val">—</span></div>
+        <div class="kpi-card"><span class="kpi-lbl">${t('kpi_rate')}</span><span class="kpi-val">—</span></div>
+        <div class="kpi-card"><span class="kpi-lbl">${t('kpi_last')}</span><span class="kpi-val" style="font-size:14px">—</span></div>
+        <div class="kpi-card"><span class="kpi-lbl">${t('kpi_up')}</span><span class="kpi-val" id="kpiUptime">—</span></div>
+      </div>
+      <div class="grid2">
+        <div class="glass card">
+          <div class="card-title">${t('st_wa')}</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div class="pulse wait" id="statusDot"></div><div id="statusTxt" style="font-weight:600">...</div></div>
+          <img id="qrImg" src="" alt="QR Code" style="display:none;width:160px;border-radius:12px;margin-bottom:12px">
+          <div class="btn-row">
+            <button class="btn ghost sm" onclick="doRestart(false)">${t('st_restart')}</button>
+            <button class="btn danger sm" onclick="doRestart(true)">${t('st_purge')}</button>
+          </div>
+        </div>
+        <div class="glass card">
+          <div class="card-title">${t('st_disc')}</div>
+          <label class="lbl">Webhook URL</label>
+          <input type="text" id="discordUrl" placeholder="https://discord.com/api/webhooks/...">
+          <div class="btn-row">
+            <button class="btn sm" onclick="saveDiscord()">${t('st_save')}</button>
+            <button class="btn ghost sm" onclick="testDiscord()">${t('st_test')}</button>
+          </div>
+        </div>
+      </div>
+      <div class="glass card">
+        <div class="card-title">${t('st_ov')}</div>
+        <div class="input-row">
+          <div><label class="lbl">URL</label><input type="text" id="overseerrUrl" placeholder="http://192.168.1.1:5055"></div>
+          <div><label class="lbl">API Key</label><input type="text" id="overseerrApiKey" placeholder="••••••••••••••••"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" onclick="saveOverseerr()">${t('st_save')}</button>
+          <button class="btn ghost" onclick="testOverseerr()">${t('st_test')}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIQUE -->
+    <div id="tab-history" class="tab-pane">
+      <div class="glass card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div class="card-title" style="margin:0">${t('hist_title')}</div>
+          <div class="btn-row">
+            <button class="btn ghost sm" onclick="refreshHistory()">${t('hist_refresh')}</button>
+            <button class="btn danger sm" onclick="clearHistory()">${t('hist_clear')}</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table><tbody id="histBody"></tbody></table>
+        </div>
+        <div class="pager" id="histPager"></div>
+      </div>
+    </div>
+
+    <!-- UTILISATEURS -->
+    <div id="tab-users" class="tab-pane">
+      <div class="glass card">
+        <div class="card-title">${t('usr_add')}</div>
+        <div class="input-row">
+          <div><label class="lbl">${t('usr_email')}</label><input type="email" id="newEmail" placeholder="ami@gmail.com"></div>
+          <div>
+            <label class="lbl">${t('usr_phone')}</label>
+            <div class="phone-grp">
+              <select id="newPrefix">${PREFIX_OPTS}</select>
+              <input type="text" id="newPhone" placeholder="0634619737">
+            </div>
+          </div>
+          <div style="flex:0.4;min-width:70px"><label class="lbl">Lang</label><select id="newLang"><option value="fr">FR</option><option value="en">EN</option></select></div>
+        </div>
+        <button class="btn" onclick="addUser()">${t('usr_add')}</button>
+      </div>
+      <div class="glass card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div class="card-title" style="margin:0">${t('usr_list')}</div>
+          <button class="btn ghost sm" onclick="refreshUsers()">${t('hist_refresh')}</button>
+        </div>
+        <div class="table-wrap"><table><tbody id="usersBody"></tbody></table></div>
+      </div>
+      <div class="glass card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="card-title" style="margin:0">${t('usr_import')}</div>
+          <button class="btn blue sm" id="ovLoadBtn" onclick="loadOvUsers()">${t('usr_load')}</button>
+        </div>
+        <div id="ovList" style="margin-top:16px"></div>
+      </div>
+    </div>
+
+    <!-- REGLAGES -->
+    <div id="tab-settings" class="tab-pane">
+      <div class="glass card">
+        <div class="card-title">${t('set_tpl')}</div>
+        <div class="grid2">
+          <div><label class="lbl">🇫🇷 Template FR</label><textarea id="tpl_fr"></textarea></div>
+          <div><label class="lbl">🇬🇧 Template EN</label><textarea id="tpl_en"></textarea></div>
+        </div>
+        <button class="btn" onclick="saveTemplates()">${t('st_save')}</button>
+      </div>
+      <div class="glass card">
+        <div class="card-title">${t('set_dnd')}</div>
+        <div class="input-row">
+          <div><label class="lbl">${t('dnd_en')}</label><select id="dnd_en"><option value="true">Oui / Yes</option><option value="false">Non / No</option></select></div>
+          <div><label class="lbl">${t('dnd_start')}</label><input type="time" id="dnd_s"></div>
+          <div><label class="lbl">${t('dnd_end')}</label><input type="time" id="dnd_e"></div>
+        </div>
+        <button class="btn" onclick="saveConfig()">${t('st_save')}</button>
+      </div>
+      <div class="grid2">
+        <div class="glass card" style="margin:0">
+          <div class="card-title">${t('set_lang')}</div>
+          <select id="dashLang" onchange="changeDashLang()"><option value="fr">Français</option><option value="en">English</option></select>
+        </div>
+        <div class="glass card" style="margin:0">
+          <div class="card-title">${t('set_test')}</div>
+          <label class="lbl">${t('usr_phone')}</label>
+          <div class="phone-grp">
+            <select id="testPrefix">${PREFIX_OPTS}</select>
+            <input type="text" id="testPhone" placeholder="0634619737">
+          </div>
+          <button class="btn sm" onclick="testManual()">Envoyer</button>
+        </div>
+      </div>
+      <div class="glass card" style="margin-top:16px">
+        <div class="card-title">${t('set_export')}</div>
+        <div class="btn-row">
+          <button class="btn ghost" onclick="exportData()">${t('btn_export')}</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+          <button class="btn blue" onclick="document.getElementById('importFile').click()">${t('btn_import')}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-bg" id="editModal" onclick="if(event.target===this)closeEdit()">
+    <div class="modal">
+      <h3 style="margin-bottom:18px;font-weight:600">${t('btn_edit')}</h3>
+      <input type="hidden" id="editOld">
+      <label class="lbl">${t('usr_email')}</label><input type="email" id="editEmail">
+      <label class="lbl">${t('usr_phone')}</label>
+      <div class="phone-grp">
+        <select id="editPrefix">${PREFIX_OPTS}</select>
+        <input type="text" id="editPhone" placeholder="0634619737">
+      </div>
+      <label class="lbl">Lang</label><select id="editLang" style="margin-bottom:18px"><option value="fr">FR</option><option value="en">EN</option></select>
+      <div class="btn-row">
+        <button class="btn" onclick="saveEdit()">${t('st_save')}</button>
+        <button class="btn ghost" onclick="closeEdit()">Annuler</button>
+      </div>
+    </div>
+  </div>
+  <div id="toast"></div>`;
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────
+function renderFull(){
+  if(refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; } // Fix interval leak
+  if(!auth){
+    document.getElementById('root').innerHTML=renderLogin();
+    document.getElementById('loginForm').onsubmit=async e=>{
+      e.preventDefault();
+      auth='Basic '+btoa(document.getElementById('lu').value+':'+document.getElementById('lp').value);
+      let r=await fetch('/dashboard/api/status',{headers:{Authorization:auth}});
+      if(r.ok){ sessionStorage.setItem('wa_auth',auth); renderFull(); }
+      else { auth=''; document.getElementById('loginMsg').textContent='Identifiants invalides'; }
     };
   } else {
-    document.getElementById('root').innerHTML = renderApp();
+    document.getElementById('root').innerHTML=renderApp();
     refreshAll();
-    setInterval(refreshAll, 10000);
+    refreshInterval=setInterval(refreshAll,10000);
   }
 }
+
 renderFull();
 </script>
 </body>

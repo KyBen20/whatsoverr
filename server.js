@@ -17,6 +17,7 @@ const {
 // Config
 // ---------------------------------------------------------------------------
 const PORT         = process.env.PORT || 3000;
+const APP_VERSION  = '2.0.4'; // ← Modifier ici pour chaque release
 const DATA_DIR     = path.join(__dirname, 'data');
 const USERS_FILE   = path.join(DATA_DIR, 'users.json');
 const AVATARS_FILE = path.join(DATA_DIR, 'avatars.json');
@@ -151,7 +152,7 @@ async function notifyDiscord(content, isReadyMsg = false) {
 // Express
 // ---------------------------------------------------------------------------
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '512kb' })); // Limite anti-DoS
 
 // ---------------------------------------------------------------------------
 // WhatsApp / Baileys
@@ -352,10 +353,25 @@ adminRouter.get('/api/status', (req, res) => {
     whatsapp_ready: whatsappReady,
     qr: whatsappReady ? null : lastQrDataUrl,
     uptime_seconds: Math.floor((Date.now() - startedAt) / 1000),
+    version: APP_VERSION,
   });
 });
 
 adminRouter.get('/api/history', (req, res) => res.json(history));
+
+adminRouter.delete('/api/history/:id', (req, res) => {
+  const before = history.length;
+  history = history.filter(h => h.id !== req.params.id);
+  if (history.length === before) return res.status(404).json({ error: 'Introuvable' });
+  saveJson(HISTORY_FILE, history);
+  res.json({ deleted: true });
+});
+
+adminRouter.delete('/api/history', (req, res) => {
+  history = [];
+  saveJson(HISTORY_FILE, history);
+  res.json({ cleared: true });
+});
 
 adminRouter.get('/api/config', (req, res) => {
   const discUrl = config.discordWebhookUrl || '';
