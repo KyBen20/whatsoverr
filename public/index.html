@@ -62,14 +62,10 @@ textarea { min-height: 140px; resize: vertical; line-height: 1.5; }
 .pulse.off{background:var(--red);}
 .pulse.wait{background:var(--orange);animation:pa 1s infinite;}
 @keyframes pa{0%,100%{opacity:1;}50%{opacity:.3;}}
-
-/* KPI Widget */
 .kpi-row{display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:12px;margin-bottom:16px;}
 .kpi-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;}
 .kpi-val{font-size:20px;font-weight:700;}
 .kpi-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;}
-
-/* Tables / Mobile Cards */
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th,td{text-align:left;padding:11px 10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
@@ -83,8 +79,6 @@ th{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--dimmed);b
 .poster{width:32px;height:46px;object-fit:cover;border-radius:5px;}
 .uavatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.09);}
 .uavatar-ph{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--muted);border:1px solid rgba(255,255,255,0.09);}
-
-/* Modals & Toasts */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
 .modal-bg.open{display:flex;}
 .modal{background:rgba(11,13,22,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:22px;padding:30px;width:100%;max-width:430px;box-shadow:0 24px 80px rgba(0,0,0,0.8);}
@@ -93,11 +87,30 @@ th{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--dimmed);b
 #toast.s{color:var(--green);border:1px solid rgba(34,211,114,0.3);}
 #toast.e{color:var(--red);border:1px solid rgba(255,79,110,0.3);}
 #toast.i{color:var(--blue);border:1px solid rgba(96,165,250,0.3);}
+.phone-grp { display:flex; gap:6px; margin-bottom:12px; }
+.phone-grp select { width: 90px; margin-bottom:0; border-radius: 10px; }
+.phone-grp input { flex: 1; margin-bottom:0; border-radius: 10px; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
+const PREFIX_OPTS = `
+  <option value="33">🇫🇷 +33</option>
+  <option value="32">🇧🇪 +32</option>
+  <option value="41">🇨🇭 +41</option>
+  <option value="1">🇺🇸 +1</option>
+  <option value="44">🇬🇧 +44</option>
+  <option value="49">🇩🇪 +49</option>
+  <option value="34">🇪🇸 +34</option>
+  <option value="39">🇮🇹 +39</option>
+  <option value="212">🇲🇦 +212</option>
+  <option value="213">🇩🇿 +213</option>
+  <option value="216">🇹🇳 +216</option>
+  <option value="225">🇨🇮 +225</option>
+  <option value="221">🇸🇳 +221</option>
+`;
+
 const DICT = {
   fr: {
     login: "Connexion", user: "Identifiant", pass: "Mot de passe", logout: "Déconnexion",
@@ -139,6 +152,21 @@ let currentLang = 'fr';
 let auth = sessionStorage.getItem('wa_auth') || '';
 
 function t(key) { return DICT[currentLang][key] || key; }
+
+function formatPhone(prefix, num) {
+  let p = prefix.replace(/\D/g, '');
+  let n = num.replace(/\D/g, '');
+  if (n.startsWith('0')) n = n.substring(1);
+  return p + n;
+}
+
+function splitPhone(fullPhone) {
+  let prefixes = ['33','32','41','1','44','49','34','39','212','213','216','225','221'];
+  for(let p of prefixes) {
+    if(fullPhone.startsWith(p)) return { prefix: p, num: '0' + fullPhone.substring(p.length) };
+  }
+  return { prefix: '33', num: fullPhone };
+}
 
 function renderLogin() {
   return `
@@ -219,7 +247,13 @@ function renderApp() {
           <div class="card-title">${t('usr_add')}</div>
           <div class="input-row">
             <div><label class="lbl">${t('usr_email')}</label><input type="email" id="newEmail" placeholder="ami@gmail.com"></div>
-            <div><label class="lbl">${t('usr_phone')}</label><input type="text" id="newPhone" placeholder="33612345678 (sans +)"></div>
+            <div>
+              <label class="lbl">${t('usr_phone')}</label>
+              <div class="phone-grp">
+                <select id="newPrefix">${PREFIX_OPTS}</select>
+                <input type="text" id="newPhone" placeholder="0634619737">
+              </div>
+            </div>
             <div style="flex:0.5;min-width:70px"><label class="lbl">Lang</label><select id="newLang"><option value="fr">FR</option><option value="en">EN</option></select></div>
           </div>
           <button class="btn" onclick="addUser()">${t('usr_add')}</button>
@@ -270,7 +304,13 @@ function renderApp() {
           </div>
           <div class="glass card" style="margin:0">
             <div class="card-title">${t('set_test')}</div>
-            <div><label class="lbl">${t('usr_phone')}</label><input type="text" id="testPhone" placeholder="33612345678"></div>
+            <div>
+              <label class="lbl">${t('usr_phone')}</label>
+              <div class="phone-grp">
+                <select id="testPrefix">${PREFIX_OPTS}</select>
+                <input type="text" id="testPhone" placeholder="0634619737">
+              </div>
+            </div>
             <button class="btn sm" onclick="testManual()">Go</button>
           </div>
         </div>
@@ -291,9 +331,15 @@ function renderApp() {
       <div class="modal">
         <h3 style="margin-bottom:16px;font-weight:600;">${t('btn_edit')} Utilisateur</h3>
         <input type="hidden" id="editOld">
-        <label class="lbl">${t('usr_email')}</label><input type="email" id="editEmail">
-        <label class="lbl">${t('usr_phone')}</label><input type="text" id="editPhone">
-        <label class="lbl">Lang</label><select id="editLang"><option value="fr">FR</option><option value="en">EN</option></select>
+        <label class="lbl">${t('usr_email')}</label>
+        <input type="email" id="editEmail" style="margin-bottom:12px">
+        <label class="lbl">${t('usr_phone')}</label>
+        <div class="phone-grp">
+          <select id="editPrefix">${PREFIX_OPTS}</select>
+          <input type="text" id="editPhone" placeholder="0634619737">
+        </div>
+        <label class="lbl">Lang</label>
+        <select id="editLang" style="margin-bottom:12px"><option value="fr">FR</option><option value="en">EN</option></select>
         <div class="btn-row" style="margin-top:16px;">
           <button class="btn" onclick="saveEdit()">${t('st_save')}</button>
           <button class="btn ghost" onclick="closeEdit()">Annuler</button>
@@ -337,9 +383,11 @@ async function saveTemplates(){ await api('/config/templates',{method:'POST',bod
 async function saveConfig(){ await api('/config',{method:'POST',body:JSON.stringify({dnd:{enabled:document.getElementById('dnd_en').value==='true',start:document.getElementById('dnd_s').value,end:document.getElementById('dnd_e').value}})}); toast('OK'); }
 
 async function testManual(){ 
-  let p = document.getElementById('testPhone').value;
-  if(!p) return toast('Entrez un numéro', 'e');
-  let r = await api('/whatsapp/test',{method:'POST',body:JSON.stringify({phone:p, message:'TEST WhatsApp Bot'})}); 
+  let num = document.getElementById('testPhone').value;
+  let pref = document.getElementById('testPrefix').value;
+  if(!num) return toast('Entrez un numéro', 'e');
+  let finalPhone = formatPhone(pref, num);
+  let r = await api('/whatsapp/test',{method:'POST',body:JSON.stringify({phone:finalPhone, message:'TEST WhatsApp Bot'})}); 
   if(r.error) toast(r.error, 'e'); else toast('Test Envoyé'); 
 }
 
@@ -367,7 +415,6 @@ async function importData(e) {
   r.readAsText(f);
 }
 
-// Translations for statuses
 function transStatus(st) {
   if (st === 'sent_with_poster') return t('st_sent_img');
   if (st === 'sent_text_only') return t('st_sent_txt');
@@ -410,9 +457,11 @@ async function refreshUsers() {
 
 // EDIT USER MODAL
 function openEdit(email, phone, lang) {
+  let parts = splitPhone(phone);
   document.getElementById('editOld').value = email;
   document.getElementById('editEmail').value = email;
-  document.getElementById('editPhone').value = phone;
+  document.getElementById('editPrefix').value = parts.prefix;
+  document.getElementById('editPhone').value = parts.num;
   document.getElementById('editLang').value = lang || 'fr';
   document.getElementById('editModal').classList.add('open');
 }
@@ -420,14 +469,24 @@ function closeEdit() { document.getElementById('editModal').classList.remove('op
 async function saveEdit() {
   let old = document.getElementById('editOld').value;
   let email = document.getElementById('editEmail').value;
-  let phone = document.getElementById('editPhone').value;
+  let pref = document.getElementById('editPrefix').value;
+  let num = document.getElementById('editPhone').value;
   let lang = document.getElementById('editLang').value;
-  let r = await api('/users/'+encodeURIComponent(old), {method:'PUT', body:JSON.stringify({email, phone, lang})});
+  
+  let finalPhone = formatPhone(pref, num);
+  let r = await api('/users/'+encodeURIComponent(old), {method:'PUT', body:JSON.stringify({email, phone:finalPhone, lang})});
   if(r.saved) { closeEdit(); toast('OK'); refreshUsers(); } else toast(r.error||'Err', 'e');
 }
 
 async function addUser() {
-  let r=await api('/users',{method:'POST',body:JSON.stringify({email:document.getElementById('newEmail').value,phone:document.getElementById('newPhone').value,lang:document.getElementById('newLang').value})});
+  let pref = document.getElementById('newPrefix').value;
+  let num = document.getElementById('newPhone').value;
+  let email = document.getElementById('newEmail').value;
+  let lang = document.getElementById('newLang').value;
+  if (!num || !email) return toast('Remplir les champs', 'e');
+  
+  let finalPhone = formatPhone(pref, num);
+  let r=await api('/users',{method:'POST',body:JSON.stringify({email, phone:finalPhone, lang})});
   if(r.saved){toast('OK');document.getElementById('newEmail').value='';document.getElementById('newPhone').value='';refreshUsers();}else toast(r.error||'Err','e');
 }
 
@@ -436,32 +495,32 @@ async function loadOvUsers() {
   let us=await api('/overseerr/users'); document.getElementById('ovLoadBtn').textContent = t('usr_load');
   if(!us||us.error)return toast(us?.error||'Err','e');
   
-  // Rendu de la liste
   document.getElementById('ovList').innerHTML = us.map(u=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,0.05)" id="ovrow_${u.id}">
     <img src="${u.thumb}" style="width:30px;border-radius:50%"> ${esc(u.title)}
     ${u.registered?'<span class="badge ok" style="margin-left:auto">OK</span>':`
-    <div style="margin-left:auto;display:flex;gap:4px;">
-      <input type="text" id="ovp_${u.id}" placeholder="336..." style="width:90px;margin:0">
-      <select id="ovl_${u.id}" style="width:50px;margin:0"><option value="fr">FR</option><option value="en">EN</option></select>
+    <div style="margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+      <select id="ovpref_${u.id}" style="width:70px;margin:0;padding:6px;font-size:11px;">${PREFIX_OPTS}</select>
+      <input type="text" id="ovp_${u.id}" placeholder="06..." style="width:90px;margin:0;padding:6px;">
+      <select id="ovl_${u.id}" style="width:50px;margin:0;padding:6px;"><option value="fr">FR</option><option value="en">EN</option></select>
       <button class="btn sm" onclick="addOvDirect('${u.id}', '${esc(u.email)}', '${esc(u.thumb)}')">Add</button>
     </div>` }
   </div>`).join('');
 }
 
-// Add directly from Overseerr list without reloading everything
 async function addOvDirect(id, email, thumb) {
-  let phone = document.getElementById('ovp_'+id).value;
+  let pref = document.getElementById('ovpref_'+id).value;
+  let num = document.getElementById('ovp_'+id).value;
   let lang = document.getElementById('ovl_'+id).value;
-  if (!phone) return toast('Numéro requis', 'e');
+  if (!num) return toast('Numéro requis', 'e');
   
-  let r = await api('/users', {method:'POST', body:JSON.stringify({email, phone, lang, avatar:thumb})});
+  let finalPhone = formatPhone(pref, num);
+  let r = await api('/users', {method:'POST', body:JSON.stringify({email, phone:finalPhone, lang, avatar:thumb})});
   if (r.error) {
     toast(r.error, 'e');
   } else {
     toast('OK');
-    // Update just this row DOM instead of full reload!
     document.getElementById('ovrow_'+id).innerHTML = `<img src="${thumb}" style="width:30px;border-radius:50%"> ${esc(email)} <span class="badge ok" style="margin-left:auto">OK</span>`;
-    refreshUsers(); // Refresh background list
+    refreshUsers(); 
   }
 }
 
@@ -474,7 +533,6 @@ async function refreshAll() {
   let cf = await api('/config');
   if(cf.dashboardLang && cf.dashboardLang !== currentLang) { currentLang = cf.dashboardLang; renderFull(); return; }
   
-  // Use properties for placeholder instead of clearing value
   document.getElementById('discordUrl').placeholder = cf.hasWebhook?cf.maskedUrl:'https://discord.com/api/webhooks/...';
   document.getElementById('overseerrApiKey').placeholder = cf.hasOverseerrApiKey?cf.maskedApiKey:'••••••••••••••••';
   document.getElementById('dashLang').value = currentLang;
@@ -502,4 +560,5 @@ function renderFull() {
 }
 renderFull();
 </script>
-</body></html>
+</body>
+</html>
