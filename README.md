@@ -61,7 +61,18 @@ docker compose up -d
    * Coche `Demande Disponible` (Media Available).
    * Webhook URL : `http://<IP_DE_WHATSOVERR>:3000/webhook`
    * JSON Payload : Laisse par défaut ou assure-toi que `{{request.requestedBy_email}}`, `{{subject}}` et `{{image}}` soient présents.
+     Voici un exemple : 
 
+```bash
+   {
+  "notification_type": "{{notification_type}}",
+  "subject": "{{subject}}",
+  "image": "{{image}}",
+  "media_type": "{{media_type}}",
+  "requestedBy_username": "{{requestedBy_username}}",
+  "requestedBy_email": "{{requestedBy_email}}"
+}
+```
 ## 📝 Personnalisation des Templates
 
 Dans l'onglet *Réglages*, tu peux personnaliser le message WhatsApp envoyé pour le français et l'anglais en utilisant ces variables :
