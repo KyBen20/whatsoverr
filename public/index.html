@@ -260,18 +260,16 @@ async function exportData(){
 }
 async function importData(e){
   let f=e.target.files[0]; if(!f) return;
-  new FileReader().onload=async ev=>{
+  let fr=new FileReader();
+  fr.onload=async ev=>{
     try {
       let j=JSON.parse(ev.target.result);
       await api('/config/import',{method:'POST',body:JSON.stringify(j)});
       toast('Import OK, redémarrage...','i');
       setTimeout(()=>api('/restart',{method:'POST'}).then(()=>setTimeout(()=>location.reload(),3000)),1000);
-    } catch{ toast('Fichier invalide','e'); }
+    } catch { toast('Fichier invalide','e'); }
   };
-  (new FileReader()).onload; // noop reset
-  let fr=new FileReader(); fr.onload=async ev=>{
-    try { let j=JSON.parse(ev.target.result); await api('/config/import',{method:'POST',body:JSON.stringify(j)}); toast('Import OK','i'); setTimeout(()=>api('/restart',{method:'POST'}).then(()=>setTimeout(()=>location.reload(),3000)),1000); } catch { toast('Fichier invalide','e'); }
-  }; fr.readAsText(f);
+  fr.readAsText(f);
 }
 
 // ─── History ──────────────────────────────────────────────────────────────
@@ -330,7 +328,7 @@ async function deleteEntry(id){
 }
 
 async function clearHistory(){
-  if(!confirm('Effacer tout l'historique ?')) return;
+  if(!confirm('Effacer tout l\'historique ?')) return;
   await api('/history',{method:'DELETE'}); allHistory=[]; histPage=0; renderHistory(); toast('Historique effacé');
 }
 

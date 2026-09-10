@@ -76,18 +76,30 @@ if (!config.dnd) { config.dnd = { enabled: false, start: "23:00", end: "08:00" }
 if (!config.dashboardLang) { config.dashboardLang = 'fr'; configMigrated = true; }
 if (configMigrated) saveJson(CONFIG_FILE, config);
 
-// Migration v1 -> v2 for users (string -> object)
-const users = loadJson(USERS_FILE, {});
-let usersMigrated = false;
-for (const [k, v] of Object.entries(users)) {
-  if (typeof v === 'string') {
-    users[k] = { phone: v, lang: 'fr' };
-    usersMigrated = true;
-  }
-}
-if (usersMigrated) saveJson(USERS_FILE, users);
+// In-memory caches (reduces disk reads per request → lower RAM pressure from GC)
+let usersCache   = null;
+let avatarsCache = null;
 
-if (!fs.existsSync(AVATARS_FILE)) saveJson(AVATARS_FILE, {});
+function getUsers() {
+  if (!usersCache) usersCache = loadJson(USERS_FILE, {});
+  return usersCache;
+}
+function getAvatars() {
+  if (!avatarsCache) avatarsCache = loadJson(AVATARS_FILE, {});
+  return avatarsCache;
+}
+function saveUsers(data)   { usersCache = data;   saveJson(USERS_FILE, data); }
+function saveAvatars(data) { avatarsCache = data; saveJson(AVATARS_FILE, data); }
+
+// Migration v1 -> v2 for users (string -> object)
+const usersRaw = getUsers();
+let usersMigrated = false;
+for (const [k, v] of Object.entries(usersRaw)) {
+  if (typeof v === 'string') { usersRaw[k] = { phone: v, lang: 'fr' }; usersMigrated = true; }
+}
+if (usersMigrated) saveUsers(usersRaw);
+
+if (!fs.existsSync(AVATARS_FILE)) saveAvatars({});
 fs.mkdirSync(AUTH_PATH, { recursive: true });
 
 // ---------------------------------------------------------------------------
@@ -236,7 +248,7 @@ async function processSend(entry, isFromQueue = false) {
   
   if (entry.retriedFrom) base.retriedFrom = entry.retriedFrom;
 
-  const currentUsers = loadJson(USERS_FILE, {});
+  const currentUsers = getUsers();
   const emailKey  = String(entry.requestedBy_email).toLowerCase();
   const userEntry = Object.keys(currentUsers).find(k => k.toLowerCase() === emailKey);
   const userData  = userEntry ? currentUsers[userEntry] : null;
@@ -293,7 +305,7 @@ app.post('/webhook', async (req, res) => {
   if (notification_type === 'TEST_NOTIFICATION') {
     if (!whatsappReady || !sock) return res.status(503).json({ error: 'WhatsApp non prêt' });
     // Find first registered user to send test to
-    const allUsers = loadJson(USERS_FILE, {});
+    const allUsers = getUsers();
     const adminPhone = Object.values(allUsers)[0]?.phone;
     if (!adminPhone) return res.status(404).json({ error: 'Aucun utilisateur enregistré pour le test' });
     
@@ -430,8 +442,8 @@ adminRouter.get('/api/config/export', (req, res) => {
   const payload = {
     version: 2,
     config: config,
-    users: loadJson(USERS_FILE, {}),
-    avatars: loadJson(AVATARS_FILE, {})
+    users: getUsers(),
+    avatars: getAvatars()
   };
   res.json(payload);
 });
@@ -471,8 +483,8 @@ adminRouter.post('/api/restart-wipe', async (req, res) => {
 // Admin Routes - Users CRUD
 // ---------------------------------------------------------------------------
 adminRouter.get('/api/users', (req, res) => {
-  const users   = loadJson(USERS_FILE, {});
-  const avatars = loadJson(AVATARS_FILE, {});
+  const users   = getUsers();
+  const avatars = getAvatars();
   res.json(
     Object.entries(users).map(([email, data]) => ({
       email,
@@ -487,13 +499,13 @@ adminRouter.post('/api/users', (req, res) => {
   const { email, phone, avatar, lang } = req.body || {};
   if (!email || !phone) return res.status(400).json({ error: 'email/phone requis' });
   const cleanEmail = String(email).trim().toLowerCase();
-  const users = loadJson(USERS_FILE, {});
+  const users = getUsers();
   users[cleanEmail] = { phone: String(phone).replace(/\D/g, ''), lang: lang || 'fr' };
-  saveJson(USERS_FILE, users);
+  saveUsers(users);
   if (avatar) {
-    const avatars = loadJson(AVATARS_FILE, {});
+    const avatars = getAvatars();
     avatars[cleanEmail] = avatar;
-    saveJson(AVATARS_FILE, avatars);
+    saveAvatars(avatars);
   }
   res.json({ saved: true });
 });
@@ -501,8 +513,8 @@ adminRouter.post('/api/users', (req, res) => {
 adminRouter.put('/api/users/:email', (req, res) => {
   const oldEmail = decodeURIComponent(req.params.email).toLowerCase();
   const { email: newEmail, phone, avatar, lang } = req.body || {};
-  const users    = loadJson(USERS_FILE, {});
-  const avatars  = loadJson(AVATARS_FILE, {});
+  const users    = getUsers();
+  const avatars  = getAvatars();
   if (!users[oldEmail]) return res.status(404).json({ error: 'Introuvable' });
   
   const finalEmail = newEmail ? String(newEmail).trim().toLowerCase() : oldEmail;
@@ -513,24 +525,24 @@ adminRouter.put('/api/users/:email', (req, res) => {
     phone: phone ? String(phone).replace(/\D/g, '') : oldData.phone,
     lang:  lang || oldData.lang
   };
-  saveJson(USERS_FILE, users);
+  saveUsers(users);
 
   if (avatar !== undefined) {
     if (oldEmail !== finalEmail) delete avatars[oldEmail];
     if (avatar) avatars[finalEmail] = avatar;
-    saveJson(AVATARS_FILE, avatars);
+    saveAvatars(avatars);
   }
   res.json({ saved: true });
 });
 
 adminRouter.delete('/api/users/:email', (req, res) => {
   const email = decodeURIComponent(req.params.email).toLowerCase();
-  const users = loadJson(USERS_FILE, {});
+  const users = getUsers();
   delete users[email];
-  saveJson(USERS_FILE, users);
-  const avatars = loadJson(AVATARS_FILE, {});
+  saveUsers(users);
+  const avatars = getAvatars();
   delete avatars[email];
-  saveJson(AVATARS_FILE, avatars);
+  saveAvatars(avatars);
   res.json({ deleted: true });
 });
 
@@ -564,8 +576,8 @@ adminRouter.get('/api/overseerr/users', async (req, res) => {
     const response = await fetch(baseUrl + '/api/v1/user?take=1000', { headers: { 'X-Api-Key': apiKey, Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const data       = await response.json();
-    const registered = loadJson(USERS_FILE, {});
-    const avatars    = loadJson(AVATARS_FILE, {});
+    const registered = getUsers();
+    const avatars    = getAvatars();
 
     const result = (data.results || []).filter(u => u.email).map(u => {
       const email = u.email.toLowerCase();
@@ -592,7 +604,7 @@ adminRouter.get('/api/overseerr/users', async (req, res) => {
       };
     });
 
-    saveJson(AVATARS_FILE, avatars);
+    saveAvatars(avatars);
     res.json(result);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
