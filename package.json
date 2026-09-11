@@ -1,11 +1,11 @@
-﻿{
+{
   "name": "overseerr-whatsapp-relay",
   "version": "2.0.0",
   "description": "Relais Overseerr Webhook -> WhatsApp via Baileys (sans navigateur), avec panneau admin et integration Plex",
   "main": "server.js",
   "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "node --max-old-space-size=80 server.js"
   },
   "dependencies": {
     "@hapi/boom": "^10.0.1",

@@ -146,18 +146,12 @@ setInterval(async () => {
 // ---------------------------------------------------------------------------
 // Discord
 // ---------------------------------------------------------------------------
-let lastDiscordReadyNotif = 0;
-async function notifyDiscord(content, isReadyMsg = false) {
+async function notifyDiscord(content) {
   const url = config.discordWebhookUrl;
   if (!url) return;
-  if (isReadyMsg) {
-    const now = Date.now();
-    if (now - lastDiscordReadyNotif < 30 * 60 * 1000) return; // Cooldown 30 min
-    lastDiscordReadyNotif = now;
-  }
   try {
     await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) });
-  } catch (err) {}
+  } catch (_) {}
 }
 
 // ---------------------------------------------------------------------------
@@ -169,11 +163,18 @@ app.use(express.json({ limit: '512kb' })); // Limite anti-DoS
 // ---------------------------------------------------------------------------
 // WhatsApp / Baileys
 // ---------------------------------------------------------------------------
-let sock          = null;
-let whatsappReady = false;
-let lastQrDataUrl = null;
-const startedAt   = Date.now();
-const waLogger    = pino({ level: 'silent' });
+let sock            = null;
+let whatsappReady   = false;
+let lastQrDataUrl   = null;
+const startedAt     = Date.now();
+const waLogger      = pino({ level: 'silent' });
+
+// Tracks connection state to avoid Discord notification spam on Baileys auto-reconnect.
+// Baileys reconnects silently every ~30-90 min (normal WebSocket keepalive). We only
+// notify Discord on the very first connection and after a real outage (>2 min gap).
+let firstConnectionDone = false;
+let disconnectedAt      = null; // ms timestamp of last 'close' event
+const REAL_OUTAGE_MS    = 2 * 60 * 1000; // 2 min threshold to consider a real outage
 
 async function connectWhatsApp() {
   try {
@@ -189,24 +190,37 @@ async function connectWhatsApp() {
       browser: ['Whatsoverr', 'Desktop', '2.0.0'],
       generateHighQualityLinkPreview: false,
       syncFullHistory: false,
-      markOnlineOnConnect: false, // Prevents blocking push notifications on the user's phone
+      markOnlineOnConnect: false,   // Prevents blocking push notifications on phone
+      getMessage: async () => undefined, // Disable internal message store → saves RAM
     });
 
     sock.ev.on('creds.update', saveCreds);
     sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
       if (qr) try { lastQrDataUrl = await QRCode.toDataURL(qr); } catch {}
+
       if (connection === 'close') {
-        whatsappReady = false;
-        lastQrDataUrl = null;
+        whatsappReady  = false;
+        lastQrDataUrl  = null;
+        disconnectedAt = Date.now();
         const code      = (lastDisconnect?.error instanceof Boom) ? lastDisconnect.error.output.statusCode : 0;
         const loggedOut = code === DisconnectReason.loggedOut;
-        if (!loggedOut) setTimeout(connectWhatsApp, 5000);
-        else notifyDiscord('⚠️ Session WhatsApp expirée. Purge + rescan QR requis depuis le dashboard.');
+        if (loggedOut) {
+          notifyDiscord('⚠️ **Session WhatsApp expirée.** Rescan QR requis depuis le dashboard.');
+        } else {
+          setTimeout(connectWhatsApp, 5000);
+        }
       }
+
       if (connection === 'open') {
         whatsappReady = true;
         lastQrDataUrl = null;
-        notifyDiscord('✅ Bot WhatsApp connecté et prêt.', true);
+        const wasRealOutage = disconnectedAt && (Date.now() - disconnectedAt > REAL_OUTAGE_MS);
+        // Notify only on first boot OR after a real outage (not on silent Baileys reconnects)
+        if (!firstConnectionDone || wasRealOutage) {
+          notifyDiscord('✅ **Bot WhatsApp connecté et prêt.**');
+          firstConnectionDone = true;
+        }
+        disconnectedAt = null;
       }
     });
   } catch (err) { setTimeout(connectWhatsApp, 5000); }
