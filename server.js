@@ -9,8 +9,7 @@ const {
   default: makeWASocket,
   useMultiFileAuthState,
   DisconnectReason,
-  fetchLatestBaileysVersion,
-  makeCacheableSignalKeyStore,
+  fetchLatestBaileysVersion
 } = require('@whiskeysockets/baileys');
 
 // ---------------------------------------------------------------------------
@@ -176,15 +175,29 @@ let firstConnectionDone = false;
 let disconnectedAt      = null; // ms timestamp of last 'close' event
 const REAL_OUTAGE_MS    = 2 * 60 * 1000; // 2 min threshold to consider a real outage
 
+// Force Garbage Collection periodically to keep RAM at strict minimum
+setInterval(() => {
+  if (global.gc) {
+    global.gc();
+    console.log('[system] Garbage Collection exécutée (Opti RAM)');
+  }
+}, 15 * 60 * 1000); // Toutes les 15 minutes
+
 async function connectWhatsApp() {
   try {
+    // Nettoyage agressif de l'ancienne socket lors d'une reconnexion
+    if (sock) {
+      sock.ev.removeAllListeners();
+      sock = null;
+    }
+
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_PATH);
     let version = [2, 3000, 1015920];
     try { ({ version } = await fetchLatestBaileysVersion()); } catch {}
 
     sock = makeWASocket({
       version,
-      auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, waLogger) },
+      auth: state, // On enlève makeCacheableSignalKeyStore qui accumulait toutes les clés en RAM
       printQRInTerminal: false,
       logger: waLogger,
       browser: ['Whatsoverr', 'Desktop', '2.0.0'],
