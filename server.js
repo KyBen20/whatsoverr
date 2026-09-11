@@ -16,7 +16,7 @@ const {
 // Config
 // ---------------------------------------------------------------------------
 const PORT         = process.env.PORT || 3000;
-const APP_VERSION  = '2.0.4'; // ← Modifier ici pour chaque release
+const APP_VERSION  = '2.0.6';
 const DATA_DIR     = path.join(__dirname, 'data');
 const USERS_FILE   = path.join(DATA_DIR, 'users.json');
 const AVATARS_FILE = path.join(DATA_DIR, 'avatars.json');
