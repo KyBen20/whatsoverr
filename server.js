@@ -352,17 +352,30 @@ app.post('/webhook', async (req, res) => {
     pushHistory({ requestedBy_username, requestedBy_email, media_title: subject, status: 'error', error: 'Payload incomplet' });
     return res.status(400).json({ error: 'Payload incomplet' });
   }
+
+  // Amélioration : Détecter s'il s'agit d'un épisode de série spécifique
+  let displayTitle = subject;
+  if (req.body.extra && Array.isArray(req.body.extra)) {
+    const seasonObj = req.body.extra.find(e => e.name === 'Season' || e.name === 'Saison');
+    const episodeObj = req.body.extra.find(e => e.name === 'Episode' || e.name === 'Épisode');
+    
+    if (seasonObj && episodeObj) {
+      // Si le sujet est juste "The Reacher", on rajoute (Saison X, Épisode Y)
+      displayTitle = `${subject} (Saison ${seasonObj.value}, Épisode ${episodeObj.value})`;
+    }
+  }
+
   if (!whatsappReady || !sock) {
-    pushHistory({ requestedBy_username, requestedBy_email, media_title: subject, status: 'error', error: 'WhatsApp non prêt' });
+    pushHistory({ requestedBy_username, requestedBy_email, media_title: displayTitle, status: 'error', error: 'WhatsApp non prêt' });
     return res.status(503).json({ error: 'WhatsApp non prêt' });
   }
 
   const result = await processSend({
     requestedBy_username,
     requestedBy_email,
-    media_title: subject,
-    media_type,
-    media_poster: image
+    media_title: displayTitle,
+    media_poster: image,
+    media_type: media_type
   });
 
   if (result.status) return res.status(result.status).json(result);
