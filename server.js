@@ -353,15 +353,22 @@ app.post('/webhook', async (req, res) => {
     return res.status(400).json({ error: 'Payload incomplet' });
   }
 
-  // Amélioration : Détecter s'il s'agit d'un épisode de série spécifique
+  // Amélioration : Détecter s'il s'agit d'un épisode ou d'une saison spécifique
   let displayTitle = subject;
   if (req.body.extra && Array.isArray(req.body.extra)) {
-    const seasonObj = req.body.extra.find(e => e.name === 'Season' || e.name === 'Saison');
-    const episodeObj = req.body.extra.find(e => e.name === 'Episode' || e.name === 'Épisode');
+    const seasonObj = req.body.extra.find(e => /^saisons?|^seasons?/i.test(e.name));
+    const episodeObj = req.body.extra.find(e => /^épisodes?|^episodes?/i.test(e.name));
     
     if (seasonObj && episodeObj) {
-      // Si le sujet est juste "The Reacher", on rajoute (Saison X, Épisode Y)
+      // Cas : Saison + Épisode (ex: The Reacher (Saison 1, Épisode 3))
       displayTitle = `${subject} (Saison ${seasonObj.value}, Épisode ${episodeObj.value})`;
+    } else if (seasonObj) {
+      // Cas : Uniquement une ou plusieurs saisons (ex: Family Guy (Saisons 6, 7))
+      const isMultiple = String(seasonObj.value).includes(',') || String(seasonObj.value).includes('-') || seasonObj.name.toLowerCase().endsWith('s');
+      displayTitle = `${subject} (${isMultiple ? 'Saisons' : 'Saison'} ${seasonObj.value})`;
+    } else if (episodeObj) {
+      // Cas : Uniquement épisode
+      displayTitle = `${subject} (Épisode ${episodeObj.value})`;
     }
   }
 
