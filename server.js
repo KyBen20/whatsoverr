@@ -16,7 +16,7 @@ const {
 // CONFIGURATION ET CONSTANTES
 // ---------------------------------------------------------------------------
 const PORT         = process.env.PORT || 3000;
-const APP_VERSION  = '2.0.10';
+const APP_VERSION  = '2.0.11';
 const DATA_DIR     = path.join(__dirname, 'data');
 const USERS_FILE   = path.join(DATA_DIR, 'users.json');
 const AVATARS_FILE = path.join(DATA_DIR, 'avatars.json');
@@ -326,7 +326,12 @@ async function processSend(entry, isFromQueue = false) {
 app.get('/health', (req, res) => res.json({ status: 'ok', whatsapp_ready: whatsappReady }));
 
 app.post('/webhook', async (req, res) => {
-  const { notification_type, message, subject, image, media_type, requestedBy_username, requestedBy_email } = req.body || {};
+  const { notification_type, message, subject, image } = req.body || {};
+  
+  // Supporter à la fois le format "plat" (racine) et le format "imbriqué" (par défaut d'Overseerr)
+  const media_type = req.body.media?.media_type || req.body.media_type;
+  const requestedBy_username = req.body.request?.requestedBy_username || req.body.requestedBy_username;
+  const requestedBy_email = req.body.request?.requestedBy_email || req.body.requestedBy_email;
 
   // Overseerr Test Webhook
   if (notification_type === 'TEST_NOTIFICATION') {
@@ -358,24 +363,34 @@ app.post('/webhook', async (req, res) => {
   
   // DEBUG pour voir ce qu'Overseerr envoie exactement
   if (media_type === 'tv' && config.discordWebhookUrl) {
-    notifyDiscord(`🛠️ [DEBUG V2.0.10] Webhook reçu: ${subject}\nExtra: \`${JSON.stringify(req.body.extra || 'aucun')}\``);
+    notifyDiscord(`🛠️ [DEBUG V2.0.11] Webhook reçu: ${subject}\nExtra: \`${JSON.stringify(req.body.extra || req.body.extra_string || 'aucun')}\``);
   }
+
+  let seasonVal = null;
+  let episodeVal = null;
+  let seasonName = 'Saison';
 
   if (req.body.extra && Array.isArray(req.body.extra)) {
     const seasonObj = req.body.extra.find(e => /^saisons?|^seasons?/i.test(e.name));
     const episodeObj = req.body.extra.find(e => /^épisodes?|^episodes?/i.test(e.name));
-    
-    if (seasonObj && episodeObj) {
-      // Cas : Saison + Épisode (ex: The Reacher (Saison 1, Épisode 3))
-      displayTitle = `${subject} (Saison ${seasonObj.value}, Épisode ${episodeObj.value})`;
-    } else if (seasonObj) {
-      // Cas : Uniquement une ou plusieurs saisons (ex: Family Guy (Saisons 6, 7))
-      const isMultiple = String(seasonObj.value).includes(',') || String(seasonObj.value).includes('-') || seasonObj.name.toLowerCase().endsWith('s');
-      displayTitle = `${subject} (${isMultiple ? 'Saisons' : 'Saison'} ${seasonObj.value})`;
-    } else if (episodeObj) {
-      // Cas : Uniquement épisode
-      displayTitle = `${subject} (Épisode ${episodeObj.value})`;
-    }
+    if (seasonObj) { seasonVal = seasonObj.value; seasonName = seasonObj.name; }
+    if (episodeObj) { episodeVal = episodeObj.value; }
+  } else if (req.body.extra_string) {
+    // Parsing custom string pour contourner le validateur JSON d'Overseerr
+    // Format attendu: "Season:1,Episode:3,"
+    const sMatch = req.body.extra_string.match(/(?:Saisons?|Seasons?):([^,]+)/i);
+    const eMatch = req.body.extra_string.match(/(?:Épisodes?|Episodes?):([^,]+)/i);
+    if (sMatch) { seasonVal = sMatch[1].trim(); seasonName = sMatch[0].split(':')[0]; }
+    if (eMatch) { episodeVal = eMatch[1].trim(); }
+  }
+
+  if (seasonVal && episodeVal) {
+    displayTitle = `${subject} (Saison ${seasonVal}, Épisode ${episodeVal})`;
+  } else if (seasonVal) {
+    const isMultiple = String(seasonVal).includes(',') || String(seasonVal).includes('-') || seasonName.toLowerCase().endsWith('s');
+    displayTitle = `${subject} (${isMultiple ? 'Saisons' : 'Saison'} ${seasonVal})`;
+  } else if (episodeVal) {
+    displayTitle = `${subject} (Épisode ${episodeVal})`;
   }
 
   if (!whatsappReady || !sock) {
