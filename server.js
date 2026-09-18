@@ -16,7 +16,7 @@ const {
 // CONFIGURATION ET CONSTANTES
 // ---------------------------------------------------------------------------
 const PORT         = process.env.PORT || 3000;
-const APP_VERSION  = '2.0.12';
+const APP_VERSION  = '2.0.13';
 const DATA_DIR     = path.join(__dirname, 'data');
 const USERS_FILE   = path.join(DATA_DIR, 'users.json');
 const AVATARS_FILE = path.join(DATA_DIR, 'avatars.json');
@@ -360,12 +360,6 @@ app.post('/webhook', async (req, res) => {
 
   // Chercher Season/Episode récursivement dans TOUT le body (peu importe la structure)
   let displayTitle = subject;
-
-  // DEBUG - log TOUT le body brut sur Discord pour diagnostic
-  if (media_type === 'tv' && config.discordWebhookUrl) {
-    const bodyStr = JSON.stringify(req.body).substring(0, 800);
-    notifyDiscord(`🛠️ [DEBUG V2.0.12] Webhook TV\nSubject: ${subject}\nBody (tronqué): \`${bodyStr}\``);
-  }
 
   // Recherche récursive de Season/Episode dans n'importe quelle partie du body
   function deepSearch(obj) {
