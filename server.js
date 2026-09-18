@@ -16,7 +16,7 @@ const {
 // CONFIGURATION ET CONSTANTES
 // ---------------------------------------------------------------------------
 const PORT         = process.env.PORT || 3000;
-const APP_VERSION  = '2.0.11';
+const APP_VERSION  = '2.0.12';
 const DATA_DIR     = path.join(__dirname, 'data');
 const USERS_FILE   = path.join(DATA_DIR, 'users.json');
 const AVATARS_FILE = path.join(DATA_DIR, 'avatars.json');
@@ -358,36 +358,46 @@ app.post('/webhook', async (req, res) => {
     return res.status(400).json({ error: 'Payload incomplet' });
   }
 
-  // Amélioration : Détecter s'il s'agit d'un épisode ou d'une saison spécifique
+  // Chercher Season/Episode récursivement dans TOUT le body (peu importe la structure)
   let displayTitle = subject;
-  
-  // DEBUG pour voir ce qu'Overseerr envoie exactement
+
+  // DEBUG - log TOUT le body brut sur Discord pour diagnostic
   if (media_type === 'tv' && config.discordWebhookUrl) {
-    notifyDiscord(`🛠️ [DEBUG V2.0.11] Webhook reçu: ${subject}\nExtra: \`${JSON.stringify(req.body.extra || req.body.extra_string || 'aucun')}\``);
+    const bodyStr = JSON.stringify(req.body).substring(0, 800);
+    notifyDiscord(`🛠️ [DEBUG V2.0.12] Webhook TV\nSubject: ${subject}\nBody (tronqué): \`${bodyStr}\``);
   }
 
-  let seasonVal = null;
-  let episodeVal = null;
-  let seasonName = 'Saison';
-
-  if (req.body.extra && Array.isArray(req.body.extra)) {
-    const seasonObj = req.body.extra.find(e => /^saisons?|^seasons?/i.test(e.name));
-    const episodeObj = req.body.extra.find(e => /^épisodes?|^episodes?/i.test(e.name));
-    if (seasonObj) { seasonVal = seasonObj.value; seasonName = seasonObj.name; }
-    if (episodeObj) { episodeVal = episodeObj.value; }
-  } else if (req.body.extra_string) {
-    // Parsing custom string pour contourner le validateur JSON d'Overseerr
-    // Format attendu: "Season:1,Episode:3,"
-    const sMatch = req.body.extra_string.match(/(?:Saisons?|Seasons?):([^,]+)/i);
-    const eMatch = req.body.extra_string.match(/(?:Épisodes?|Episodes?):([^,]+)/i);
-    if (sMatch) { seasonVal = sMatch[1].trim(); seasonName = sMatch[0].split(':')[0]; }
-    if (eMatch) { episodeVal = eMatch[1].trim(); }
+  // Recherche récursive de Season/Episode dans n'importe quelle partie du body
+  function deepSearch(obj) {
+    let seasonVal = null, episodeVal = null;
+    function walk(node) {
+      if (!node || typeof node !== 'object') return;
+      if (Array.isArray(node)) {
+        for (const item of node) {
+          if (item && typeof item === 'object' && 'name' in item && 'value' in item) {
+            if (/^saisons?|^seasons?/i.test(item.name)) seasonVal = item.value;
+            if (/^épisodes?|^episodes?/i.test(item.name)) episodeVal = item.value;
+          }
+          walk(item);
+        }
+      } else {
+        for (const key of Object.keys(node)) {
+          if (/^saisons?|^seasons?/i.test(key) && node[key]) seasonVal = node[key];
+          if (/^épisodes?|^episodes?/i.test(key) && node[key]) episodeVal = node[key];
+          walk(node[key]);
+        }
+      }
+    }
+    walk(obj);
+    return { seasonVal, episodeVal };
   }
+
+  const { seasonVal, episodeVal } = deepSearch(req.body);
 
   if (seasonVal && episodeVal) {
     displayTitle = `${subject} (Saison ${seasonVal}, Épisode ${episodeVal})`;
   } else if (seasonVal) {
-    const isMultiple = String(seasonVal).includes(',') || String(seasonVal).includes('-') || seasonName.toLowerCase().endsWith('s');
+    const isMultiple = String(seasonVal).includes(',') || String(seasonVal).includes('-');
     displayTitle = `${subject} (${isMultiple ? 'Saisons' : 'Saison'} ${seasonVal})`;
   } else if (episodeVal) {
     displayTitle = `${subject} (Épisode ${episodeVal})`;
