@@ -13,10 +13,10 @@ const {
 } = require('@whiskeysockets/baileys');
 
 // ---------------------------------------------------------------------------
-// Config
+// CONFIGURATION ET CONSTANTES
 // ---------------------------------------------------------------------------
 const PORT         = process.env.PORT || 3000;
-const APP_VERSION  = '2.0.7';
+const APP_VERSION  = '2.0.10';
 const DATA_DIR     = path.join(__dirname, 'data');
 const USERS_FILE   = path.join(DATA_DIR, 'users.json');
 const AVATARS_FILE = path.join(DATA_DIR, 'avatars.json');
@@ -355,6 +355,12 @@ app.post('/webhook', async (req, res) => {
 
   // Amélioration : Détecter s'il s'agit d'un épisode ou d'une saison spécifique
   let displayTitle = subject;
+  
+  // DEBUG pour voir ce qu'Overseerr envoie exactement
+  if (media_type === 'tv' && config.discordWebhookUrl) {
+    notifyDiscord(`🛠️ [DEBUG V2.0.10] Webhook reçu: ${subject}\nExtra: \`${JSON.stringify(req.body.extra || 'aucun')}\``);
+  }
+
   if (req.body.extra && Array.isArray(req.body.extra)) {
     const seasonObj = req.body.extra.find(e => /^saisons?|^seasons?/i.test(e.name));
     const episodeObj = req.body.extra.find(e => /^épisodes?|^episodes?/i.test(e.name));
