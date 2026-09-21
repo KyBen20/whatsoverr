@@ -9,14 +9,15 @@ const {
   default: makeWASocket,
   useMultiFileAuthState,
   DisconnectReason,
-  fetchLatestBaileysVersion
+  fetchLatestBaileysVersion,
+  makeCacheableSignalKeyStore
 } = require('@whiskeysockets/baileys');
 
 // ---------------------------------------------------------------------------
 // CONFIGURATION ET CONSTANTES
 // ---------------------------------------------------------------------------
 const PORT         = process.env.PORT || 3000;
-const APP_VERSION  = '2.0.13';
+const APP_VERSION  = '2.0.14';
 const DATA_DIR     = path.join(__dirname, 'data');
 const USERS_FILE   = path.join(DATA_DIR, 'users.json');
 const AVATARS_FILE = path.join(DATA_DIR, 'avatars.json');
@@ -175,6 +176,9 @@ let firstConnectionDone = false;
 let disconnectedAt      = null; // ms timestamp of last 'close' event
 const REAL_OUTAGE_MS    = 2 * 60 * 1000; // 2 min threshold to consider a real outage
 
+// Cache super léger pour permettre à Baileys de déchiffrer/renvoyer les messages en cas d'échec
+const messageStore = new Map();
+
 // Force Garbage Collection periodically to keep RAM at strict minimum
 setInterval(() => {
   if (global.gc) {
@@ -184,6 +188,7 @@ setInterval(() => {
 }, 15 * 60 * 1000); // Toutes les 15 minutes
 
 async function connectWhatsApp() {
+  if (sock) return;
   try {
     // Nettoyage agressif de l'ancienne socket lors d'une reconnexion
     if (sock) {
@@ -197,15 +202,26 @@ async function connectWhatsApp() {
 
     sock = makeWASocket({
       version,
-      auth: state, // On enlève makeCacheableSignalKeyStore qui accumulait toutes les clés en RAM
+      auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, waLogger) },
       printQRInTerminal: false,
       logger: waLogger,
-      browser: ['Whatsoverr', 'Desktop', '2.0.0'],
+      browser: ['Whatsoverr', 'Desktop', '2.0.14'],
       generateHighQualityLinkPreview: false,
       syncFullHistory: false,
-      markOnlineOnConnect: false,   // Prevents blocking push notifications on phone
-      getMessage: async () => undefined, // Disable internal message store → saves RAM
+      markOnlineOnConnect: false,
+      getMessage: async (key) => messageStore.get(key.id)
     });
+
+    // Intercepter les messages envoyés pour les stocker dans le cache léger (utile pour les retrys de déchiffrement)
+    const originalSendMessage = sock.sendMessage.bind(sock);
+    sock.sendMessage = async (...args) => {
+      const result = await originalSendMessage(...args);
+      if (result && result.key && result.key.id && result.message) {
+        messageStore.set(result.key.id, result.message);
+        if (messageStore.size > 100) messageStore.delete(messageStore.keys().next().value);
+      }
+      return result;
+    };
 
     sock.ev.on('creds.update', saveCreds);
     sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
