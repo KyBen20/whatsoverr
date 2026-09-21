@@ -17,7 +17,7 @@ const {
 // CONFIGURATION ET CONSTANTES
 // ---------------------------------------------------------------------------
 const PORT         = process.env.PORT || 3000;
-const APP_VERSION  = '2.0.14';
+const APP_VERSION  = '2.0.15';
 const DATA_DIR     = path.join(__dirname, 'data');
 const USERS_FILE   = path.join(DATA_DIR, 'users.json');
 const AVATARS_FILE = path.join(DATA_DIR, 'avatars.json');
@@ -188,13 +188,13 @@ setInterval(() => {
 }, 15 * 60 * 1000); // Toutes les 15 minutes
 
 async function connectWhatsApp() {
-  if (sock) return;
   try {
-    // Nettoyage agressif de l'ancienne socket lors d'une reconnexion
+    // Nettoyage de l'ancienne socket lors d'une reconnexion
     if (sock) {
-      sock.ev.removeAllListeners();
+      try { sock.ev.removeAllListeners(); } catch {}
       sock = null;
     }
+    whatsappReady = false;
 
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_PATH);
     let version = [2, 3000, 1015920];
@@ -212,7 +212,7 @@ async function connectWhatsApp() {
       getMessage: async (key) => messageStore.get(key.id)
     });
 
-    // Intercepter les messages envoyés pour les stocker dans le cache léger (utile pour les retrys de déchiffrement)
+    // Stocker les messages envoyés pour le re-chiffrement multi-appareils
     const originalSendMessage = sock.sendMessage.bind(sock);
     sock.sendMessage = async (...args) => {
       const result = await originalSendMessage(...args);
@@ -235,7 +235,9 @@ async function connectWhatsApp() {
         const loggedOut = code === DisconnectReason.loggedOut;
         if (loggedOut) {
           notifyDiscord('⚠️ **Session WhatsApp expirée.** Rescan QR requis depuis le dashboard.');
+          sock = null; // Réinitialiser pour permettre une nouvelle connexion
         } else {
+          sock = null;
           setTimeout(connectWhatsApp, 5000);
         }
       }
@@ -244,7 +246,6 @@ async function connectWhatsApp() {
         whatsappReady = true;
         lastQrDataUrl = null;
         const wasRealOutage = disconnectedAt && (Date.now() - disconnectedAt > REAL_OUTAGE_MS);
-        // Notify only on first boot OR after a real outage (not on silent Baileys reconnects)
         if (!firstConnectionDone || wasRealOutage) {
           notifyDiscord('✅ **Bot WhatsApp connecté et prêt.**');
           firstConnectionDone = true;
@@ -252,7 +253,10 @@ async function connectWhatsApp() {
         disconnectedAt = null;
       }
     });
-  } catch (err) { setTimeout(connectWhatsApp, 5000); }
+  } catch (err) {
+    sock = null;
+    setTimeout(connectWhatsApp, 5000);
+  }
 }
 
 // ---------------------------------------------------------------------------
